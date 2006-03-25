@@ -38,55 +38,41 @@ END_MESSAGE_MAP()
 //Taken from goPod source code, do not mess this up as this could cause hard damage to an iPod.
 //Be very carefull!!! when editing below
 //START
-int CTweaksDialog::seekChaine (void)
-{
-   int chaine = 0, block_cap = 0;
-
-   BYTE temp[8]={0x8,0x0,0x9F,0xE5,0x38,0x1,0x90,0xE5};
-   BYTE temp2[8]={0x8,0x0,0x9F,0xE5,0x94,0x0,0x90,0xE5};
-   
-   lseek (dev, BLOCK_SIZE * 1000, SEEK_SET);
-   
-   while ((block_cap < BLOCK_SIZE * 2000) && read (dev, buffer, BLOCK_SIZE) != -1)
-   {
-      block_cap += BLOCK_SIZE;
-
-      for (byte_cap = 7; byte_cap < BLOCK_SIZE - 2; byte_cap++)
-      {
-         if (memcmp(&buffer[byte_cap-7], &temp, 8)==0 || memcmp(&buffer[byte_cap-7], &temp2, 8)==0)
-         {
-            if (byte_cap > BLOCK_SIZE - 3)
-               break;
-
-            if ((buffer[byte_cap+1] == 0x1 && buffer[byte_cap+2] == 0x0) || (buffer[byte_cap+1] == 0x0 && buffer[byte_cap+2] == 0x1))
-			{
-               return (1);
-			}
-            else
-               break;
-         }
-      }
-   }
-   
-   return (0);
-}
-
-//Taken from goPod source code, do not mess this up as this could cause hard damage to an iPod.
 int CTweaksDialog::isCapped(void)
 {
-   if(seekChaine())
-   {
+	int chaine = 0, block_cap = 0;
 
-      if(buffer[byte_cap+1] == 0x1 && buffer[byte_cap+2] == 0x0)
-      {
-         return 1;
-      }
+	BYTE temp[8]={0x8,0x0,0x9F,0xE5,0x38,0x1,0x90,0xE5};
+	BYTE temp2[8]={0x8,0x0,0x9F,0xE5,0x94,0x0,0x90,0xE5};
+	   
+	lseek (dev, BLOCK_SIZE * 1000, SEEK_SET);
+	   
+	while ((block_cap < BLOCK_SIZE * 2000) && read (dev, buffer, BLOCK_SIZE) != -1)
+	{
+		block_cap += BLOCK_SIZE;
 
-      if(buffer[byte_cap+1] == 0x0 && buffer[byte_cap+2] == 0x1)
-      {
-         return 0;
-      }
-   }
+		for (byte_cap = 7; byte_cap < BLOCK_SIZE - 2; byte_cap++)
+		{
+			if (memcmp(&buffer[byte_cap-7], &temp, 8)==0 || memcmp(&buffer[byte_cap-7], &temp2, 8)==0)
+			{
+				if (byte_cap > BLOCK_SIZE - 3)
+				break;
+
+				if ((buffer[byte_cap+1] == 0x1 && buffer[byte_cap+2] == 0x0) || (buffer[byte_cap+1] == 0x0 && buffer[byte_cap+2] == 0x1))
+					goto found;
+				else
+					break;
+			}
+		}
+	}
+	   
+	return -1;
+found:
+	if(buffer[byte_cap+1] == 0x1 && buffer[byte_cap+2] == 0x0)
+		return 1;
+
+	if(buffer[byte_cap+1] == 0x0 && buffer[byte_cap+2] == 0x1)
+		return 0;
 
    return -1;
 }

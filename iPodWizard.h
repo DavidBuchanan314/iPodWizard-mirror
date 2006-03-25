@@ -9,8 +9,6 @@
 
 #include "resource.h"		// main symbols
 
-void InitWindowStyles(CWnd* pWnd);
-
 
 // CiPodWizardApp:
 // See iPodWizard.cpp for the implementation of this class

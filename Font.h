@@ -1,28 +1,30 @@
 #pragma once
 
+//static const char FONT_MAGIC[] = { 0x04, 0x00, 0x21, 0x00 };
+//it tunes out that the 0x04 is not always that value (there was 0x05 too)
+
 struct IPOD_FONT_HEADER1
 {
-	BYTE d1[10];
+	DWORD z0; //char magic[4];
+	WORD first_char;
+	WORD last_char;
+	WORD z1; //seems to be always 0x01
 	WORD numChars;
-	WORD numMappingEntries;
-	WORD w2;
+	DWORD numMappingEntries;
 };
 
 struct IPOD_FONT_UNICODE_GROUP
 {
 	WORD code;
 	WORD offset;
-	WORD length;
-	WORD w1;
+	DWORD length;
 };
 
 struct IPOD_FONT_HEADER2
 {
-	WORD	w1;
-	char	name[64];
-	WORD	w2;
-	WORD	size;
-	WORD	w3;
+	WORD	w1; //seems to be always 0x04
+	char	name[66];
+	DWORD	size;
 	BYTE	style;
 	BYTE	bitdepth;
 	WORD	numChars;
@@ -30,10 +32,10 @@ struct IPOD_FONT_HEADER2
 	WORD	width; 
     WORD	line_height;
     WORD	descent; // pixels below baseline
-    DWORD	w4;
-    DWORD	finfo_size;
-	DWORD	charMapEnd;
-	DWORD	metricsEnd;
+    DWORD	w4; //0 or 1
+    DWORD	finfo_size; //might be size of this struct
+	DWORD	charMapEnd; // from beginning of this struct to end of char map
+	DWORD	metricsEnd; // from beginning of this struct to end of char metrics
 };
 
 struct IPOD_FONT_CHARINFO
@@ -103,27 +105,29 @@ public:
 	LPCTSTR						GetFontName();
 	DWORD						GetFontBlockLen();
 	WORD						GetFontBitDepth();
-	WORD						GetFontSize();
+	DWORD						GetFontSize();
+	LPCTSTR						GetFontStyle();
 	BOOL						IsFixedWidth();
 	void						SetData(LPBYTE buffer);
+	LPBYTE						GetMetricData();
+	DWORD						GetMetricDataLen();
+	void						SetMetricData(LPBYTE lpBuf);
 
 	CSize						GetFontBitmapSize();
 	COLORREF					GetFontPixel(CPoint point);
 	void						SetFontPixel(LONG x, LONG y, COLORREF color);
 
-	WORD						GetNumUnicodeGroups();
-	void						GetUnicodeGroup(WORD index, LPWORD start, LPWORD len, LPWORD offset);
-	void						SetUnicodeGroup(WORD index, WORD start, WORD len, WORD offset);
+	DWORD						GetNumUnicodeGroups();
+	void						GetUnicodeGroup(WORD index, LPWORD start, LPDWORD len, LPWORD offset);
+	void						SetUnicodeGroup(WORD index, WORD start, DWORD len, WORD offset);
 	WORD						GetNumChars();
 	WORD						GetNumMetrics();
 	WORD						GetCharMapping(WORD index);
 	void						SetCharMapping(WORD index, WORD index2);
 
-	WORD						GetNumUnicodeChars();
+	DWORD						GetNumUnicodeChars();
 	WORD						GetUnicodeChar(WORD index, LPWORD groupIndex);
 	WORD						GetUnicodeCharOffset(WORD c);
-	void						GetCharMetrics(WORD c, LPWORD offset1, LPWORD offset2, SHORT *width, SHORT *ident);
+	void						GetCharMetrics(WORD c, LPDWORD offset1, LPDWORD offset2, SHORT *width, SHORT *ident);
 	void						SetCharMetrics(WORD c, WORD offset1, WORD offset2, SHORT width, SHORT ident);
-
-	void						Draw(CDC *pDC, CRect rect);
 };

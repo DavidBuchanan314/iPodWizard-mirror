@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "iPodWizard.h"
 #include "ThemesDialog.h"
+#include ".\themesdialog.h"
+#include "cgfiltyp.h"
 
-#define NO_SCF_STR	_T("No SCF file loaded")
+#define NO_SCF_STR	_T("No String List file loaded")
 
 IMPLEMENT_DYNAMIC(CThemesDialog, CDialog)
 
@@ -23,6 +25,8 @@ void CThemesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_GRAPHICS_LIST, m_GraphicsList);
 	DDX_Control(pDX, IDC_FONT_LIST, m_FontsList);
 	DDX_Control(pDX, IDC_FONTIDX_CMB, m_FontIndexCombo);
+	DDX_Control(pDX, IDC_OTFFONTIDX_CMB, m_OTFFontIndexCombo);
+	DDX_Control(pDX, IDC_STRIDX_CMB, m_StringIndexCombo);
 }
 
 BEGIN_MESSAGE_MAP(CThemesDialog, CDialog)
@@ -34,6 +38,8 @@ BEGIN_MESSAGE_MAP(CThemesDialog, CDialog)
 	ON_BN_CLICKED(IDC_DELETEFONT_BUTTON, OnBnClickedDeleteFont)
 	ON_BN_CLICKED(IDC_LOADSCF_BUTTON, OnBnClickedLoadSCF)
 	ON_BN_CLICKED(IDC_CLEARSCF_BUTTON, OnBnClickedClearSCF)
+	ON_BN_CLICKED(IDC_OTF_CHK, OnBnClickedOtfChk)
+	ON_BN_CLICKED(IDC_ASSOCIATE_IPW, OnBnClickedAssociateIpw)
 END_MESSAGE_MAP()
 
 BOOL CThemesDialog::OnInitDialog()
@@ -47,8 +53,9 @@ BOOL CThemesDialog::OnInitDialog()
 
 	m_FontsList.SetExtendedStyle(m_FontsList.GetExtendedStyle()|LVS_EX_FULLROWSELECT);
 	m_FontsList.InsertColumn(0, TEXT("#"), LVCFMT_LEFT, 20);
-	m_FontsList.InsertColumn(1, TEXT("Bitmap Path"), LVCFMT_LEFT, 250);
-	m_FontsList.InsertColumn(2, TEXT("Metrics Path"), LVCFMT_LEFT, 250);
+	m_FontsList.InsertColumn(1, TEXT("Type"), LVCFMT_LEFT, 50);
+	m_FontsList.InsertColumn(2, TEXT("Bitmap Path"), LVCFMT_LEFT, 250);
+	m_FontsList.InsertColumn(3, TEXT("Metrics Path"), LVCFMT_LEFT, 250);
 
 	return TRUE;
 }
@@ -67,14 +74,43 @@ void CThemesDialog::SetFirmware(CFirmware *pFirmware, CStringDialog *pStringDial
 	m_pStringDialog = pStringDialog;
 
 	m_FontIndexCombo.ResetContent();
+	m_StringIndexCombo.ResetContent();
 
 	CString s;
-	for (DWORD i = 0; i < m_pFirmware->GetNumFonts(); i++)
+	DWORD i;
+	for (i = 0; i < m_pFirmware->GetNumFonts(); i++)
 	{
 		s.Format(TEXT("%d"), i);
 		m_FontIndexCombo.InsertString(i, s);
 	}
 	m_FontIndexCombo.SetCurSel(0);
+
+	for (i = 0; i < m_pFirmware->GetNumLangs(); i++)
+	{
+		s.Format(TEXT("%d"), i);
+		m_StringIndexCombo.InsertString(i, s);
+	}
+	m_StringIndexCombo.SetCurSel(0);
+
+	CheckDlgButton(IDC_OTF_CHK, 0);
+	m_OTFFontIndexCombo.ResetContent();
+	m_OTFFontIndexCombo.EnableWindow(FALSE);
+	if (m_pFirmware->GetNumOTFFonts()>0)
+	{
+		m_OTFFontIndexCombo.ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_OTF_CHK)->ShowWindow(SW_SHOW);
+		for (i = 0; i < m_pFirmware->GetNumOTFFonts(); i++)
+		{
+			s.Format(TEXT("%d"), i);
+			m_OTFFontIndexCombo.InsertString(i, s);
+		}
+		m_OTFFontIndexCombo.SetCurSel(0);
+	}
+	else
+	{
+		m_OTFFontIndexCombo.ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_OTF_CHK)->ShowWindow(SW_HIDE);
+	}
 
 	m_GraphicsList.DeleteAllItems();
 	m_FontsList.DeleteAllItems();
@@ -142,6 +178,9 @@ void CThemesDialog::OnBnClickedMakeTheme()
 	WORD z=0;
 	file.Write(&z, 2);
 
+	CIpodFont font;
+	COTFFont ofont;
+
 	//write header:
 	char empty[4]={"EMP"};
 	if (bGraphics)
@@ -199,29 +238,64 @@ void CThemesDialog::OnBnClickedMakeTheme()
 		file.Write(&sep, 4);
 
 	//Prepare fonts
+
+	LPBYTE lpEnd = m_pFirmware->GetFirmwareBuffer() + m_pFirmware->GetFirmwareSize();
+	BOOL bOTF;
 	for (x=0;x<m_FontsList.GetItemCount();x++)
 	{
+		s=m_FontsList.GetItemText(x, 1);
+		bOTF=FALSE;
+		if (!s.Compare(TEXT("OpenType")))
+			bOTF=TRUE;
+
 		s=m_FontsList.GetItemText(x, 0);
 		if (_stscanf(s, TEXT("%d"), &value) != 1)
 			value=0;
-		s=m_FontsList.GetItemText(x, 1);
-		CIpodFont font;
-		LPBYTE lpEnd = m_pFirmware->GetFirmwareBuffer() + m_pFirmware->GetFirmwareSize();
-		if (!font.Read(m_pFirmware->GetFont(value), lpEnd))
+		
+		if (!bOTF)
+		{
+			if (!font.Read(m_pFirmware->GetFont(value), lpEnd))
+			{
+				sMsg.Format(TEXT("Error reading font, make sure firmware is loaded!"));
+				goto readerror;
+			}
+		}
+		else if (!ofont.Read(m_pFirmware->GetOTFFont(value)))
 		{
 			sMsg.Format(TEXT("Error reading font, make sure firmware is loaded!"));
 			goto readerror;
 		}
-		s2=m_FontsList.GetItemText(x, 2);
-		if (LoadFont(&font, s, s2)==FALSE)
+
+		s=m_FontsList.GetItemText(x, 2);
+		s2=m_FontsList.GetItemText(x, 3);
+		if (!bOTF)
 		{
-			sMsg.Format(TEXT("Error loading font from specific file in list! Either the bitmap or the metrics file is damaged."));
-			goto readerror;
+			if (LoadFont(&font, s, s2)==FALSE)
+			{
+				sMsg.Format(TEXT("Error loading font from specific file in list! Either the bitmap or the metrics file is damaged."));
+				goto readerror;
+			}
+			file.Write(&value, 4);
+			w=0;
+			file.Write(&w, 4);
+			w=font.GetFontBlockLen();
+			file.Write(&w, 4);
+			file.Write(m_pFirmware->GetFont(value), w);
 		}
-		file.Write(&value, 4);
-		w=font.GetFontBlockLen();
-		file.Write(&w, 4);
-		file.Write(m_pFirmware->GetFont(value), w);
+		else
+		{
+			if (LoadOTFFont(&ofont, value, s)==FALSE)
+			{
+				sMsg.Format(TEXT("Error loading font from specific file in list! The file you tried to load is damaged."));
+				goto readerror;
+			}
+			file.Write(&value, 4);
+			w=1;
+			file.Write(&w, 4);
+			w=ofont.GetFontBlockLen();
+			file.Write(&w, 4);
+			file.Write(m_pFirmware->GetOTFFont(value), w);
+		}
 	}
 
 	//Prepare String Changes File
@@ -234,6 +308,8 @@ void CThemesDialog::OnBnClickedMakeTheme()
 	//write seperator
 	file.Write(&sep, 4);
 
+	w=(DWORD)m_StringIndexCombo.GetCurSel();
+	file.Write(&w, 4);
 	w=(DWORD)scffile.GetLength();
 	file.Write(&w, 4);
 	buffer = new BYTE[w];
@@ -253,6 +329,18 @@ readerror:
 	DeleteFile(dlg.GetPathName());
 	sMsg.AppendFormat(TEXT("\nAborting theme maker."));
 	MessageBox(sMsg);
+}
+
+BOOL CThemesDialog::LoadOTFFont(COTFFont *pFont, DWORD index, LPCTSTR lpszFilename)
+{
+	CFile file;
+	if (!file.Open(lpszFilename, CFile::modeRead))
+		return FALSE;
+	
+	if (file.Read(m_pFirmware->GetOTFFont(index), pFont->GetFontBlockLen()) < pFont->GetFontBlockLen())
+		return FALSE;
+	
+	return TRUE;
 }
 
 BOOL CThemesDialog::LoadFont(CIpodFont *pFont, LPCTSTR lpszBmpFilename, LPCTSTR lpszIfmFilename)
@@ -290,6 +378,24 @@ BOOL CThemesDialog::LoadFont(CIpodFont *pFont, LPCTSTR lpszBmpFilename, LPCTSTR 
 		return FALSE;
 	}
 
+	//new way :)
+	DWORD fsize=pFont->GetMetricDataLen();
+	DWORD length=(DWORD)file.GetLength();
+	if (length!=fsize)
+		goto NotValid;
+
+	LPBYTE lpBuf;
+	lpBuf=new BYTE[fsize];
+	if (file.Read(lpBuf, fsize) == fsize)
+	{
+		pFont->SetMetricData(lpBuf);
+	}
+	else
+		goto NotValid;
+
+	return TRUE;
+
+	/*
 	WORD offset1, offset2;
 	SHORT width, ident;
 	WORD c;
@@ -340,6 +446,7 @@ BOOL CThemesDialog::LoadFont(CIpodFont *pFont, LPCTSTR lpszBmpFilename, LPCTSTR 
 	file.Close();
 
 	return TRUE;
+	*/
 
 NotValid:
 	return FALSE;
@@ -387,8 +494,13 @@ void CThemesDialog::OnBnClickedLoadTheme()
 	if (dlg.DoModal() != IDOK)
 		return;
 
+	LoadTheme(dlg.GetPathName());
+}
+
+void CThemesDialog::LoadTheme(CString filename)
+{
 	CFile file;
-	if (!file.Open(dlg.GetPathName(), CFile::modeRead))
+	if (!file.Open(filename, CFile::modeRead))
 	{
 		MessageBox(TEXT("Can't open theme file!"));
 		return;
@@ -550,6 +662,7 @@ void CThemesDialog::OnBnClickedLoadTheme()
 
 fontstep:
 	//Parse fonts
+	DWORD ftype;
 	LPBYTE lpEnd = m_pFirmware->GetFirmwareBuffer() + m_pFirmware->GetFirmwareSize();
 	while (TRUE)
 	{
@@ -560,23 +673,43 @@ fontstep:
 		}
 		if (memcmp(&index, &sep, 4)==0)
 			break;
+		if (file.Read(&ftype, 4) < 4)
+		{
+			errid=1;
+			goto readerror;
+		}
 		if (file.Read(&size, 4) < 4)
 		{
 			errid=1;
 			goto readerror;
 		}
-		if (!font.Read(m_pFirmware->GetFont(index), lpEnd))
+		switch (ftype)
 		{
-			errid=3;
+		case 0:
+			if (!font.Read(m_pFirmware->GetFont(index), lpEnd))
+			{
+				errid=3;
+				goto readerror;
+			}
+			buffer = new BYTE[size];
+			if (file.Read(buffer, size) < size)
+			{
+				errid=4;
+				goto readerror;
+			}
+			font.SetData(buffer);
+			break;
+		case 1:
+			if (file.Read(m_pFirmware->GetOTFFont(index), size) < size)
+			{
+				errid=4;
+				goto readerror;
+			}
+			break;
+		default:
+			errid=18;
 			goto readerror;
 		}
-		buffer = new BYTE[size];
-		if (file.Read(buffer, size) < size)
-		{
-			errid=4;
-			goto readerror;
-		}
-		font.SetData(buffer);
 	}
 
 	if (!bSCF)
@@ -584,12 +717,18 @@ fontstep:
 
 scfstep:
 	//Parse string changes file
+	DWORD lang;
+	if (file.Read(&lang, 4) < 4)
+	{
+		errid=19;
+		goto readerror;
+	}
 	if (file.Read(&size, 4) < 4)
 	{
 		errid=10;
 		goto readerror;
 	}
-	if (m_pStringDialog->LoadStringChanges(&file)==FALSE)
+	if (m_pStringDialog->LoadLanguageBlock(&file, size, lang)==FALSE)
 	{
 		errid=11;
 		goto readerror;
@@ -714,42 +853,98 @@ void CThemesDialog::OnBnClickedLoadFont()
 		return;
 	}
 
+	BOOL bOTF=FALSE;
+	if (IsDlgButtonChecked(IDC_OTF_CHK) == 1)
+		bOTF=TRUE;
+
+	CString filetype,title;
+	if (bOTF)
+	{
+		filetype.Format(TEXT("OpenType Font Files (*.otf)|*.otf||"));
+		title.Format(TEXT("Open OpenType font file"));
+	}
+	else
+	{
+		filetype.Format(TEXT("Bitmap Files (*.bmp, *.gif, *.jpg)|*.bmp;*.gif;*.jpg||"));
+		title.Format(TEXT("Open bitmap font file"));
+	}
 	//Get font file
-	CFileDialog dlg_b(TRUE, 0, 0, OFN_HIDEREADONLY, TEXT("Bitmap Files (*.bmp, *.gif, *.jpg)|*.bmp;*.gif;*.jpg||"), this);
-	dlg_b.m_pOFN->lpstrTitle = TEXT("Open bitmap font file");
+	CFileDialog dlg_b(TRUE, 0, 0, OFN_HIDEREADONLY, filetype, this);
+	dlg_b.m_pOFN->lpstrTitle = title;
 
 	if (dlg_b.DoModal() != IDOK)
 		return;
 
-	//Get metrics file
-	CFileDialog dlg_m(TRUE, TEXT("ifm"), 0, OFN_HIDEREADONLY, TEXT("Fonts Metrics (*.ifm)|*.ifm||"), this);
-	dlg_m.m_pOFN->lpstrTitle = TEXT("Open metrics file");
-
-	if (dlg_m.DoModal() != IDOK)
-		return;
-
-	CString s,s2;
-	s2.Format(TEXT("%d"), m_FontIndexCombo.GetCurSel());
-	int i=-1;
-	for (int x=0;x<m_FontsList.GetItemCount();x++)
+	CString s,s2,s3;
+	int i=-1,x;
+	if (!bOTF)
 	{
-		s=m_GraphicsList.GetItemText(x, 0);
-		if (s.Compare(s2)==0)
+		//Get metrics file
+		CFileDialog dlg_m(TRUE, TEXT("ifm"), 0, OFN_HIDEREADONLY, TEXT("Fonts Metrics (*.ifm)|*.ifm||"), this);
+		dlg_m.m_pOFN->lpstrTitle = TEXT("Open metrics file");
+
+		if (dlg_m.DoModal() != IDOK)
+			return;
+
+		s2.Format(TEXT("%d"), m_FontIndexCombo.GetCurSel());
+		for (x=0;x<m_FontsList.GetItemCount();x++)
 		{
-			i=x;
-			break;
+			s3=m_FontsList.GetItemText(x, 3);
+			if (s3.Compare(TEXT("Mac Bitmap"))==0)
+			{
+				s=m_FontsList.GetItemText(x, 0);
+				if (s.Compare(s2)==0)
+				{
+					i=x;
+					break;
+				}
+			}
 		}
-	}
-	if (i==-1)
-	{
-		i=m_FontsList.GetItemCount();
-		m_FontsList.InsertItem(i, s2);
-	}
-	s.Format(dlg_b.GetPathName());
-	m_FontsList.SetItemText(i, 1, s);
+		if (i==-1)
+		{
+			i=m_FontsList.GetItemCount();
+			m_FontsList.InsertItem(i, s2);
+		}
+		s.Format(TEXT("Mac Bitmap"));
+		m_FontsList.SetItemText(i, 1, s);
 
-	s.Format(dlg_m.GetPathName());
-	m_FontsList.SetItemText(i, 2, s);
+		s.Format(dlg_b.GetPathName());
+		m_FontsList.SetItemText(i, 2, s);
+
+		s.Format(dlg_m.GetPathName());
+		m_FontsList.SetItemText(i, 3, s);
+	}
+	else
+	{
+		s2.Format(TEXT("%d"), m_OTFFontIndexCombo.GetCurSel());
+		for (x=0;x<m_FontsList.GetItemCount();x++)
+		{
+			s3=m_FontsList.GetItemText(x, 3);
+			if (s3.Compare(TEXT("OpenType"))==0)
+			{
+				s=m_FontsList.GetItemText(x, 0);
+				if (s.Compare(s2)==0)
+				{
+					i=x;
+					break;
+				}
+			}
+		}
+		if (i==-1)
+		{
+			i=m_FontsList.GetItemCount();
+			m_FontsList.InsertItem(i, s2);
+		}
+
+		s.Format(TEXT("OpenType"));
+		m_FontsList.SetItemText(i, 1, s);
+
+		s.Format(dlg_b.GetPathName());
+		m_FontsList.SetItemText(i, 2, s);
+
+		s.Format(TEXT(""));
+		m_FontsList.SetItemText(i, 3, s);
+	}
 }
 
 void CThemesDialog::OnBnClickedDeleteFont()
@@ -771,7 +966,7 @@ void CThemesDialog::OnBnClickedDeleteFont()
 
 void CThemesDialog::OnBnClickedLoadSCF()
 {
-	CFileDialog dlg(TRUE, TEXT("scf"), 0, OFN_HIDEREADONLY, TEXT("String Changes (*.scf)|*.scf||"), this);
+	CFileDialog dlg(TRUE, TEXT("txt"), 0, OFN_HIDEREADONLY, TEXT("String List File (*.txt)|*.txt||"), this);
 
 	if (dlg.DoModal() != IDOK)
 		return;
@@ -784,4 +979,50 @@ void CThemesDialog::OnBnClickedClearSCF()
 {
 	m_SCFPath.Empty();
 	GetDlgItem(IDC_SCFPATH_STATIC)->SetWindowText(NO_SCF_STR);
+}
+void CThemesDialog::OnBnClickedOtfChk()
+{
+	if (IsDlgButtonChecked(IDC_OTF_CHK) == 1)
+	{
+		m_OTFFontIndexCombo.EnableWindow(TRUE);
+		m_FontIndexCombo.EnableWindow(FALSE);
+	}
+	else
+	{
+		m_OTFFontIndexCombo.EnableWindow(FALSE);
+		m_FontIndexCombo.EnableWindow(TRUE);
+	}
+}
+
+void CThemesDialog::OnBnClickedAssociateIpw()
+{
+	CGCFileTypeAccess TheFTA;
+
+	// get full file path to program executable file
+	TCHAR	szProgPath[MAX_PATH * 2];
+	::GetModuleFileName(NULL, szProgPath, sizeof(szProgPath)/sizeof(TCHAR));
+
+	CString csTempText;
+
+	TheFTA.SetExtension(_TEXT("iPW"));
+
+	// just pass file path in quotes on command line
+	//csTempText  = szProgPath;
+	//csTempText += _TEXT(" \"%1\"");
+	csTempText.Format(_TEXT("\"%s\" -theme %s"),szProgPath,_TEXT("\"%1\""));
+	TheFTA.SetShellOpenCommand(csTempText);
+	TheFTA.SetDocumentShellOpenCommand(csTempText);
+
+	TheFTA.SetDocumentClassName(_TEXT("iPodWizard.Document"));
+
+	// use first icon in program
+	csTempText  = szProgPath;
+	csTempText += _TEXT(",0");
+	//csTempText.Format(_TEXT("%s%s"),szProgPath,_TEXT(",0"));
+	TheFTA.SetDocumentDefaultIcon(csTempText);
+
+	// set the necessary registry entries	
+	TheFTA.RegSetAllInfo();
+
+	MessageBox(_TEXT("Associated successfully!"));
 }

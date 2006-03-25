@@ -38,6 +38,9 @@ protected:
 	CString	m_Filename;
 	CResourceManager m_RsrcMgr;
 	CFirmware m_Firmware;
+	BOOL m_iPodFirm;
+	CString m_ThemeFirmware;
+	CString m_ThemeFile;
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
@@ -47,10 +50,12 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg HCURSOR OnQueryDragIcon();
+	void ThemeChecker();
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedOpen();
 	void OpenUpdater(BOOL firstTime);
+	CComboBox m_EditModeCombo;
 	CComboBox m_FirmwareCombo;
 	CComboBox m_iPodDriveCombo;
 	CStringArray m_FirmwareNames; //non visible
@@ -68,8 +73,11 @@ public:
 	CStringArray m_iPodDevices;
 	afx_msg void OnBnClickedAbout();
 	afx_msg void OnBnClickedUpdateSysInfo();
-	afx_msg void OnBnClickedRefreshDrives();
+	//afx_msg void OnBnClickedRefreshDrives();
 	afx_msg void OnBnClickedTweaks();
 	void GetAppPath(CString &app_path);
 	int CheckiPod(BOOL bSilent=FALSE);
+	afx_msg void OnCbnSelChangeiPodDriveCombo();
+	afx_msg void OnBnClickedLoadipodfwButton();
+	afx_msg void OnCbnSelchangeModeCombo();
 };

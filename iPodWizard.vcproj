@@ -16,6 +16,7 @@
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
 			UseOfMFC="1"
+			UseOfATL="1"
 			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
@@ -126,6 +127,9 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\cgfiltyp.cpp">
+			</File>
+			<File
 				RelativePath=".\DialogMinHelpBtn.cpp">
 			</File>
 			<File
@@ -160,6 +164,15 @@
 			</File>
 			<File
 				RelativePath=".\iPodWizardDlg.cpp">
+			</File>
+			<File
+				RelativePath=".\OTFDialog.cpp">
+			</File>
+			<File
+				RelativePath=".\OTFFontParser.cpp">
+			</File>
+			<File
+				RelativePath=".\OTFFontWnd.cpp">
 			</File>
 			<File
 				RelativePath=".\Picture.cpp">
@@ -215,6 +228,9 @@
 				RelativePath=".\AfxBeginMsgMapTemplate.h">
 			</File>
 			<File
+				RelativePath=".\cgfiltyp.h">
+			</File>
+			<File
 				RelativePath=".\DialogMinHelpBtn.h">
 			</File>
 			<File
@@ -252,6 +268,15 @@
 			</File>
 			<File
 				RelativePath=".\memdc.h">
+			</File>
+			<File
+				RelativePath=".\OTFDialog.h">
+			</File>
+			<File
+				RelativePath=".\OTFFontParser.h">
+			</File>
+			<File
+				RelativePath=".\OTFFontWnd.h">
 			</File>
 			<File
 				RelativePath=".\Picture.h">

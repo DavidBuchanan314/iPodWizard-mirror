@@ -40,8 +40,11 @@
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
+// Include the ATL headers needed:
+#define _ATL_ATTRIBUTES 1
+#include <atlbase.h>
+#include <atlcom.h>
 #include <atlimage.h>
 
 #define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))
 
-//extern "C" int __cdecl __ascii_stricmp(const char * dst, const char * src);

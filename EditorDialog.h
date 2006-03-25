@@ -4,6 +4,7 @@
 #include "PicturesDialog.h"
 #include "FontsDialog.h"
 #include "StringDialog.h"
+#include "OTFDialog.h"
 #include "afxwin.h"
 #include "afxcmn.h"
 
@@ -28,12 +29,15 @@ public:
 	virtual BOOL OnInitDialog();
 	CTabCtrl m_PropsTab;
 	void SetFirmware(CFirmware *pFirmware);
-	void UpdatePages();
+	void UpdatePages(BOOL bFonts = FALSE);
 	CPicturesDialog m_PicsDialog;
 	CFontsDialog m_FontsDialog;
 	CStringDialog m_StringDialog;
+	COTFDialog m_OTFDialog;
+	BOOL bFonts,bOTFCreate;
 protected:
 	virtual void OnOK();
 public:
 	afx_msg void OnTcnSelchangePropTab(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg LRESULT OnSwitchFontSystem(WPARAM wParam, LPARAM lParam);
 };

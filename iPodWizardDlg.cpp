@@ -6,7 +6,11 @@
 #include "iPodWizardDlg.h"
 #include ".\ipodwizarddlg.h"
 
-#include <atlimage.h>
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+//#include <atlimage.h>
 
 #include "ResourceManager.h"
 #include "Picture.h"
@@ -14,16 +18,50 @@
 #include "TweaksDialog.h"
 #include "HelpDialog.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
-
 #define BUFSIZE 512
 
-//#define UNICODE
+//iPod Detector:
+#import "progid:IPodService.iPodManager.1" no_dual_interfaces, no_namespace, named_guids, embedded_idl
+[ module(name="iPodEventReceiver") ];
+
+[ event_receiver(com) ]
+class iPodEvents
+{
+public:
+	CiPodWizardDlg  *m_pHandler;
+	void OniPodStatusChanged(HIPOD HIPOD, EDeviceStatus status, IPODAPPID homeAppID);
+
+	void SetHandler(CiPodWizardDlg *pHandler)
+	{
+		m_pHandler=pHandler;
+	}
+
+	void HookEvents(IiPodManager *piPodM)
+	{
+		__hook(&_IiPodManagerEvents::OniPodStatusChanged, piPodM, &iPodEvents::OniPodStatusChanged);
+	}
+
+	void UnhookEvents(IiPodManager *piPodM)
+	{
+		__unhook(&_IiPodManagerEvents::OniPodStatusChanged, piPodM, &iPodEvents::OniPodStatusChanged);
+	}
+};
+
 #include <windows.h>
 
 BOOL (WINAPI *_TransparentBlt)(HDC, int, int, int, int, HDC, int, int, int, int, UINT) = NULL;
+
+iPodEvents iPodEventsHandler;
+IPODAPPID appid;
+IiPodManagerPtr ipod;
+
+void iPodEvents::OniPodStatusChanged(HIPOD HIPOD, EDeviceStatus status, IPODAPPID homeAppID)
+{
+	if (status==kDeviceStatusMounted || status==kDeviceStatusUnmounted)
+	{
+		m_pHandler->RefreshiPodDrives();
+	}
+}
 
 // CAboutDlg dialog used for App About
 
@@ -70,6 +108,7 @@ void CiPodWizardDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CExDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_FIRMWARE_COMBO, m_FirmwareCombo);
+	DDX_Control(pDX, IDC_MODE_COMBO, m_EditModeCombo);
 	DDX_Control(pDX, IDC_OPT_TAB, m_OptionsTab);
 	DDX_Control(pDX, IDC_FIRMWARE_LIST, m_FirmwareList);
 	DDX_Control(pDX, IDC_IPODDRIVE_COMBO, m_iPodDriveCombo);
@@ -89,19 +128,12 @@ BEGIN_MESSAGE_MAP(CiPodWizardDlg, CExDialog)
 	ON_BN_CLICKED(IDC_WRITE_FIRMWARE_BUTTON, OnBnClickedWriteFirmwareButton)
 	ON_BN_CLICKED(ID_ABOUT, OnBnClickedAbout)
 	ON_BN_CLICKED(IDC_USYSINFO_BUTTON, OnBnClickedUpdateSysInfo)
-	ON_BN_CLICKED(IDC_REFRESHDRV_BUTTON, OnBnClickedRefreshDrives)
+	//ON_BN_CLICKED(IDC_REFRESHDRV_BUTTON, OnBnClickedRefreshDrives)
 	ON_BN_CLICKED(ID_TWEAKS, OnBnClickedTweaks)
+	ON_CBN_SELCHANGE(IDC_IPODDRIVE_COMBO, OnCbnSelChangeiPodDriveCombo)
+	ON_BN_CLICKED(IDC_LOADIPODFW_BUTTON, OnBnClickedLoadipodfwButton)
+	ON_CBN_SELCHANGE(IDC_MODE_COMBO, OnCbnSelchangeModeCombo)
 END_MESSAGE_MAP()
-
-void InitWindowStyles(CWnd* pWnd)
-{
-	//if (thePrefs.GetStraightWindowStyles() < 0)
-		return;
-	//else if (thePrefs.GetStraightWindowStyles() > 0)
-		//StraightWindowStyles(pWnd);
-	//else
-		//FlatWindowStyles(pWnd);
-}
 
 // CiPodWizardDlg message handlers
 
@@ -131,6 +163,12 @@ BOOL CiPodWizardDlg::OnInitDialog()
 	//  when the application's main window is not a dialog
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
+
+	//initialize modes
+	m_EditModeCombo.ResetContent();
+	m_EditModeCombo.AddString(_T("Updater"));
+	m_EditModeCombo.AddString(_T("iPod"));
+	m_EditModeCombo.SetCurSel(0);
 
 	// initialize list
 	m_FirmwareList.SetExtendedStyle(m_FirmwareList.GetExtendedStyle()|LVS_EX_FULLROWSELECT);
@@ -191,10 +229,109 @@ BOOL CiPodWizardDlg::OnInitDialog()
 		}
 	}
 
+	//ipod detector
+	CoInitialize(NULL);
+
+	iPodEventsHandler.SetHandler(this);
+	
+	HRESULT hr = ipod.CreateInstance(CLSID_iPodManager);
+
+	if (hr != S_OK)
+	{
+		ipod=NULL;
+		CoUninitialize();
+		goto refresh;
+	}
+
+	iPodEventsHandler.HookEvents(ipod);
+
+	appid=4;
+
+	ipod->Login(appid);
+refresh:
 	RefreshiPodDrives();
 	//
-	
+
+	//check automatic theme loader
+	ThemeChecker();
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
+}
+
+void CiPodWizardDlg::ThemeChecker()
+{
+	m_ThemeFirmware.Empty();
+	m_ThemeFile.Empty();
+
+	CString m_strCommandLine;
+	CString strParam;
+	CString strFlag;
+	int nParam = 0;
+	TCHAR seps1[] = _T("\"");
+	TCHAR seps2[] = _T(" ");
+	BOOL bRet = FALSE;
+	
+	strFlag = _T("");
+	strParam = _T("");
+
+	m_strCommandLine = ::GetCommandLine();
+	m_strCommandLine.TrimLeft();
+	m_strCommandLine.TrimRight();
+	//MessageBox(m_strCommandLine);
+	
+	int pos1=0,pos2=0;
+	strParam = m_strCommandLine.Tokenize(seps1, pos1);
+	strParam = m_strCommandLine.Tokenize(seps1, pos1);
+	strFlag = strParam.Tokenize(seps2, pos2);
+	if (strFlag.Compare(_TEXT("-theme"))==0)
+	{
+		strParam = m_strCommandLine.Tokenize(seps1, pos1);
+		if (PathFileExists(strParam)==TRUE)
+		{
+			m_ThemeFile = strParam;
+
+			CFile file;
+			if (!file.Open(m_ThemeFile, CFile::modeRead))
+			{
+				MessageBox(TEXT("Can't open theme file!"));
+				return;
+			}
+			LPWORD warr;
+			WORD w;
+			warr = new WORD[255];
+			int n=0;
+			while (TRUE)
+			{
+				if (file.Read(&w, 2) < 2)
+				{
+					MessageBox(_T("Error reading theme file!"));
+					file.Close();
+					return;
+				}
+				warr[n]=w;
+				n++;
+				if (w==0)
+					break;
+			}
+			m_ThemeFirmware.Format(TEXT("%s"), (LPCTSTR)warr);
+			for (int n=0;n<m_FirmwareNames.GetCount();n++)
+			{
+				if (m_FirmwareNames.GetAt(n).Compare(m_ThemeFirmware)==0)
+				{
+					m_FirmwareCombo.SetCurSel(n);
+					UpdateData(FALSE);
+					file.Close();
+					OnBnClickedLoadFirmware();
+					return;
+				}
+			}
+			file.Close();
+		}
+		else
+		{
+			MessageBox(_TEXT("Theme file not found!"));
+		}
+	}
 }
 
 int CiPodWizardDlg::CheckiPod(BOOL bSilent)
@@ -261,6 +398,13 @@ int CiPodWizardDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CiPodWizardDlg::OnDestroy()
 {
+	if (ipod)
+	{
+		ipod->Logout(appid);
+		iPodEventsHandler.UnhookEvents(ipod);
+		ipod=NULL;
+		CoUninitialize();
+	}
 	CExDialog::OnDestroy();
 }
 
@@ -317,7 +461,6 @@ void CiPodWizardDlg::OnBnClickedTweaks()
 {
 	if (CheckiPod(FALSE)==-1)
 		return;
-	theApp.m_DeviceSel=m_iPodDevices.GetAt(m_iPodDriveCombo.GetCurSel());
 	CTweaksDialog dlg(this);
 	INT_PTR nRet = -1;
 	nRet = dlg.DoModal();
@@ -332,10 +475,10 @@ void CiPodWizardDlg::OnBnClickedTweaks()
 	}
 }
 
-void CiPodWizardDlg::OnBnClickedRefreshDrives()
+/*void CiPodWizardDlg::OnBnClickedRefreshDrives()
 {
 	RefreshiPodDrives();
-}
+}*/
 
 void CiPodWizardDlg::RefreshiPodDrives()
 {
@@ -401,6 +544,7 @@ void CiPodWizardDlg::RefreshiPodDrives()
 					sdn_drives[idx].PartitionNumber=1;
 				else
 					sdn_drives[idx].PartitionNumber=0;
+				CloseHandle(hDrive);
 			}
 		}
 	}
@@ -429,6 +573,7 @@ void CiPodWizardDlg::RefreshiPodDrives()
 							break;
 						}
 				}
+				CloseHandle(h);
 			}
 			y++;
 		}
@@ -444,12 +589,15 @@ ShowStatus:
 		GetDlgItem(IDC_STATIC_FOUND)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_IPODDRIVE_COMBO)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_STATIC_NOTFOUND)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_LOADIPODFW_BUTTON)->EnableWindow(FALSE);
+		theApp.m_DeviceSel.Empty();
 	}
 	else
 	{
 		GetDlgItem(IDC_STATIC_FOUND)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_IPODDRIVE_COMBO)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_STATIC_NOTFOUND)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_LOADIPODFW_BUTTON)->EnableWindow(TRUE);
 		CString sDrive;
 		if (ipod_list.Find(TEXT("|"),0)>0)
 		{
@@ -488,9 +636,17 @@ ShowStatus:
 		}
 		sDrive.Format(TEXT("Found %d iPod drives:"), m_iPodDriveCombo.GetCount());
 		GetDlgItem(IDC_STATIC_FOUND)->SetWindowText(sDrive);
+		m_iPodDriveCombo.SetCurSel(0);
+		theApp.m_DeviceSel=m_iPodDevices.GetAt(m_iPodDriveCombo.GetCurSel());
 	}
-	m_iPodDriveCombo.SetCurSel(0);
+	
 }
+
+void CiPodWizardDlg::OnCbnSelChangeiPodDriveCombo()
+{
+	theApp.m_DeviceSel=m_iPodDevices.GetAt(m_iPodDriveCombo.GetCurSel());
+}
+
 void CiPodWizardDlg::OnBnClickedUpdateSysInfo()
 {
 	if (GetDlgItem(IDC_STATIC_NOTFOUND)->IsWindowVisible()==TRUE)
@@ -647,12 +803,20 @@ void CiPodWizardDlg::OnBnClickedLoadFirmware()
 	m_EditorDialog.SetFirmware(&m_Firmware);
 	m_ThemesDialog.SetFirmware(&m_Firmware, &m_EditorDialog.m_StringDialog);
 	
+	m_iPodFirm=FALSE;
 	GetDlgItem(IDC_WRITE_FIRMWARE_BUTTON)->EnableWindow(TRUE);
 
 	// save settings
 	CWinApp *pApp = AfxGetApp();
 	pApp->WriteProfileString(TEXT("Main"), TEXT("Updater"), m_Filename);
 	pApp->WriteProfileString(TEXT("Main"), TEXT("Firmware"), name);
+
+	//Check if we need to auto load a theme:
+	if (m_ThemeFirmware.IsEmpty()==FALSE)
+	{
+		m_ThemeFirmware.Empty();
+		m_ThemesDialog.LoadTheme(m_ThemeFile);
+	}
 }
 
 void CiPodWizardDlg::OnTcnSelchangeOptionTab(NMHDR *pNMHDR, LRESULT *pResult)
@@ -668,17 +832,17 @@ void CiPodWizardDlg::UpdatePages()
 
 	switch (i)
 	{
-	case 0:
+	case 0: //Editor
 		m_EditorDialog.ShowWindow(SW_SHOW);
 		m_ThemesDialog.ShowWindow(SW_HIDE);
 		m_UpdaterDialog.ShowWindow(SW_HIDE);
 		break;
-	case 1:
+	case 1: //Themes
 		m_EditorDialog.ShowWindow(SW_HIDE);
 		m_ThemesDialog.ShowWindow(SW_SHOW);
 		m_UpdaterDialog.ShowWindow(SW_HIDE);
 		break;
-	case 2:
+	case 2: //Updater
 		m_EditorDialog.ShowWindow(SW_HIDE);
 		m_ThemesDialog.ShowWindow(SW_HIDE);
 		m_UpdaterDialog.ShowWindow(SW_SHOW);
@@ -688,36 +852,150 @@ void CiPodWizardDlg::UpdatePages()
 
 void CiPodWizardDlg::OnBnClickedWriteFirmwareButton()
 {
-	if (MessageBox(TEXT("Are you sure you want to write the modified firmware to the updater?"), TEXT("Warning"), MB_YESNO) != IDYES)
-		return;
-
-	CString title, title_new;
-	GetWindowText(title);
-	title_new.Format(TEXT("%s - Writing firmware, please wait..."), title);
-	SetWindowText(title_new);
-
-	m_Firmware.SyncChecksum();
-
-	UpdateChecksums();
-
-	if (!m_RsrcMgr.WriteResource(m_Filename, FIRMWARE_RESOURCE_TYPE, m_Firmware.GetName(), m_Firmware.GetFirmwareBuffer(), m_Firmware.GetFirmwareSize()))
+	if (m_iPodFirm)
 	{
-		SetWindowText(title);
-		MessageBox(TEXT("Unable to write modified firmware!"));
+		if (MessageBox(TEXT("Are you sure you want to write the modified firmware to your iPod?"), TEXT("Warning"), MB_YESNO) != IDYES)
+			return;
+
+		if (m_Firmware.GetNumOTFFonts()>0)
+		{
+			COTFFont m_Font;
+			for (DWORD i=0;i<m_Firmware.GetNumOTFFonts();i++)
+			{
+				if (!m_Font.Read(m_Firmware.GetOTFFont(i), FALSE))
+				{
+					MessageBox(TEXT("One of the OTF fonts is damages and therefor iPodWizard cannot write the update as it may cause damage to iPod.\nPlease reload the firmware and make the changes again."));
+					return;
+				}
+				m_Font.SyncChecksums();
+			}
+		}
+
+		m_Firmware.SyncChecksum();
+
+		UpdateChecksums();
+
+		if (CheckiPod(FALSE)==-1)
+			return;
+
+		MessageBox(TEXT("Before continuing please make sure iPodWizard is running in front and don't switch to any other program while writing the firmware to the iPod!!!"));
+		TCHAR devstring[25];
+		wsprintf (devstring, TEXT("%s"), theApp.m_DeviceSel);
+		int dev = _wopen (devstring, O_WRONLY | _O_RAW);
+		if (dev==-1)
+		{
+			MessageBox(TEXT("Unable to access iPod! Make sure programs who use the iPod like iTunes are closed."));
+			return;
+		}
+
+		DWORD size=m_Firmware.GetFirmwareSize();
+		LPBYTE lpBuf=m_Firmware.GetFirmwareBuffer();
+		lseek(dev, FIRMWARE_START, SEEK_SET);
+		
+		CScanDialog dlg;
+		dlg.Create(dlg.IDD, this);
+
+		dlg.SendMessage(WM_APP, (WPARAM)_T("Writing iPod firmware to disk"), 0);
+		dlg.m_ProgressCtrl.SetRange32(0, size);
+		dlg.m_ProgressCtrl.SetPos(0);
+		int m_UpdatesDone=0,ret;
+		DWORD i;
+		for (i=0;i<size;i+=BLOCK_SIZE)
+		{
+			ret=write(dev, &lpBuf[i], BLOCK_SIZE);
+			if (ret==-1 && m_UpdatesDone==0)
+			{
+				close(dev);
+				MessageBox(TEXT("Can't write the modded firmware to your iPod.\r\nYour iPod is remained untouched.\r\nRestarting your computer may help to solve this problem."), TEXT("Error"));
+				return;
+			}
+			else if (ret!=BLOCK_SIZE)
+			{
+				close(dev);
+				MessageBox(TEXT("A severe writing error occured to the iPod and the firmware might be damaged.\nIn order to fix this, you must go into disk mode (see more info on our website www.iPodWizard.net) and restore or update using original Apple updater."), TEXT("Error"));
+				return;
+			}
+			m_UpdatesDone++;
+			if (i%(BLOCK_SIZE*2000)==0)
+			{
+				dlg.m_ProgressCtrl.SetPos(i);
+				dlg.m_ProgressCtrl.UpdateWindow();
+			}
+		}
+		dlg.m_ProgressCtrl.SetPos(size);
+		dlg.m_ProgressCtrl.UpdateWindow();
+		close(dev);
+		dlg.DestroyWindow();
+
+		MessageBox(TEXT("Successfully written the modded firmware to your iPod!\r\nNow in order for changed to take order, you need to safe remove your iPod from your computer and the iPod will auto reset itself."));
 	}
 	else
 	{
-		CString s;
-		s.Format(TEXT("1"));
-		if (!m_RsrcMgr.Open(m_Filename))
+		if (MessageBox(TEXT("Are you sure you want to write the modified firmware to the updater?"), TEXT("Warning"), MB_YESNO) != IDYES)
+			return;
+
+		//Check for diskspace:
+		int f=_wopen(m_Filename, O_RDONLY | _O_RAW);
+		__int64	m_uliFreeBytesAvailable,m_uliTotalNumberOfBytes;
+		if( f==-1 || !GetDiskFreeSpaceEx(
+			m_Filename.Left(3),                  // directory name
+			(PULARGE_INTEGER)&m_uliFreeBytesAvailable,         // bytes available to caller
+			(PULARGE_INTEGER)&m_uliTotalNumberOfBytes,         // bytes on disk
+			NULL) )   // free bytes on disk
 		{
-			DWORD err = GetLastError();
-			s.Format(TEXT("Unable to reopen file! Code=%d"), err);
+			MessageBox(TEXT("Unable to access hard disk!"));
+			return;
 		}
-		SetWindowText(title);
-		MessageBox(TEXT("Updater modified successfully!"), TEXT("Success"));
-		if (s.Compare(TEXT("1")))
-			MessageBox(s);
+		
+		if (m_uliFreeBytesAvailable < (_filelength(f) + 0xFFFF))
+		{
+			MessageBox(TEXT("You don't have enough disk space to write the updater file!"));
+			return;
+		}
+		close(f);
+
+		CString title, title_new;
+		GetWindowText(title);
+		title_new.Format(TEXT("%s - Writing firmware, please wait..."), title);
+		SetWindowText(title_new);
+
+		if (m_Firmware.GetNumOTFFonts()>0)
+		{
+			COTFFont m_Font;
+			for (DWORD i=0;i<m_Firmware.GetNumOTFFonts();i++)
+			{
+				if (!m_Font.Read(m_Firmware.GetOTFFont(i), FALSE))
+				{
+					MessageBox(TEXT("One of the OTF fonts is damages and therefor iPodWizard cannot write the update as it may cause damage to iPod.\nPlease reload the firmware and make the changes again."));
+					return;
+				}
+				m_Font.SyncChecksums();
+			}
+		}
+
+		m_Firmware.SyncChecksum();
+
+		UpdateChecksums();
+
+		if (!m_RsrcMgr.WriteResource(m_Filename, FIRMWARE_RESOURCE_TYPE, m_Firmware.GetName(), m_Firmware.GetFirmwareBuffer(), m_Firmware.GetFirmwareSize()))
+		{
+			SetWindowText(title);
+			MessageBox(TEXT("Unable to write modified firmware!"));
+		}
+		else
+		{
+			CString s;
+			s.Format(TEXT("1"));
+			if (!m_RsrcMgr.Open(m_Filename))
+			{
+				DWORD err = GetLastError();
+				s.Format(TEXT("Unable to reopen file! Code=%d"), err);
+			}
+			SetWindowText(title);
+			MessageBox(TEXT("Updater modified successfully!"), TEXT("Success"));
+			if (s.Compare(TEXT("1")))
+				MessageBox(s);
+		}
 	}
 }
 
@@ -757,4 +1035,97 @@ void CiPodWizardDlg::OnBnClickedAbout()
 	CAboutDlg dlg;
 
 	dlg.DoModal();
+}
+
+void CiPodWizardDlg::OnBnClickedLoadipodfwButton()
+{
+	if (CheckiPod(FALSE)==-1)
+		return;
+
+	TCHAR devstring[25];
+	wsprintf (devstring, TEXT("%s"), theApp.m_DeviceSel);
+	int dev = _wopen (devstring, O_RDONLY | _O_RAW);
+	if (dev==-1)
+	{
+		MessageBox(TEXT("Unable to access iPod! Make sure programs who use the iPod like iTunes are closed."));
+		return;
+	}
+
+	DWORD size=0;
+	LPBYTE partitions;
+	lseek(dev, FIRMWARE_START + PARTITION_MAP_ADDRESS, SEEK_SET);
+	partitions = new BYTE[BLOCK_SIZE];
+	read(dev, partitions, BLOCK_SIZE);
+	IPOD_PARTITION_HEADER *	m_pParts;
+	int num=0;
+	char ata[4]={0x21,0x41,0x54,0x41}; 
+	m_pParts = (IPOD_PARTITION_HEADER *)partitions;
+	while (memcmp(&m_pParts[num].type, &ata, 4) == 0)
+	{
+		if (m_pParts[num].devOffset+m_pParts[num].len > size)
+			size=m_pParts[num].devOffset+m_pParts[num].len;
+		num++;
+	}
+	delete[] partitions;
+	
+	LPBYTE buffer;
+	DWORD i=0;
+	for (i=0;i<size;i+=BLOCK_SIZE);
+	size=i+BLOCK_SIZE; //extra read
+	buffer = new BYTE[size];
+	lseek(dev, FIRMWARE_START, SEEK_SET);
+
+	CScanDialog dlg;
+	dlg.Create(dlg.IDD, this);
+
+	dlg.SendMessage(WM_APP, (WPARAM)_T("Reading iPod firmware from disk"), 0);
+	dlg.m_ProgressCtrl.SetRange32(0, size);
+	dlg.m_ProgressCtrl.SetPos(0);
+	for (i=0;i<size;i+=BLOCK_SIZE)
+	{
+		read(dev, &buffer[i], BLOCK_SIZE);
+		if (i%2500==0)
+			dlg.m_ProgressCtrl.SetPos(i);
+	}
+
+	CString name = _T("iPod Firmware");
+	if (!m_Firmware.SetFirmware(name, buffer, size))
+	{
+		MessageBox(TEXT("Unable to allocate memory!"));
+		return;
+	}
+
+	delete[] buffer;
+	close(dev);
+
+	UpdateChecksums();
+
+	dlg.ScanFirmware(&m_Firmware);
+	dlg.DestroyWindow();
+
+	m_EditorDialog.SetFirmware(&m_Firmware);
+	m_ThemesDialog.SetFirmware(&m_Firmware, &m_EditorDialog.m_StringDialog);
+	
+	m_iPodFirm=TRUE;
+	GetDlgItem(IDC_WRITE_FIRMWARE_BUTTON)->EnableWindow(TRUE);
+}
+
+void CiPodWizardDlg::OnCbnSelchangeModeCombo()
+{
+	if (m_EditModeCombo.GetCurSel()==0) //updater
+	{
+		GetDlgItem(IDC_LOADIPODFW_BUTTON)->ShowWindow(SW_HIDE);
+		GetDlgItem(ID_OPEN)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_STATIC)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_FIRMWARE_COMBO)->ShowWindow(SW_SHOW);
+		GetDlgItem(ID_LOAD_FIRMWARE)->ShowWindow(SW_SHOW);
+	}
+	else //ipod
+	{
+		GetDlgItem(ID_OPEN)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_STATIC)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_FIRMWARE_COMBO)->ShowWindow(SW_HIDE);
+		GetDlgItem(ID_LOAD_FIRMWARE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_LOADIPODFW_BUTTON)->ShowWindow(SW_SHOW);
+	}
 }

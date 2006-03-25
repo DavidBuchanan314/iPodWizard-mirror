@@ -3,6 +3,7 @@
 #include "Firmware.h"
 #include "Picture.h"
 #include "Font.h"
+#include "OTFFontParser.h"
 #include "StringDialog.h"
 #include "afxwin.h"
 #include "afxcmn.h"
@@ -29,12 +30,16 @@ public:
 	CListCtrl m_FontsList;
 	CString m_SCFPath;
 	CComboBox m_FontIndexCombo;
+	CComboBox m_OTFFontIndexCombo;
+	CComboBox m_StringIndexCombo;
 	CFirmware *	m_pFirmware;
 	CStringDialog *	m_pStringDialog;
 	virtual BOOL OnInitDialog();
 	void SetFirmware(CFirmware *pFirmware, CStringDialog *pStringDialog);
 	BOOL LoadPicture(CPicture *pPicture, LPCTSTR lpszFilename);
 	BOOL LoadFont(CIpodFont *pFont, LPCTSTR lpszBmpFilename, LPCTSTR lpszIfmFilename);
+	BOOL LoadOTFFont(COTFFont *pFont, DWORD index, LPCTSTR lpszFilename);
+	void LoadTheme(CString filename);
 protected:
 	virtual void OnOK();
 public:
@@ -46,4 +51,6 @@ public:
 	afx_msg void OnBnClickedDeleteFont();
 	afx_msg void OnBnClickedLoadSCF();
 	afx_msg void OnBnClickedClearSCF();
+	afx_msg void OnBnClickedOtfChk();
+	afx_msg void OnBnClickedAssociateIpw();
 };

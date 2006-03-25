@@ -31,10 +31,13 @@ BOOL CIpodFont::Read(LPBYTE lpBuffer, LPBYTE lpEnd)
 	m_pHeader1 = (IPOD_FONT_HEADER1 *)lpPos;
 	lpPos += sizeof(IPOD_FONT_HEADER1);
 
+	//if (memcmp(&m_pHeader1->magic, FONT_MAGIC, 4))
+	//	return FALSE;
+
 	// validate
 
 	if (m_pHeader1->numChars == 0 || m_pHeader1->numMappingEntries == 0 || 
-		m_pHeader1->numMappingEntries > 0x1000)
+		m_pHeader1->numMappingEntries > 0x2000)
 		return FALSE;
 
 	//
@@ -147,7 +150,7 @@ BOOL CIpodFont::Read(LPBYTE lpBuffer, LPBYTE lpEnd)
 	}
 
 	// verify bitmap header
-	//40
+	//
 	if (m_BitmapHeader.height == 0 || m_BitmapHeader.height > 80)
 		return FALSE;
 
@@ -155,6 +158,98 @@ BOOL CIpodFont::Read(LPBYTE lpBuffer, LPBYTE lpEnd)
 	m_pBitmapData = lpPos;
 
 	return TRUE;
+}
+
+DWORD CIpodFont::GetMetricDataLen()
+{
+	DWORD ugpblock=sizeof(IPOD_FONT_UNICODE_GROUP)*m_pHeader1->numMappingEntries;
+	DWORD mapblock=m_pHeader2->numChars*sizeof(WORD);
+	WORD m_NumMetrics;
+	DWORD charblock;
+	if (m_pHeader2->bitdepth == 2)
+	{
+		m_NumMetrics = (WORD)((m_pHeader2->metricsEnd - m_pHeader2->charMapEnd) / sizeof(IPOD_FONT_CHARINFO_V2));
+		charblock=m_NumMetrics*sizeof(IPOD_FONT_CHARINFO_V2);
+	}
+	else
+	{
+		m_NumMetrics = (WORD)((m_pHeader2->metricsEnd - m_pHeader2->charMapEnd) / sizeof(IPOD_FONT_CHARINFO));
+		charblock=m_NumMetrics*sizeof(IPOD_FONT_CHARINFO);
+	}
+	return ugpblock+mapblock+charblock;
+}
+
+LPBYTE CIpodFont::GetMetricData()
+{
+	LPBYTE lpBuf;
+	DWORD ugpblock=sizeof(IPOD_FONT_UNICODE_GROUP)*m_pHeader1->numMappingEntries;
+	DWORD mapblock=m_pHeader2->numChars*sizeof(WORD);
+	WORD m_NumMetrics;
+	DWORD charblock;
+	if (m_pHeader2->bitdepth == 2)
+	{
+		m_NumMetrics = (WORD)((m_pHeader2->metricsEnd - m_pHeader2->charMapEnd) / sizeof(IPOD_FONT_CHARINFO_V2));
+		charblock=m_NumMetrics*sizeof(IPOD_FONT_CHARINFO_V2);
+	}
+	else
+	{
+		m_NumMetrics = (WORD)((m_pHeader2->metricsEnd - m_pHeader2->charMapEnd) / sizeof(IPOD_FONT_CHARINFO));
+		charblock=m_NumMetrics*sizeof(IPOD_FONT_CHARINFO);
+	}
+	
+	DWORD total=ugpblock+mapblock+charblock+4;
+	lpBuf=new BYTE[total];
+	DWORD size=total-4;
+	memcpy(lpBuf, (LPBYTE)&size, 4);
+	LPBYTE lpPos=lpBuf+4;
+	memcpy(lpPos, (LPBYTE)m_pUnicodeGroups, ugpblock);
+	lpPos+=ugpblock;
+	memcpy(lpPos, (LPBYTE)m_pCharMapping, mapblock);
+	lpPos+=mapblock;
+	memcpy(lpPos, (LPBYTE)m_pCharInfo, charblock);
+	return lpBuf;
+}
+
+void CIpodFont::SetMetricData(LPBYTE lpBuf)
+{
+	DWORD ugpblock=sizeof(IPOD_FONT_UNICODE_GROUP)*m_pHeader1->numMappingEntries;
+	DWORD mapblock=m_pHeader2->numChars*sizeof(WORD);
+	WORD m_NumMetrics;
+	DWORD charblock;
+	if (m_pHeader2->bitdepth == 2)
+	{
+		m_NumMetrics = (WORD)((m_pHeader2->metricsEnd - m_pHeader2->charMapEnd) / sizeof(IPOD_FONT_CHARINFO_V2));
+		charblock=m_NumMetrics*sizeof(IPOD_FONT_CHARINFO_V2);
+	}
+	else
+	{
+		m_NumMetrics = (WORD)((m_pHeader2->metricsEnd - m_pHeader2->charMapEnd) / sizeof(IPOD_FONT_CHARINFO));
+		charblock=m_NumMetrics*sizeof(IPOD_FONT_CHARINFO);
+	}
+	LPBYTE lpPos=lpBuf;
+	memcpy((LPBYTE)m_pUnicodeGroups, lpPos, ugpblock);
+	lpPos+=ugpblock;
+	memcpy((LPBYTE)m_pCharMapping, lpPos, mapblock);
+	lpPos+=mapblock;
+	memcpy((LPBYTE)m_pCharInfo, lpPos, charblock);
+}
+
+LPCTSTR	CIpodFont::GetFontStyle()
+{
+	if (m_pHeader1==NULL)
+		return NULL;
+
+	char ststyle[32];
+	if (m_pHeader2->style & 0x01)
+		strcpy(ststyle,"Bold");
+	else
+		strcpy(ststyle,"Regular");
+
+	wchar_t* lpwStr;
+	int nLen = MultiByteToWideChar(CP_ACP, 0, ststyle, -1, NULL, NULL);
+	lpwStr = ( wchar_t* )malloc(( nLen )*sizeof( wchar_t ));
+	MultiByteToWideChar(CP_ACP, 0,  ststyle, -1, lpwStr, nLen);
+	return (LPTSTR)lpwStr;
 }
 
 void CIpodFont::SetData(LPBYTE buffer)
@@ -187,7 +282,7 @@ WORD CIpodFont::GetFontBitDepth()
 	return m_pHeader2->bitdepth;
 }
 
-WORD CIpodFont::GetFontSize()
+DWORD CIpodFont::GetFontSize()
 {
 	if (m_pHeader2 == NULL)
 		return 0;
@@ -333,43 +428,7 @@ void CIpodFont::SetFontPixel(LONG x, LONG y, COLORREF color)
 	}
 }
 
-void CIpodFont::Draw(CDC *pDC, CRect rect)
-{
-	LONG xoffset = rect.left;
-	LONG yoffset = rect.top;
-
-	WORD startOffset, endOffset, charwidth;
-	SHORT width, w1;
-
-	for (int c = 0; c < m_NumMetrics; c++)
-	{
-		int x, y;
-
-		GetCharMetrics(c, &startOffset, &endOffset, &width, &w1);
-
-		charwidth = endOffset - startOffset;
-
-		if (xoffset + (charwidth + 2) > rect.right)
-		{
-			xoffset = rect.left;
-			yoffset += m_BitmapHeader.height + 2;
-		}
-
-		for (y = 0; y < m_BitmapHeader.height; y++)
-		{
-			for (x = startOffset; x < endOffset; x++)
-			{
-				COLORREF c = GetFontPixel(CPoint(x, y));
-				pDC->SetPixel(x - startOffset + xoffset, y + yoffset, c);
-			}
-		}
-
-		xoffset += charwidth + 2;
-		// xoffset += width;
-	}
-}
-
-WORD CIpodFont::GetNumUnicodeGroups()
+DWORD CIpodFont::GetNumUnicodeGroups()
 {
 	if (m_pHeader1 == NULL)
 		return 0;
@@ -377,7 +436,7 @@ WORD CIpodFont::GetNumUnicodeGroups()
 	return m_pHeader1->numMappingEntries;
 }
 
-void CIpodFont::GetUnicodeGroup(WORD index, LPWORD start, LPWORD len, LPWORD offset)
+void CIpodFont::GetUnicodeGroup(WORD index, LPWORD start, LPDWORD len, LPWORD offset)
 {
 	if (index >= GetNumUnicodeGroups())
 	{
@@ -392,7 +451,8 @@ void CIpodFont::GetUnicodeGroup(WORD index, LPWORD start, LPWORD len, LPWORD off
 	*offset = m_pUnicodeGroups[index].offset;
 }
 
-void CIpodFont::SetUnicodeGroup(WORD index, WORD start, WORD len, WORD offset)
+
+void CIpodFont::SetUnicodeGroup(WORD index, WORD start, DWORD len, WORD offset)
 {
 	if (index >= GetNumUnicodeGroups())
 		return;
@@ -400,6 +460,27 @@ void CIpodFont::SetUnicodeGroup(WORD index, WORD start, WORD len, WORD offset)
 	m_pUnicodeGroups[index].code = start;
 	m_pUnicodeGroups[index].length = len;
 	m_pUnicodeGroups[index].offset = offset;
+
+	
+	//We must sort the unicode groups array or else it might cause some chars to be represented as missing glyphs although they exist
+	DWORD i,j,indexOfMin;
+	IPOD_FONT_UNICODE_GROUP temp,curr;
+	for (i=0;i<m_pHeader1->numMappingEntries;i++)
+	{
+		indexOfMin=i;
+		for (j=i+1;j<m_pHeader1->numMappingEntries;j++)
+		{
+			curr=m_pUnicodeGroups[indexOfMin];
+			temp=m_pUnicodeGroups[j];
+			if (temp.code<curr.code)
+				indexOfMin=j;
+		}
+
+		//swap
+		temp=m_pUnicodeGroups[i];
+		m_pUnicodeGroups[i]=m_pUnicodeGroups[indexOfMin];
+		m_pUnicodeGroups[indexOfMin]=temp;
+	}
 }
 
 WORD CIpodFont::GetNumChars()
@@ -423,11 +504,11 @@ void CIpodFont::SetCharMapping(WORD index, WORD index2)
 		m_pCharMapping[index] = index2;
 }
 
-WORD CIpodFont::GetNumUnicodeChars()
+DWORD CIpodFont::GetNumUnicodeChars()
 {
-	WORD i;
+	DWORD i;
 
-	WORD sum = 0;
+	DWORD sum = 0;
 
 	if (m_pHeader1 == NULL)
 		return 0;
@@ -444,14 +525,14 @@ WORD CIpodFont::GetUnicodeChar(WORD index, LPWORD groupIndex)
 {
 	WORD i;
 
-	WORD sum = 0;
+	DWORD sum = 0;
 
 	for (i = 0; i < m_pHeader1->numMappingEntries; i++)
 	{
 		if (index >= sum && index < (sum + m_pUnicodeGroups[i].length))
 		{
 			*groupIndex = i;
-			return m_pUnicodeGroups[i].code + index - sum;
+			return (WORD)(m_pUnicodeGroups[i].code + index - sum);
 		}
 
 		sum += m_pUnicodeGroups[i].length;
@@ -475,7 +556,7 @@ WORD CIpodFont::GetUnicodeCharOffset(WORD c)
 	return 0;
 }
 
-void CIpodFont::GetCharMetrics(WORD c, LPWORD offset1, LPWORD offset2, SHORT *width, SHORT *ident)
+void CIpodFont::GetCharMetrics(WORD c, LPDWORD offset1, LPDWORD offset2, SHORT *width, SHORT *ident)
 {
 	if (m_pHeader2 == NULL)
 	{
@@ -491,7 +572,7 @@ void CIpodFont::GetCharMetrics(WORD c, LPWORD offset1, LPWORD offset2, SHORT *wi
 		// fixed width
 		*offset1 = c * m_pHeader2->size;
 		*offset2 = *offset1 + m_pHeader2->size;
-		*width = *offset2 - *offset1; // ??
+		*width = (SHORT)(*offset2 - *offset1); // ??
 		*ident = 0; // ??
 	}
 	else

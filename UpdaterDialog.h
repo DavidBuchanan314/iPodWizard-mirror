@@ -39,4 +39,5 @@ public:
 	afx_msg void OnBnClickedLoadFirmware();
 	afx_msg void OnBnClickedDeleteFirmware();
 	afx_msg void OnBnClickedWriteAllChanges();
+	afx_msg void OnBnClickedExtractiPodFirmware();
 };

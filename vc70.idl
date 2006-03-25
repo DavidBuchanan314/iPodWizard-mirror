@@ -1,0 +1,459 @@
+import "docobj.idl";
+
+#line 8 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+typedef long IPODAPPID;
+
+typedef long HIPOD;
+
+typedef long HDB;
+
+typedef long HTRACK;
+
+typedef long HPLAYLIST;
+
+typedef long HPLAYLISTITEM;
+
+#line 16 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+typedef long EDeviceStatus;
+
+#line 18 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+typedef long EDBNotification;
+
+#line 20 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+typedef long EUnlockNotification;
+
+#line 22 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+typedef long EFileCopyStatus;
+
+#line 34 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+interface IiPodManager;
+#line 36 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+interface IiPodPreferences;
+#line 38 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+interface IiPodUpdater;
+#line 40 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+interface IiPodUser;
+#line 42 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+interface _IiPodManagerEvents;
+#line 44 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+interface _IiPodUpdaterEvents;
+#line 63 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum EFormatState {
+	kFormatUnknown = 0,
+	kFormatFat32 = 1,
+	kFormatMac = 2,
+	kFormatFat32NoFirmware = 3,
+	kFormatMacNoFirmware = 4,
+};
+
+#line 72 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum _EDeviceStatus {
+	kDeviceStatusUnknown = 0,
+	kDeviceStatusConnected = 1,
+	kDeviceStatusMounted = 2,
+	kDeviceStatusUnmounted = 3,
+	kDeviceStatusDisconnected = 4,
+};
+
+#line 81 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum _EDBNotification {
+	kDBNotifyUnknown = 0,
+	kDBNotifyDBChange = 1,
+	kDBNotifyTrackChanged = 2,
+	kDBNotifyPlaylistChanged = 3,
+	kDBNotifyPlaylistItemChanged = 4,
+};
+
+#line 90 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum _EUnlockNotification {
+	kAPIUnlocked = 0,
+	kiPodUnlocked = 1,
+	kiPodServiceShutdown = 2,
+};
+
+#line 97 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum _EFileCopyStatus {
+	kFileCopyInQueue = 0,
+	kFileCopyInProgress = 1,
+	kFileCopyComplete = 2,
+	kFileCopyCompleteDuplicate = 3,
+	kFileCopyCancel = 4,
+	kFileCopyError = 5,
+};
+
+#line 107 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum EiPodState {
+	kUnknowniPod = 0,
+	kNewiPod = 1,
+	kConfigured = 4,
+};
+
+#line 114 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum EAutomaticUpdateMode {
+	kUpdateUnknown = 0,
+	kUpdateAll = 1,
+	kUpdateSelectedPlaylists = 2,
+};
+
+#line 121 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum EiPodDBFilter {
+	kDBFilterOn = 0,
+	kDBFilterOff = -1,
+};
+
+#line 127 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum ECopyThreadStatus {
+	kCopyThreadStatusUnknown = -1,
+	kCopyThreadStatusWaiting = 0,
+	kCopyThreadStatusPumping = 1,
+};
+
+#line 134 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum EIPodClass {
+	kIPodClassNone = 0,
+	kIPodClassV1 = 1,
+	kIPodClassV2 = 2,
+	kIPodClassV3 = 4,
+};
+
+#line 142 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum EiPodErrors {
+	kErrCopyThreadBusy = -2147164159,
+	kErriPodNotMounted = -2147164059,
+	kErrAppNotRegistered = -2147164058,
+	kErrAppNotLoggedIn = -2147164057,
+	kErrAPILock = -2147164056,
+	kErriPodLock = -2147164055,
+	kErriPodHandle = -2147164054,
+	kErriPodNotLocked = -2147164053,
+	kErrWrongServiceUser = -2147164052,
+	kErrAddTrackRejected = -2147163959,
+	kErrMountUnmount = -2147163957,
+};
+
+#line 157 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum EFormatFlags {
+	kFormatFlagsNone = 0,
+	kFormatFlagsOptimizeFATAlignment = 1,
+	kFormatFlagsGrowFirmwarePartition = 2,
+};
+
+#line 164 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+enum ETrackOrders {
+	kTrackOrderInvalid = 0,
+	kTrackOrderPhysical = 1,
+	kTrackOrderShuffle = 2,
+	kTrackOrderTrackID = 3,
+	kTrackOrderName = 5,
+	kTrackOrderAlbum = 6,
+	kTrackOrderArtist = 7,
+	kTrackOrderBitRate = 8,
+	kTrackOrderGenre = 9,
+	kTrackOrderKind = 10,
+	kTrackOrderDate = 11,
+	kTrackOrderTrackNumber = 12,
+	kTrackOrderTotalSize = 13,
+	kTrackOrderTotalTime = 14,
+	kTrackOrderYear = 15,
+	kTrackOrderSampleRate = 16,
+	kTrackOrderCategory = 17,
+	kTrackOrderLocation = 18,
+	kTrackOrderComment = 20,
+	kTrackOrderDateAdded = 21,
+	kTrackOrderComposer = 23,
+	kTrackOrderNormVolume = 25,
+	kTrackOrderUserPlayCount = 26,
+	kTrackOrderPlayDate = 27,
+	kTrackOrderDiscNumber = 28,
+	kTrackOrderUserRating = 29,
+};
+
+#line 194 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+struct TrackInformation {
+	HTRACK HTRACK;
+	long trackID;
+	BSTR trackName;
+	BSTR artist;
+	BSTR album;
+	BSTR genre;
+	BSTR kind;
+	BSTR comments;
+	BSTR composer;
+	BSTR category;
+	long totalTimeInMS;
+	long startTimeInMS;
+	long stopTimeInMS;
+	long bookmarkTimeInMS;
+	long date;
+	long sizeInBytes;
+	long sampleRate;
+	short bitRate;
+	short year;
+	short volumeAdjustment;
+	short userRating;
+	short audioFormat;
+	short trackNumber;
+	short maxTrackNumber;
+	short discNumber;
+	short maxDiscNumber;
+	long userPlayCount;
+	long recentPlayCount;
+	long playDate;
+};
+
+#line 227 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+struct AddTrackStatus {
+	enum ECopyThreadStatus status;
+	long nTracksInQueue;
+	long nTracksInQueueFromThisApp;
+	unsigned long dwIntThreadBuffSize;
+	CURRENCY liBytesToCopy;
+	CURRENCY liEstDeviceSize;
+};
+
+
+[ version(1.0), uuid(bad4f4dd-bad6-3f14-b95b-11d9f615ba9a) ]
+library iPodEventReceiver
+{
+	importlib("stdole2.tlb");
+	importlib("olepro32.dll");
+
+	[
+		uuid(31e3fbaf-c200-4776-9dbf-45226765cf4d)
+	] 
+#line 237 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+	dispinterface IiPodManager {
+	properties:
+
+	methods:
+#line 244 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1)] void  RegisterApp([in] IPODAPPID appID, [in] BSTR appName, [in] BSTR appPath, [in] BSTR cmdLine);
+#line 249 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x2)] void  UnregisterApp([in] IPODAPPID appID);
+#line 251 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x3)] SAFEARRAY *  GetRegisteredApps();
+		[id(0x4)] BSTR  GetAppNameFromID([in] IPODAPPID appID);
+#line 254 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x5)] IPODAPPID  GetAPILockingApp();
+		[id(0x6)] void  Login([in] IPODAPPID appID);
+#line 257 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x7)] void  Logout([in] IPODAPPID appID);
+#line 259 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x8)] void  EnableSync([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 262 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x9)] void  DisableSync([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 265 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xa)] void  BeginTransfer([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 268 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xb)] void  EndTransfer([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 271 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xc)] void  LockiPod([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 274 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xd)] void  UnlockiPod([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 277 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xe)] IPODAPPID  GetiPodLockingApp([in] HIPOD iPodHandle);
+#line 279 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xf)] HIPOD  FindFirstiPod([in] IPODAPPID appID);
+#line 281 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x10)] HIPOD  FindNextiPod([in] IPODAPPID appID, [in] HIPOD pCuriPodHandle);
+#line 284 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x11)] void  Mount([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 287 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x12)] void  Unmount([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 290 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x13)] long  IsMounted([in]IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 293 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x14)] CURRENCY  GetiPodFreeSpace([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 296 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x15)] CURRENCY  GetDiskSize([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 299 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x16)] BSTR  GetiPodDriveLetter([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] int format);
+#line 303 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x17)] void  LaunchUpdater([in] IPODAPPID callerAppID);
+#line 305 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x18)] BSTR  GetVersionInfo([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out] BSTR *firmwareVersion );
+#line 309 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x19)] long  GetAPIVersion();
+		[id(0x1a)] enum EFormatState  IsFormatted([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 313 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1b)] BSTR  GetVoiceNotesFolderName([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 316 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1c)] BSTR  GetDeviceUniqueID([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 319 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1d)] void  BeginTransferAsync([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 322 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1e)] void  EndTransferAsync([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 325 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1f)] unsigned short  GetFirmwareVersion([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 328 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x20)] SAFEARRAY(IPODAPPID)   GetCheckpointData([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 331 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x21)] void  SetSupportedIPodClasses([in] IPODAPPID appID, [in] enum EIPodClass supportedIPodClasses);
+#line 334 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x22)] enum EIPodClass  GetSupportedIPodClasses([in] IPODAPPID appID);
+	};
+
+	[
+		uuid(3be5a207-40f6-4f25-bf37-27b898660b67)
+	] 
+#line 339 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+	dispinterface IiPodPreferences {
+	properties:
+
+	methods:
+#line 346 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x1)] BSTR  DeviceName([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 349 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x1)] void  DeviceName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] BSTR _arg3);
+#line 353 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x2)] BSTR  OwnerName([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 356 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x2)] void  OwnerName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] BSTR _arg3);
+#line 360 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x3)] BSTR  HomeMachineName([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 363 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x3)] void  HomeMachineName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] BSTR _arg3);
+#line 367 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x4)] long  FireWireDiskUse([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 370 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x4)] void  FireWireDiskUse([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] long _arg3);
+#line 374 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x5)] long  LaunchApplication([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 377 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x5)] void  LaunchApplication([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] long _arg3);
+#line 381 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x6)] IPODAPPID  HomeApplicationID([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 384 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x6)] void  HomeApplicationID([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] IPODAPPID _arg3);
+#line 388 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x7)] long  AutomaticUpdate([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 391 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x7)] void  AutomaticUpdate([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] long _arg3);
+#line 395 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x8)] enum EAutomaticUpdateMode  AutomaticUpdateMode([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 398 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x8)] void  AutomaticUpdateMode([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] enum EAutomaticUpdateMode _arg3);
+#line 402 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0x9)] CURRENCY  HomeUserID([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 405 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0x9)] void  HomeUserID([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] CURRENCY _arg3);
+#line 409 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propget,id(0xa)] long  Configured([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 412 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[propput,id(0xa)] void  Configured([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] long _arg3);
+#line 416 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xb)] void  SetSessionState([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] enum EiPodState sessionState, [in] IPODAPPID sessionHomeAppID);
+#line 421 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xc)] void  SetHomeMachine([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 424 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xd)] long  IsItHomeMachine([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+	};
+
+	[
+		uuid(42a63984-1154-4995-a75e-2e92f75ed902)
+	] 
+#line 430 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+	dispinterface IiPodUpdater {
+	properties:
+
+	methods:
+#line 437 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1)] IPODAPPID  LockAPI([in] IPODAPPID updaterID);
+#line 439 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x2)] void  UnlockAPI([in] IPODAPPID updaterID);
+#line 441 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x3)] void  U_InitUpdater();
+		[id(0x4)] void  U_CloseUpdater();
+		[id(0x5)] void  U_IsConnected();
+		[id(0x6)] void  U_Mount();
+		[id(0x7)] void  U_Open();
+		[id(0x8)] void  U_LockIPOD();
+		[id(0x9)] void  U_EraseSector([in]unsigned long nSec);
+#line 449 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xa)] void  U_formatFAT32([in]unsigned long dwType, [in]unsigned long dwStart);
+#line 452 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xb)] void  U_WriteMBR([in]unsigned long dwType, [in]unsigned long dwStart);
+#line 455 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xc)] void  U_UnlockIPOD([in]long fDismount);
+#line 457 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0xd)] void  U_Close();
+		[id(0xe)] void  U_Unmount();
+		[id(0xf)] void  U_Disconnect();
+		[id(0x10)] void  U_GetPowerState([in]unsigned long *pdwState);
+#line 462 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x11)] void  U_Write([in]unsigned long start, [in]unsigned long cnt, [in]VARIANT *pVar);
+#line 466 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x12)] void  U_GetiPodCount([in]unsigned long *pdwCount);
+#line 468 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x13)] void  U_GetProgressStatus([in]unsigned long *pdwDone, [in]unsigned long *pdwTotal);
+#line 471 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x14)] void  U_GetDriveLetter([in]unsigned long *pchar);
+#line 473 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x15)] void  U_NotifyUpdateComplete([in]HIPOD HIPOD);
+#line 475 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x16)] void  U_iPodGetHWVersion([in]unsigned long *pVersion);
+#line 477 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x17)] void  U_Execute([in]unsigned long param, [in]VARIANT *pvar1, [in]VARIANT *pvar2, [in]VARIANT *pvar3, [in]VARIANT *pvar4, [in]VARIANT *pvar5, [in]VARIANT *pvar6);
+#line 485 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x18)] void  U_formatFAT32Ex([in]unsigned long dwFlags, [in]unsigned long dwType, [in]unsigned long dwStart, [in]unsigned long dwFirmwareSectors);
+#line 490 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x19)] void  U_WriteMBREx([in]unsigned long dwFlags, [in]unsigned long dwType, [in]unsigned long dwStart, [in]unsigned long dwFirmwareSectors);
+	};
+
+	[
+		uuid(65e1d175-369d-412f-bbbf-a5e042c220e7)
+	] 
+#line 498 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+	dispinterface IiPodUser {
+	properties:
+
+	methods:
+#line 505 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1)] unsigned long  RegisterUser([in] IUnknown *pUnk, [in] long procID);
+#line 508 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x2)] void  UnregisterUser([in] unsigned long userCookie);
+#line 510 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x3)] void  OnDisplayiPodManagerUIEvent([in] long UIHandle, [in] long SessionHomeApp, [in] long sessionState, [in] long UIStatus);
+	};
+
+	[
+		uuid(4d56b972-8259-4833-9ab2-543962f5cf5b)
+	] 
+#line 518 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+	dispinterface _IiPodManagerEvents {
+	properties:
+
+	methods:
+#line 525 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x1)] int  OnAddTrackStatus([in] HDB HDB, [in] long queueID, [in] EFileCopyStatus status, [in] long param, [in] VARIANT *pReserveVar);
+#line 531 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x2)] void  OnDBChanged([in] HDB HDB, [in] IPODAPPID changingApp, [in] EDBNotification notification, [in] long handleToModifiedData);
+#line 536 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x3)] void  OniPodStatusChanged([in] HIPOD HIPOD, [in] EDeviceStatus status, [in] IPODAPPID homeAppID);
+#line 540 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x4)] void  OnLockStatusChanged([in] EUnlockNotification status, [in] HIPOD HIPOD);
+#line 543 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+		[id(0x5)] long  Identify();
+	};
+
+	[
+		uuid(7a1aad4c-a417-439c-9318-d6bdc63fa46a)
+	] 
+#line 547 "d:\\itunes music\\ipodwizardsrc\\release\\ipodservice.tlh"
+	dispinterface _IiPodUpdaterEvents {
+	properties:
+
+	methods:
+	};
+
+	[
+		uuid(18FC7734-B4AC-3461-8C00-21067FEFD4D4),
+		version(1.0),
+		noncreatable
+	] 
+	coclass __Impl__IiPodManagerEvents {
+		[default] interface IUnknown;
+	};
+
+}
+

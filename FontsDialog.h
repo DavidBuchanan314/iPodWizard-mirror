@@ -25,6 +25,7 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	CString m_FontName;
+	CString m_FontStyle;
 	CIpodFont m_Font;
 	CFirmware * m_pFirmware;
 	void SetFirmware(CFirmware *pFirmware);
@@ -83,4 +84,5 @@ public:
 	afx_msg void OnBnClickedShowGrid();
 	afx_msg void OnBnClickedCharMapExplain();
 	afx_msg LRESULT OnSelectMetricsFromBitmap(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBnClickedOtfButton();
 };

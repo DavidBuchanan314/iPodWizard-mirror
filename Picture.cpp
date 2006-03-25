@@ -53,7 +53,7 @@ BOOL CPicture::Read(LPBYTE lpBuffer, BOOL bScan)
 
 		m_pData = lpBuffer - m_pFooter->lineSizeBytes * m_pFooter->height;
 		break;
-	case 0:
+	default:
 		m_pHeader = (IPOD_PICTURE_HEADER *)lpBuffer;
 		// validity checks
 		if (m_pHeader->width > 511 || m_pHeader->height > 511 ||
@@ -64,25 +64,28 @@ BOOL CPicture::Read(LPBYTE lpBuffer, BOOL bScan)
 		{
 			// bad image
 			m_pHeader = NULL;
-			return FALSE;
+
+			//5g pictures are different header than others and nano has different color scheme
+			//try other header type
+			m_pHeader2 = (IPOD_PICTURE_HEADER2 *)lpBuffer;
+			// validity checks
+			if (m_pHeader2->texture_format == 0 || m_pHeader2->width > 511 || m_pHeader2->height > 511 ||
+				m_pHeader2->width == 0 || m_pHeader2->height == 0 ||
+				m_pHeader2->blockLen < (m_pHeader2->height * m_pHeader2->width * m_pHeader2->bitDepth / 8) ||
+				(m_pHeader2->bitDepth != 1 && m_pHeader2->bitDepth != 2 &&
+				m_pHeader2->bitDepth != 4 && m_pHeader2->bitDepth != 16) || *((__int64*)m_pHeader2->b1)!=0)
+			{
+				// bad image
+				m_pHeader2 = NULL;
+				return FALSE;
+			}
+
+			m_pData = lpBuffer + sizeof(IPOD_PICTURE_HEADER2);
+			m_iPictureMode=2;
+			break;
 		}
 		m_pData = lpBuffer + sizeof(IPOD_PICTURE_HEADER);
-		break;
-	case 2:
-		m_pHeader2 = (IPOD_PICTURE_HEADER2 *)lpBuffer;
-		// validity checks
-		if (m_pHeader2->texture_format == 0 || m_pHeader2->width > 511 || m_pHeader2->height > 511 ||
-			m_pHeader2->width == 0 || m_pHeader2->height == 0 ||
-			m_pHeader2->blockLen < (m_pHeader2->height * m_pHeader2->width * m_pHeader2->bitDepth / 8) ||
-			(m_pHeader2->bitDepth != 1 && m_pHeader2->bitDepth != 2 &&
-			m_pHeader2->bitDepth != 4 && m_pHeader2->bitDepth != 16) || *((__int64*)m_pHeader2->b1)!=0)
-		{
-			// bad image
-			m_pHeader2 = NULL;
-			return FALSE;
-		}
-
-		m_pData = lpBuffer + sizeof(IPOD_PICTURE_HEADER2);
+		m_iPictureMode=0;
 		break;
 	}
 

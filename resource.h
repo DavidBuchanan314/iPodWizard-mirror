@@ -21,6 +21,7 @@
 #define IDD_EDITOR_DIALOG               138
 #define IDD_THEMES_DIALOG               139
 #define IDD_UPDATER_DIALOG              140
+#define IDD_OTF_DIALOG                  141
 #define ID_OPEN                         1000
 #define IDC_FIRMWARE_COMBO              1001
 #define IDC_BUTTON2                     1002
@@ -28,17 +29,22 @@
 #define IDC_UPDATE_BUTTON               1002
 #define IDC_REFRESH_BUTTON              1002
 #define IDC_MAKETHEME_BUTTON            1002
+#define IDC_TRANSLATE_BUTTON            1002
 #define IDC_CHECKSUM1_EDIT              1003
 #define IDC_IPODDRIVE_COMBO             1003
 #define IDC_LOADTHEME_BUTTON            1003
 #define IDC_CHECKSUM2_EDIT              1004
+#define IDC_MODE_COMBO                  1004
 #define IDC_WIDTH_EDIT                  1005
 #define IDC_HEIGHT_EDIT                 1006
+#define IDC_GINDEX_EDIT                 1006
 #define IDC_BITDEPTH_EDIT               1007
 #define HELPBTN_CLASSIC                 1007
 #define ID_PREV_PICTURE                 1008
 #define ID_NEXT_PICTURE                 1009
 #define IDC_PICIDX_EDIT                 1010
+#define IDC_FONTSTYLE_EDIT              1010
+#define IDC_ID_EDIT                     1010
 #define IDC_PICTURE                     1011
 #define IDC_BUTTON1                     1012
 #define ID_LOAD_BITMAP                  1012
@@ -59,8 +65,10 @@
 #define ID_LOAD_ALL                     1016
 #define IDC_FIRMWARE_LIST               1017
 #define ID_SAVE_METRICS                 1017
+#define ID_LOAD_GLYPH                   1017
 #define IDC_PICIDX_COMBO                1018
 #define ID_LOAD_METRICS                 1018
+#define ID_SAVE_GLYPH                   1018
 #define IDC_FONTIDX_COMBO               1019
 #define IDC_FONT_LIST                   1019
 #define IDC_STRING_LIST                 1020
@@ -68,8 +76,11 @@
 #define IDC_FONTIDX_CMB                 1020
 #define IDC_FIND_EDIT                   1021
 #define IDC_CHARMAPIDX_COMBO            1021
+#define IDC_OTFFONTIDX_CMB              1021
+#define ID_MULLOAD_GLYPH                1021
 #define IDC_CHAR_COMBO                  1022
 #define IDC_CHANGE_EDIT                 1022
+#define IDC_STRIDX_CMB                  1022
 #define IDC_OFFSET1_EDIT                1023
 #define IDC_ADDR_EDIT                   1023
 #define IDC_OFFSET2_EDIT                1024
@@ -77,10 +88,13 @@
 #define IDC_IDENT_EDIT                  1025
 #define IDC_CHARMAPIDX_COMBO2           1026
 #define IDC_CHARMAPIDX2_COMBO           1026
+#define IDC_BEARINGY_EDIT               1026
 #define ID_SAVE_METRICS2                1027
 #define ID_MAKE_FONT                    1027
 #define IDC_HEX                         1028
+#define IDC_HEIGHT_TEXT                 1028
 #define ID_ZOOMIN_BUTTON                1029
+#define IDC_ADVANCE_EDIT                1030
 #define IDC_GROUPLEN_EDIT               1032
 #define IDC_GROUPSTART_EDIT             1033
 #define IDC_GROUPOFFSET_EDIT            1034
@@ -114,6 +128,7 @@
 #define IDC_CHKHEX                      1053
 #define IDC_CHECK1                      1054
 #define IDC_CHKGRID                     1054
+#define IDC_OTF_CHK                     1054
 #define IDC_EXPLAIN_BUTTON              1055
 #define IDC_OPT_TAB                     1056
 #define IDC_LOADGRAPHICS_BUTTON         1058
@@ -124,11 +139,26 @@
 #define IDC_LOADSCF_BUTTON              1063
 #define IDC_CLEARSCF_BUTTON             1064
 #define IDC_EXTRACT_BUTTON              1065
+#define IDC_ASSOCIATE_IPW               1065
 #define IDC_DELETE_BUTTON               1066
 #define IDC_LOAD_BUTTON                 1067
 #define IDC_WRITEALL_BUTTON             1068
-#define IDC_SCFPATH                     1068
 #define IDC_SCFPATH_STATIC              1068
+#define IDC_EXTRACTIPOD_BUTTON          1069
+#define IDC_OTF_BUTTON                  1069
+#define IDC_GLYPHIDX_COMBO              1070
+#define IDC_BEARINGX_EDIT               1071
+#define IDC_BMP_BUTTON                  1072
+#define IDC_GROUPEND_EDIT               1073
+#define IDC_LANGIDX_COMBO               1074
+#define IDC_ALEFT_EDIT                  1074
+#define IDC_ARIGHT_EDIT                 1075
+#define IDC_STATIC_LANG                 1076
+#define IDC_BASELINE_EDIT               1076
+#define ID_LOAD_FONT                    1077
+#define ID_SAVE_FONT                    1078
+#define IDC_LANGSTRING_LIST             1079
+#define IDC_LOADIPODFW_BUTTON           1081
 
 // Next default values for new objects
 // 
@@ -136,7 +166,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1069
+#define _APS_NEXT_CONTROL_VALUE         1082
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

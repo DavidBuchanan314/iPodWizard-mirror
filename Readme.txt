@@ -1,10 +1,21 @@
 (Modding by Kingstone)
 
 .:TODO LIST:.
-Add support for 5G main fonts.
+New stylish and improve UI design.
 
 .:WHAT'S NEW:.
 =Thanks for goPod developers on the volume hack machnism=
+
+#1.2#
+(03/25/2006)
+* New 5G font support (a bit different then regular one and not totally perfect yet).
+* Theme file fixes and format.
+* Auto associate .iPW theme files with iPodWizard and when opened, auto open iPodWizard and load them.
+* New string language blocks which allows editing all languages and strings appearing on the iPod with ability to extend or shorten the strings.
+* Regular font fixes.
+* Added IDs in pictures for accurance.
+* iPod firmware on the fly editing support. This will solve the problem for iPodLinux/Rockbox users who wants to mod their Apple firmware too. Also you can backup themes currently on your iPod. This editing is done without updating with an updater.
+* Fixed many small bugs.
 
 #1.1e#
 (11/27/2005)

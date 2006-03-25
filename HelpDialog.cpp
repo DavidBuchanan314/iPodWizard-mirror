@@ -82,13 +82,22 @@ BOOL CHelpDialog::OnInitDialog()
 
 void CHelpDialog::OnCbnSelchangeiPodCombo()
 {
-	CString s;
+	CString s,s2;
 	s.Format(TEXT("%d"), m_iPodCombo.GetCurSel()+1);
 	TCHAR szTemp[512];
 	if (GetPrivateProfileString(TEXT("FirmwareVersion"), s, NULL, szTemp, 512, theApp.m_IniPath)>0)
 	{
 		GetDlgItem(IDC_STATIC_FIRM)->SetWindowText(szTemp);
 	}
+	if (!_tcsncmp(szTemp, TEXT("13.6."), 5) || !_tcsncmp(szTemp, TEXT("14.5."), 5))
+	{
+		s2.Format(TEXT("0 = Slovak, 1 = Danish, 2 = German (Dates && Time), 3 = German\n4 = Russian (Dates && Times), 5 = Spanish, 6 = Finnish\n7 = French (Dates && Times), 8 = French (Dates && Times), 9 = French\n10 = Hungarian, 11 = Italian, 12 = Japanese\n13 = Korean, 14 = Dutch (Dates && Times), 15 = Dutch\n16 = Norwegian, 17 = Polish, 18 = Spanish (Dates && Times)\n19 = Russian, 20 = Swedish, 21 = Turkish\n22 = Simplified Chinese, 23 = Traditional Chinese, 24 = English"));
+	}
+	else
+	{
+		s2.Format(TEXT("0 = Danish, 1 = German (Dates && Time), 2 = German\n3 = Spanish, 4 = Finnish, 5 = French (Dates && Times)\n6 = French (Dates && Times), 7 = French, 8 = Italian\n9 = Japanese, 10 = Korean, 11 = Dutch (Dates && Times)\n12 = Dutch, 13 = Norwegian, 14 = Spanish (Dates && Times)\n15 = Swedish, 16 = Simplified Chinese, 17 = Traditional Chinese\n18 = English"));
+	}
+	GetDlgItem(IDC_STATIC_LANG)->SetWindowText(s2);
 	if (GetPrivateProfileString(TEXT("MainFont"), s, NULL, szTemp, 512, theApp.m_IniPath)>0)
 	{
 		GetDlgItem(IDC_STATIC_FONT)->SetWindowText(szTemp);
@@ -104,7 +113,7 @@ LRESULT CHelpDialog::OnClose(WPARAM wParam, LPARAM lParam)
 void CHelpDialog::OnBnClickedFindGen()
 {
 	CFile file;
-	CString temp, path;
+	CString path;
 	path.SetString(theApp.m_iPodDRV);
 	path.AppendFormat(TEXT("\\SysInfo"));
 	if (!file.Open(path, CFile::modeRead ))

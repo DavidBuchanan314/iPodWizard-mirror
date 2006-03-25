@@ -15,6 +15,7 @@ CPicturesDialog::CPicturesDialog(CWnd* pParent /*=NULL*/)
 	, m_PictureBitdepth(0)
 	, m_PictureIndex(0)
 	, m_PictureType(0)
+	, m_PictureID(0)
 	, m_pFirmware(NULL)
 {
 }
@@ -30,6 +31,7 @@ void CPicturesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_HEIGHT_EDIT, m_PictureHeight);
 	DDX_Text(pDX, IDC_BITDEPTH_EDIT, m_PictureBitdepth);
 	DDX_Text(pDX, IDC_TYPE_EDIT, m_PictureType);
+	DDX_Text(pDX, IDC_ID_EDIT, m_PictureID);
 	DDX_Control(pDX, IDC_PICTURE, m_PictureWnd);
 	DDX_Control(pDX, IDC_PICIDX_COMBO, m_PicIndexCombo);
 }
@@ -105,8 +107,6 @@ void CPicturesDialog::UpdatePicture()
 
 	if (m_pFirmware->GetPictureType(m_PictureIndex) != 0)
 		m_Picture.SetPictureMode(1);
-	else if (m_pFirmware->PType()==1)
-		m_Picture.SetPictureMode(2);
 	else
 		m_Picture.SetPictureMode(0);
 
@@ -117,6 +117,7 @@ void CPicturesDialog::UpdatePicture()
 		return;
 
 	CSize picSize = m_Picture.GetPictureSize();
+	m_PictureID = m_pFirmware->GetPictureID(m_PictureIndex);
 	m_PictureWidth = picSize.cx;
 	m_PictureHeight = picSize.cy;
 	m_PictureBitdepth = m_Picture.GetPictureBitDepth();
@@ -249,8 +250,6 @@ void CPicturesDialog::OnBnClickedSaveAll()
 		CPicture pic;
 		if (m_pFirmware->GetPictureType(m_PictureIndex) != 0)
 			pic.SetPictureMode(1);
-		else if (m_pFirmware->PType()==1)
-			pic.SetPictureMode(2);
 		else
 			pic.SetPictureMode(0);
 		if (pic.Read(m_pFirmware->GetPicture(i)))
@@ -306,12 +305,8 @@ void CPicturesDialog::OnBnClickedLoadAll()
 			{
 				if (m_pFirmware->GetPictureType(index) != 0)
 					pic.SetPictureMode(1);
-				else if (m_pFirmware->PType()==1)
-					pic.SetPictureMode(2);
 				else
-				{
 					pic.SetPictureMode(0);
-				}
 
 				if (pic.Read(lpBuffer) && m_pFirmware->CanWritePicture(index)==TRUE)
 					LoadPicture(&pic, filename);

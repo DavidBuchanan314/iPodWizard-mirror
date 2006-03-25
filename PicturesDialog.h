@@ -34,6 +34,7 @@ public:
 	int m_PictureWidth;
 	int m_PictureHeight;
 	int m_PictureBitdepth;
+	int m_PictureID;
 	void SetFirmware(CFirmware *pFirmware);
 	afx_msg void OnBnClickedSaveBitmap();
 	int m_PictureType;

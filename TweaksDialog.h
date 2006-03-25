@@ -24,7 +24,6 @@ public:
 	LRESULT OnClose(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnBnClickedApply();
 	afx_msg void OnBnClickedVolumeCap();
-	int seekChaine (void);
 	int isCapped(void);
 	int unCap(void);
 	int reCap(void);

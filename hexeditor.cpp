@@ -407,7 +407,8 @@ void CHexWnd::OnSetFocus(CWnd* pOldWnd)
 
 void CHexWnd::OnKillFocus(CWnd* pNewWnd)
 {
-	m_bFocus = FALSE;
+	//m_bFocus = FALSE;
+	m_bFocus = TRUE;
 
 	Invalidate();
 }
@@ -420,14 +421,26 @@ void CHexWnd::OnLButtonDown(UINT nFlags, CPoint point)
 	m_CursorPos = (m_Offset + point.y / m_CharRect.bottom) * LINE_LENGTH;
 
 	LONG column = point.x / m_CharRect.right - 10;
-	if (column < 0 || column >= LINE_LENGTH * 3)
+	if (column < 0)
 		return;
 
-	m_CursorPos += column / 3;
-	if (column % 3 == 1)
-		m_CursorHalf = 1;
-	else
+	if (column >= LINE_LENGTH * 3) //text
+	{
+		column -= (LINE_LENGTH * 3 + 1); //space between hex and text
+		if (column < 0 || column >= LINE_LENGTH) //user clicked in space or out of boundries
+			return;
+
+		m_CursorPos += column;
 		m_CursorHalf = 0;
+	}
+	else //hex codes
+	{
+		m_CursorPos += column / 3;
+		if (column % 3 == 1)
+			m_CursorHalf = 1;
+		else
+			m_CursorHalf = 0;
+	}
 
 	Invalidate();
 }

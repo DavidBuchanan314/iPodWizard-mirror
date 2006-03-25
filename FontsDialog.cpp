@@ -9,6 +9,28 @@
 
 // helper routines
 
+/*void DDX_MyText(CDataExchange *pDX, int nIDC, DWORD &value)
+{
+	CString s;
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		pDX->m_pDlgWnd->GetDlgItem(nIDC)->GetWindowText(s);
+		WORD temp;
+		WORD &val=temp;
+		if (_stscanf(s, TEXT("%u"), &val) != 1)
+		{
+			val = 0;
+		}
+		value=val;
+	}
+	else
+	{
+		s.Format(TEXT("%d"), value);
+		pDX->m_pDlgWnd->GetDlgItem(nIDC)->SetWindowText(s);
+	}
+}*/
+
 void DDX_MyText(CDataExchange *pDX, int nIDC, WORD &value)
 {
 	CString s;
@@ -108,6 +130,7 @@ void CFontsDialog::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_FONTNAME_EDIT, m_FontName);
 	DDX_Text(pDX, IDC_FONTSIZE_EDIT, m_FontSize);
+	DDX_Text(pDX, IDC_FONTSTYLE_EDIT, m_FontStyle);
 	DDX_Control(pDX, IDC_PICTURE, m_FontWnd);
 	DDX_Control(pDX, IDC_FONTZOOM, m_ZoomWnd);
 	DDX_Control(pDX, IDC_FONTIDX_COMBO, m_FontIndexCombo);
@@ -153,6 +176,7 @@ BEGIN_MESSAGE_MAP(CFontsDialog, CDialog)
 	ON_BN_CLICKED(IDC_CHKGRID, OnBnClickedShowGrid)
 	ON_MESSAGE(WM_APP, OnSelectMetricsFromBitmap)
 	ON_BN_CLICKED(IDC_EXPLAIN_BUTTON, OnBnClickedCharMapExplain)
+	ON_BN_CLICKED(IDC_OTF_BUTTON, OnBnClickedOtfButton)
 END_MESSAGE_MAP()
 
 
@@ -185,12 +209,10 @@ LRESULT CFontsDialog::OnSelectMetricsFromBitmap(WPARAM wParam, LPARAM lParam)
 	int mg=(int)wParam;
 	if (mg!=10)
 		return 0;
-	LONG px=(LONG)lParam;
-	WORD startOffset, endOffset;
+	DWORD px=(DWORD)lParam;
+	DWORD startOffset, endOffset;
 	SHORT width, ident;
-	//TCHAR buf[4];
-	//wsprintf(buf, TEXT("%d"), px);
-	//MessageBox(buf);
+
 	for (WORD i=0;i<m_Font.GetNumMetrics();i++)
 	{
 		m_Font.GetCharMetrics(m_Font.GetCharMapping(i), &startOffset, &endOffset, &width, &ident);
@@ -254,7 +276,7 @@ void CFontsDialog::SetFirmware(CFirmware *pFirmware)
 
 void CFontsDialog::UpdateFont()
 {
-	WORD i;
+	DWORD i;
 
 	LPBYTE lpBuffer = m_pFirmware->GetFont(m_FontIndex);
 	if (lpBuffer == NULL)
@@ -268,6 +290,7 @@ void CFontsDialog::UpdateFont()
 	m_FontName = m_Font.GetFontName();
 	m_FontSize = m_Font.GetFontSize();
 	m_BitDepth = m_Font.GetFontBitDepth();
+	m_FontStyle = m_Font.GetFontStyle();
 
 	UpdateData(FALSE);
 
@@ -319,6 +342,7 @@ void CFontsDialog::UpdateFont()
 	GetDlgItem(ID_ZOOMIN_BUTTON)->EnableWindow(TRUE);
 	GetDlgItem(ID_ZOOMOUT_BUTTON)->EnableWindow(TRUE);
 	GetDlgItem(IDC_CHKGRID)->EnableWindow(TRUE);
+	GetDlgItem(IDC_OTF_BUTTON)->EnableWindow(TRUE);
 }
 
 void CFontsDialog::OnBnClickedPrevPicture()
@@ -354,7 +378,74 @@ void CFontsDialog::OnBnClickedSaveBitmap()
 	CSize size = m_Font.GetFontBitmapSize();
 
 	CImage img;
+	/*
+	size.cx=m_Offset2-m_Offset1;
+	size.cy--;
 
+	int x, y;
+
+	int hstart = -1, hend = -1;
+	BOOL bLineEmpty;
+
+	for (y = 0; y < size.cy; y++)
+	{
+		bLineEmpty = TRUE;
+		for (x = 0; x < size.cx; x++)
+		{
+			if (m_Font.GetFontPixel(CPoint(x+m_Offset1, y)) != RGB(255, 255, 255))
+			{
+				bLineEmpty = FALSE;
+				break;
+			}
+		}
+		if (!bLineEmpty)
+		{
+			hstart = y;
+			break;
+		}
+	}
+
+	for (y = size.cy - 1; y >= 0 && hstart != -1; y--)
+	{
+		bLineEmpty = TRUE;
+		for (x = 0; x < size.cx ; x++)
+		{
+			if (m_Font.GetFontPixel(CPoint(x+m_Offset1, y)) != RGB(255, 255, 255))
+			{
+				bLineEmpty = FALSE;
+				break;
+			}
+		}
+		if (!bLineEmpty)
+		{
+			hend = y;
+			break;
+		}
+	}
+	if (hstart!=-1)
+		hend++;
+
+	if (!img.Create(size.cx, hend - hstart, 24))
+	{
+		MessageBox(TEXT("Unable to create image!"));
+		return;
+	}
+
+	for (x = 0; x < size.cx; x++)
+	{
+		for (y = 0; y < hend - hstart; y++)
+		{
+			img.SetPixel(x, y, m_Font.GetFontPixel(CPoint(x+m_Offset1, y + hstart)));
+		}
+	}
+
+	if (FAILED(img.Save(dlg.GetPathName())))
+	{
+		MessageBox(TEXT("Unable to save image!"));
+		return;
+	}
+	return;
+	*/
 	if (!img.Create(size.cx, size.cy, 24))
 	{
 		MessageBox(TEXT("Unable to create image!"));
@@ -458,7 +549,9 @@ void CFontsDialog::ReadUnicodeGroup()
 {
 	int i = m_GroupIndexCombo.GetCurSel();
 
-	m_Font.GetUnicodeGroup(i, &m_GroupStart, &m_GroupLen, &m_GroupOffset);
+	DWORD temp=m_GroupLen;
+	m_Font.GetUnicodeGroup(i, &m_GroupStart, &temp, &m_GroupOffset);
+	m_GroupLen=(WORD)temp;
 
 	UpdateGroupExplanation();
 }
@@ -473,6 +566,20 @@ void CFontsDialog::WriteUnicodeGroup()
 		return;
 
 	m_Font.SetUnicodeGroup(i, m_GroupStart, m_GroupLen, m_GroupOffset);
+
+	//if sorting then change the index:
+	DWORD glen,temp=m_GroupLen;
+	WORD gstart,goffset;
+	for (i=0;i<m_GroupIndexCombo.GetCount();i++)
+	{
+		m_Font.GetUnicodeGroup(i, &gstart, &glen, &goffset);
+		if (glen==temp && gstart==m_GroupStart && goffset==m_GroupOffset)
+		{
+			m_GroupIndexCombo.SetCurSel(i);
+			break;
+		}
+	}
+	//
 
 	UpdateGroupExplanation();
 
@@ -517,7 +624,7 @@ void CFontsDialog::WriteCharMetrics()
 {
 	UpdateData(TRUE);
 
-	m_Font.SetCharMetrics(m_CharMapCombo2.GetCurSel(), (WORD)m_Offset1, (WORD)m_Offset2, (WORD)m_Width, (WORD)m_Ident);
+	m_Font.SetCharMetrics(m_CharMapCombo2.GetCurSel(), (WORD)m_Offset1, (WORD)m_Offset2, (SHORT)m_Width, (SHORT)m_Ident);
 
 	UpdateZoomView();
 }
@@ -526,13 +633,13 @@ void CFontsDialog::ReadCharMetrics()
 {
 	int i = m_CharMapCombo2.GetCurSel();
 
-	WORD offset1 = 0, offset2 = 0;
+	DWORD offset1 = 0, offset2 = 0;
 	SHORT width = 0, ident = 0;
 
 	m_Font.GetCharMetrics(i, &offset1, &offset2, &width, &ident);
 
-	m_Offset1 = offset1;
-	m_Offset2 = offset2;
+	m_Offset1 = (WORD)offset1;
+	m_Offset2 = (WORD)offset2;
 	m_Width = width;
 	m_Ident = ident;
 
@@ -646,6 +753,7 @@ void CFontsDialog::OnBnClickedLoadMetrics()
 	}
 	else
 	{
+		/*
 		WORD index1, index2, start, len;
 
 		//Make file size validity check
@@ -689,6 +797,18 @@ void CFontsDialog::OnBnClickedLoadMetrics()
 			m_Font.SetCharMapping(index1, index2);
 			m_Font.SetCharMetrics(index2, offset1, offset2, width, ident);
 		}
+		*/
+		DWORD size=m_Font.GetMetricDataLen();
+		DWORD length=(DWORD)file.GetLength();
+		if (length!=size)
+			goto NotValid;
+
+		LPBYTE lpBuf;
+		lpBuf=new BYTE[size];
+		if (file.Read(lpBuf, size) == size)
+		{
+			m_Font.SetMetricData(lpBuf);
+		}
 	}
 
 	file.Close();
@@ -720,7 +840,8 @@ void CFontsDialog::OnBnClickedSaveMetrics()
 		return;
 	}
 
-	WORD offset1, offset2;
+	DWORD offset1, offset2;
+	//WORD offset3;
 	SHORT width, ident;
 	WORD c, group;
 
@@ -742,18 +863,20 @@ void CFontsDialog::OnBnClickedSaveMetrics()
 	}
 	else
 	{
+		/*
 		WORD index1, index2;
 
-		WORD start, len;
+		WORD start;
+		DWORD len;
 
 		for (WORD i = 0; i < m_Font.GetNumUnicodeGroups(); i++)
 		{
-			m_Font.GetUnicodeGroup(i, &start, &len, &offset1);
+			m_Font.GetUnicodeGroup(i, &start, &len, &offset3);
 
 			file.Write(&i, 2);
 			file.Write(&start, 2);
 			file.Write(&len, 2);
-			file.Write(&offset1, 2);
+			file.Write(&offset3, 2);
 		}
 
 		for (WORD i = 0; i < m_Font.GetNumUnicodeChars(); i++)
@@ -772,7 +895,11 @@ void CFontsDialog::OnBnClickedSaveMetrics()
 			file.Write(&offset2, 2);
 			file.Write(&width, 2);
 			file.Write(&ident, 2);
-		}
+		}*/
+		LPBYTE temp=m_Font.GetMetricData();
+		DWORD size;
+		memcpy((LPBYTE)&size, temp, 4);
+		file.Write(&temp[4], size);
 	}
 
 	file.Close();
@@ -819,13 +946,11 @@ void CFontsDialog::OnBnClickedMakeFont()
 
 	c[1] = 0;
 
-	BYTE flags[65536];
-	ZeroMemory(flags, sizeof(flags));
 	WORD offset;
 
 	CSize size = m_Font.GetFontBitmapSize();
 
-	for (int i = 0; i < m_Font.GetNumUnicodeChars(); i++)
+	for (WORD i = 0; i < (WORD)m_Font.GetNumUnicodeChars(); i++)
 	{
 		c[0] = m_Font.GetUnicodeChar(i, &group);
 
@@ -906,7 +1031,14 @@ void CFontsDialog::OnBnClickedMakeFont()
 		xoffset += end - start;
 
 		if (xoffset >= size.cx)
+		{
+			for (i++;i < (WORD)m_Font.GetNumUnicodeChars(); i++)
+			{
+				m_Font.SetCharMapping(i, i);
+				m_Font.SetCharMetrics(i, 0, 0, 1, 0);
+			}
 			break;
+		}
 	}
 
 	//
@@ -919,4 +1051,11 @@ void CFontsDialog::OnBnClickedMakeFont()
 	ReleaseDC(pDC);
 
 	UpdateFont();
+}
+void CFontsDialog::OnBnClickedOtfButton()
+{
+	if (m_pFirmware->GetNumOTFFonts() > 0)
+		::SendMessage(::GetParent(::GetParent(m_hWnd)), WM_APP, (WPARAM)10, (LPARAM)TRUE);
+	else
+		MessageBox(TEXT("No OpenType fonts found in this firmware."));
 }
