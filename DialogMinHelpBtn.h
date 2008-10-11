@@ -38,7 +38,7 @@ protected:
     virtual BOOL OnInitDialog();
     afx_msg void OnNcPaint();
     afx_msg BOOL OnNcActivate(BOOL bActive);
-    afx_msg UINT OnNcHitTest(CPoint point);
+    afx_msg LRESULT OnNcHitTest(CPoint point);
     afx_msg void OnNcLButtonDown(UINT nHitTest, CPoint point);
     afx_msg void OnNcRButtonDown(UINT nHitTest, CPoint point);
     afx_msg void OnMouseMove(UINT nFlags, CPoint point);

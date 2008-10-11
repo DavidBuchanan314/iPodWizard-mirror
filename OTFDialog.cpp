@@ -226,6 +226,9 @@ BEGIN_MESSAGE_MAP(COTFDialog, CDialog)
 	ON_BN_CLICKED(ID_LOAD_FONT, OnBnClickedLoadFont)
 	ON_BN_CLICKED(ID_SAVE_FONT, OnBnClickedSaveFont)
 	ON_BN_CLICKED(ID_MULLOAD_GLYPH, OnBnClickedMulloadGlyph)
+	ON_MESSAGE(WM_APP, OnSelectMetricsFromBitmap)
+	ON_BN_CLICKED(IDC_CHANGE_FONT_COLOR, &COTFDialog::OnBnClickedChangeFontColor)
+	ON_BN_CLICKED(ID_MULSAVE_GLYPH, &COTFDialog::OnBnClickedMulsaveGlyph)
 END_MESSAGE_MAP()
 
 
@@ -247,9 +250,27 @@ BOOL COTFDialog::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void COTFDialog::SetFirmware(CFirmware *pFirmware)
+LRESULT COTFDialog::OnSelectMetricsFromBitmap(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == NULL || lParam == NULL)
+		return 0;
+	int mg=(int)wParam;
+	if (mg!=10)
+		return 0;
+	int iGlyph=(int)lParam;
+	if (iGlyph!=-1)
+	{
+		m_GlyphCombo.SetCurSel(m_Font.GetIndexFromGlyphTable(iGlyph));
+		OnCbnSelchangeGlyphidxCombo();
+	}
+	return 0;
+}
+
+void COTFDialog::SetFirmware(CFirmware *pFirmware, CLayoutDialog *pLayoutDialog)
 {
 	m_pFirmware = pFirmware;
+
+	m_pLayoutDialog = pLayoutDialog;
 
 	m_FontIndex = 0;
 
@@ -263,7 +284,8 @@ void COTFDialog::SetFirmware(CFirmware *pFirmware)
 	}
 	m_FontIndexCombo.SetCurSel(0);
 
-	UpdateFont();
+	if (theApp.m_OTFRender==FALSE)
+		UpdateFont();
 }
 
 void COTFDialog::UpdateFont()
@@ -330,6 +352,8 @@ void COTFDialog::UpdateFont()
 	GetDlgItem(IDC_BMP_BUTTON)->EnableWindow(TRUE);
 	GetDlgItem(IDC_REFRESH_BUTTON)->EnableWindow(TRUE);
 	GetDlgItem(ID_MULLOAD_GLYPH)->EnableWindow(TRUE);
+	GetDlgItem(ID_MULSAVE_GLYPH)->EnableWindow(TRUE);
+	GetDlgItem(IDC_CHANGE_FONT_COLOR)->EnableWindow(TRUE);
 }
 
 void COTFDialog::UpdateZoomView()
@@ -360,7 +384,8 @@ void COTFDialog::UpdateCharCombo()
 	{
 		c = m_Font.GetUnicodeChar(i, &group);
 		swprintf(w, L"U+%04X (%c)", c, c);
-		::SendMessageW(m_CharCombo.m_hWnd, CB_ADDSTRING, 0, (LPARAM)w);
+		m_CharCombo.AddString(w);
+		//::SendMessageW(m_CharCombo.m_hWnd, CB_ADDSTRING, 0, (LPARAM)w);
 	}
 
 	m_CharCombo.SetCurSel(0);
@@ -748,10 +773,11 @@ void COTFDialog::OnBnClickedBmpButton()
 void COTFDialog::OnBnClickedLoadGlyph()
 {
 	CFileDialog dlg(TRUE, 0, 0, OFN_HIDEREADONLY, TEXT("Bitmap Files (*.bmp, *.gif, *.jpg)|*.bmp;*.gif;*.jpg||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlg)
 	CImage img;
 	if (FAILED(img.Load(dlg.GetPathName())))
 	{
@@ -789,10 +815,11 @@ void COTFDialog::OnBnClickedSaveGlyph()
 	filename.Format(TEXT("%s-%d.bmp"), m_Font.GetFontName(), m_GlyphIndex);
 
 	CFileDialog dlg(FALSE, TEXT("bmp"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("BMP Files (*.bmp)|*.bmp||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlg)
 	CSize size = m_Font.GetFontBitmapSize(m_GlyphIndex);
 
 	CImage img;
@@ -860,20 +887,32 @@ void COTFDialog::OnEnChangeGroupoffsetEdit()
 
 void COTFDialog::OnBnClickedLoadFont()
 {
-	CFileDialog dlg(TRUE, TEXT("otf"), 0, OFN_HIDEREADONLY, TEXT("OpenType Bitmap Fonts (*.otf)|*.otf||"), this);
+	CFileDialog dlg(TRUE, TEXT("ttf"), 0, OFN_HIDEREADONLY, TEXT("TrueType Bitmap Fonts (*.ttf)|*.ttf||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
+	MO_SAVE_RESOURCES_PATH(dlg)
+	LoadFullFont(dlg.GetPathName(), m_Font.GetFontBlockLen());
+}
+
+void COTFDialog::LoadFullFont(CString path, DWORD size, DWORD fidx)
+{
+	DWORD fontindex;
+	if (fidx==-1)
+		fontindex=m_FontIndex;
+	else
+		fontindex=fidx;
 
 	CFile file;
-	if (!file.Open(dlg.GetPathName(), CFile::modeRead))
+	if (!file.Open(path, CFile::modeRead))
 	{
 		MessageBox(TEXT("Unable to load file!"));
 		return;
 	}
 
-	LPBYTE lpBuffer = m_pFirmware->GetOTFFont(m_FontIndex);
-	if (file.Read(lpBuffer, m_Font.GetFontBlockLen()) < m_Font.GetFontBlockLen())
+	LPBYTE lpBuffer = m_pFirmware->GetOTFFont(fontindex);
+	if (file.Read(lpBuffer, size) < size)
 	{
 		MessageBox(TEXT("Error reading font file!"));
 		return;
@@ -882,16 +921,62 @@ void COTFDialog::OnBnClickedLoadFont()
 	UpdateFont();
 }
 
+void COTFDialog::LoadFullFontsDir(CString folderPath)
+{
+	CString filename;
+	filename = folderPath;
+	filename += "\\*-*-*.ttf";
+
+	WIN32_FIND_DATA findData;
+	COTFFont font;
+	CString fname;
+	CString fontname,fontstyle,fontsize;
+	LPBYTE lpEnd=m_pFirmware->GetFirmwareBuffer()+m_pFirmware->GetFirmwareSize();
+	HANDLE hFind = FindFirstFile(filename, &findData);
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			filename = folderPath;
+			filename += "\\";
+			filename += findData.cFileName;
+			fname.Format(findData.cFileName);
+			int fpos=fname.Find('-');
+			fontname=fname.Left(fpos);
+			int ftemp=fpos+1;
+			fpos=fname.Find('-', ftemp);
+			fontstyle=fname.Mid(ftemp, fpos);
+			ftemp=fpos+1;
+			fpos=fname.Find('-', ftemp);
+			fontsize=fname.Mid(ftemp, fpos);
+			for (DWORD z=0;z<m_pFirmware->GetNumFonts();z++)
+			{
+				font.Read(m_pFirmware->GetFont(z), TRUE);
+				if (!fontname.Compare(font.GetFontName()) && !fontstyle.Compare(font.GetFontStyle()) && _ttoi(fontsize)==font.GetFontSize())
+				{
+					LoadFullFont(filename, font.GetFontBlockLen(), z);
+					break;
+				}
+			}
+		} while (FindNextFile(hFind, &findData) != 0);
+
+		FindClose(hFind);
+
+		UpdateFont();
+	}
+}
+
 void COTFDialog::OnBnClickedSaveFont()
 {
 	CString filename;
-	filename.Format(TEXT("%s.otf"), m_Font.GetFontName());
+	filename.Format(TEXT("%s.ttf"), m_Font.GetFontName());
 
-	CFileDialog dlg(FALSE, TEXT("otf"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("OpenType Bitmap Font (*.otf)|*.otf||"), this);
+	CFileDialog dlg(FALSE, TEXT("ttf"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("TrueType Bitmap Font (*.ttf)|*.ttf||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlg)
 	CFile file;
 	if (!file.Open(dlg.GetPathName(), CFile::modeCreate | CFile::modeWrite))
 	{
@@ -1035,4 +1120,108 @@ void COTFDialog::OnBnClickedMulloadGlyph()
 		UpdateZoomView();
 	}
 	index=0;
+}
+
+void COTFDialog::OnBnClickedChangeFontColor()
+{
+	CWaitCursor wait;
+
+	DWORD i,id=-1;
+	wchar_t *sOut;
+	DWORD lang=m_pFirmware->GetNumLangs()-1;
+	for (i=0;i<m_pFirmware->GetNumLangStrings(lang);i++)
+	{
+		Utf8Decode((char *)m_pFirmware->GetLangString(lang, i), &sOut);
+		if (!_tcscmp(sOut, m_FontName))
+		{
+			id=m_pFirmware->GetLangStringID(lang, i);
+			delete sOut;
+			break;
+		}
+		delete sOut;
+	}
+	if (id!=-1)
+	{
+		DWORD style=0;
+		for (i=0;i<m_pLayoutDialog->TypeList->size();i++)
+		{
+			if (!wcscmp(m_FontStyle, _T("Bold")))
+				style=0;
+			else if (!wcscmp(m_FontStyle, _T("Regular")))
+				style=1;
+			if (m_pLayoutDialog->TypeList->at(i)->element->fontID==id && m_pLayoutDialog->TypeList->at(i)->element->style==style && m_pLayoutDialog->TypeList->at(i)->element->size==m_FontSize && m_pLayoutDialog->TypeList->at(i)->element->alignment==0)
+			{
+				//font found
+				CString sID;
+				sID.Format(_T("%d"), m_pLayoutDialog->TypeList->at(i)->id);
+				m_pLayoutDialog->m_ResourceTypeIdx.SetCurSel(2);
+				m_pLayoutDialog->OnCbnSelchangeResourceTypeidxCombo();
+				m_pLayoutDialog->GetDlgItem(IDC_FIND_EDIT)->SetWindowTextW(sID);
+				m_pLayoutDialog->OnBnClickedFindButton();
+				LRESULT ret=1; //important!
+				NMITEMACTIVATE nmhdr;
+				nmhdr.iItem=0;
+				nmhdr.iSubItem=3;
+				m_pLayoutDialog->OnLvnItemDblClickedResourceList((LPNMHDR)&nmhdr, &ret);
+				//::SendMessage(::GetParent(::GetParent(m_hWnd)), WM_APP, (WPARAM)21, (LPARAM)0);
+				break;
+			}
+		}
+		
+	}
+}
+
+void COTFDialog::OnBnClickedMulsaveGlyph()
+{
+	UpdateData(TRUE);
+
+	LPITEMIDLIST il;
+	TCHAR folderPath[MAX_PATH];
+
+	BROWSEINFO br;
+    br.hwndOwner = AfxGetMainWnd()->GetSafeHwnd();
+    br.pidlRoot = NULL;
+    br.pszDisplayName = folderPath;
+    br.lpszTitle = TEXT("Select folder for files to save");
+    br.ulFlags = BIF_RETURNONLYFSDIRS;
+    br.lpfn = NULL;
+    br.lParam = 0;
+    br.iImage = 0;
+
+	il = SHBrowseForFolder(&br);
+	if (il == NULL)
+		return;
+
+	SHGetPathFromIDList(il, folderPath);
+
+	int i = m_CharCombo.GetCurSel();
+
+	CString filename;
+	WORD group;
+	for (int i=0;i<m_CharCombo.GetCount();i++)
+	{
+		WORD unicodeChar = m_Font.GetUnicodeChar(i, &group);
+		WORD offset = m_Font.GetUnicodeCharOffset(unicodeChar);
+		
+		CSize size=m_Font.GetFontBitmapSize(offset);
+		if (size.cx<=0 || size.cy<=0)
+			continue;
+		filename.Format(_T("%s\\%04X.bmp"), folderPath, unicodeChar);
+		CImage img;
+		if (!img.Create(size.cx, size.cy, 24))
+		{
+			MessageBox(_T("Error saving glyphs!"));
+			return;
+		}
+
+		for (int x=0;x<size.cx;x++)
+			for (int y=0;y<size.cy;y++)
+			{
+				img.SetPixel(x, y, m_Font.GetFontPixel(offset, CPoint(x, y)));
+			}
+		if (FAILED(img.Save(filename)))
+		{
+			MessageBox(_T("Error saving glyphs!"));
+		}
+	}
 }

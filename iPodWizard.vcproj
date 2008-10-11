@@ -1,122 +1,193 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="iPodWizard"
 	ProjectGUID="{F63FD213-98B8-4736-9F77-77D18E6669AF}"
-	Keyword="MFCProj">
+	RootNamespace="iPodWizard"
+	Keyword="MFCProj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="1"
-			UseOfATL="1"
-			CharacterSet="1">
+			UseOfATL="0"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="false"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_UNICODE;$(NOINHERIT)"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				TreatWChar_tAsBuiltInType="TRUE"
-				UsePrecompiledHeader="3"
+				TreatWChar_tAsBuiltInType="true"
+				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+				CallingConvention="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				LinkIncremental="2"
-				GenerateDebugInformation="TRUE"
-				SubSystem="2"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="FALSE"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"/>
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="Credui.lib wininet.lib Version.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
+				IgnoreDefaultLibraryNames="LIBC;nafxcwd"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="1"
-			CharacterSet="1">
+			CharacterSet="1"
+			>
 			<Tool
-				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_UNICODE;$(NOINHERIT)"
-				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
-				TreatWChar_tAsBuiltInType="TRUE"
-				UsePrecompiledHeader="3"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Name="VCPreBuildEventTool"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCCustomBuildTool"
+			/>
 			<Tool
-				Name="VCLinkerTool"
-				LinkIncremental="1"
-				GenerateDebugInformation="TRUE"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				EntryPointSymbol="wWinMainCRTStartup"
-				TargetMachine="1"/>
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="FALSE"/>
+				MkTypLibCompatible="false"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCCLCompilerTool"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_UNICODE;$(NOINHERIT)"
+				MinimalRebuild="false"
+				RuntimeLibrary="0"
+				TreatWChar_tAsBuiltInType="true"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"/>
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="Credui.lib wininet.lib Version.lib"
+				LinkIncremental="1"
+				IgnoreDefaultLibraryNames="LIBC;nafxcwd"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				EntryPointSymbol="wWinMainCRTStartup"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -125,232 +196,418 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath=".\cgfiltyp.cpp">
+				RelativePath=".\iPodWizard.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\DialogMinHelpBtn.cpp">
-			</File>
-			<File
-				RelativePath=".\EditorDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\firmware.cpp">
-			</File>
-			<File
-				RelativePath=".\Font.cpp">
-			</File>
-			<File
-				RelativePath=".\FontsDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\FontWnd.cpp">
-			</File>
-			<File
-				RelativePath=".\HelpDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\hexeditor.cpp">
-			</File>
-			<File
-				RelativePath=".\HScrollListBox.cpp">
-			</File>
-			<File
-				RelativePath=".\HyperLink.cpp">
-			</File>
-			<File
-				RelativePath=".\iPodWizard.cpp">
-			</File>
-			<File
-				RelativePath=".\iPodWizardDlg.cpp">
-			</File>
-			<File
-				RelativePath=".\OTFDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\OTFFontParser.cpp">
-			</File>
-			<File
-				RelativePath=".\OTFFontWnd.cpp">
-			</File>
-			<File
-				RelativePath=".\Picture.cpp">
-			</File>
-			<File
-				RelativePath=".\PicturesDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\PictureWnd.cpp">
-			</File>
-			<File
-				RelativePath=".\ResourceManager.cpp">
-			</File>
-			<File
-				RelativePath=".\ScanDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\stdafx.cpp">
+				RelativePath=".\stdafx.cpp"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\StringDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\ThemesDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\TweaksDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\UpdaterDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\VisualStylesXP.cpp">
-			</File>
+			<Filter
+				Name="Dialogs"
+				>
+				<File
+					RelativePath=".\EditorDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FontsDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FontWnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\HelpDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\iPodWizardDlg.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OTFDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OTFFontWnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PicturesDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PictureWnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PrefsDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ScanDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StringDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ThemePreviewer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ThemesDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ThemeWnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TweaksDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\UpdaterDialog.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Helper Classes"
+				>
+				<File
+					RelativePath=".\cgfiltyp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Color.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DialogMinHelpBtn.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\HScrollListBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\HyperLink.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RDragDropFiles.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TipDlg.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolTipListCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\UpdateCheck.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\VisualStylesXP.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Core"
+				>
+				<File
+					RelativePath=".\firmware.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Font.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\hexeditor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MFCSink.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OTFFontParser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Picture.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ResourceManager.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath=".\AfxBeginMsgMapTemplate.h">
+				RelativePath=".\iPodWizard.h"
+				>
 			</File>
 			<File
-				RelativePath=".\cgfiltyp.h">
+				RelativePath=".\Resource.h"
+				>
 			</File>
 			<File
-				RelativePath=".\DialogMinHelpBtn.h">
+				RelativePath=".\stdafx.h"
+				>
 			</File>
-			<File
-				RelativePath=".\EditorDialog.h">
-			</File>
-			<File
-				RelativePath=".\firmware.h">
-			</File>
-			<File
-				RelativePath=".\Font.h">
-			</File>
-			<File
-				RelativePath=".\FontsDialog.h">
-			</File>
-			<File
-				RelativePath=".\FontWnd.h">
-			</File>
-			<File
-				RelativePath=".\HelpDialog.h">
-			</File>
-			<File
-				RelativePath=".\hexeditor.h">
-			</File>
-			<File
-				RelativePath=".\HScrollListBox.h">
-			</File>
-			<File
-				RelativePath=".\HyperLink.h">
-			</File>
-			<File
-				RelativePath=".\iPodWizard.h">
-			</File>
-			<File
-				RelativePath=".\iPodWizardDlg.h">
-			</File>
-			<File
-				RelativePath=".\memdc.h">
-			</File>
-			<File
-				RelativePath=".\OTFDialog.h">
-			</File>
-			<File
-				RelativePath=".\OTFFontParser.h">
-			</File>
-			<File
-				RelativePath=".\OTFFontWnd.h">
-			</File>
-			<File
-				RelativePath=".\Picture.h">
-			</File>
-			<File
-				RelativePath=".\PicturesDialog.h">
-			</File>
-			<File
-				RelativePath=".\PictureWnd.h">
-			</File>
-			<File
-				RelativePath=".\Resource.h">
-			</File>
-			<File
-				RelativePath=".\ResourceManager.h">
-			</File>
-			<File
-				RelativePath=".\ScanDialog.h">
-			</File>
-			<File
-				RelativePath=".\stdafx.h">
-			</File>
-			<File
-				RelativePath=".\StringDialog.h">
-			</File>
-			<File
-				RelativePath=".\ThemesDialog.h">
-			</File>
-			<File
-				RelativePath=".\TweaksDialog.h">
-			</File>
-			<File
-				RelativePath=".\UpdaterDialog.h">
-			</File>
-			<File
-				RelativePath=".\VisualStylesXP.h">
-			</File>
+			<Filter
+				Name="Dialogs"
+				>
+				<File
+					RelativePath=".\EditorDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FontsDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FontWnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\HelpDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\iPodWizardDlg.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OTFDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OTFFontWnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PicturesDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PictureWnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PrefsDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ScanDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\StringDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ThemePreviewer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ThemesDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ThemeWnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TweaksDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\UpdaterDialog.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Core"
+				>
+				<File
+					RelativePath=".\firmware.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Font.h"
+					>
+				</File>
+				<File
+					RelativePath=".\hexeditor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\MFCSink.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OTFFontParser.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Picture.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ResourceManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Helper Classes"
+				>
+				<File
+					RelativePath=".\AfxBeginMsgMapTemplate.h"
+					>
+				</File>
+				<File
+					RelativePath=".\cgfiltyp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Color.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DialogMinHelpBtn.h"
+					>
+				</File>
+				<File
+					RelativePath=".\HScrollListBox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\HyperLink.h"
+					>
+				</File>
+				<File
+					RelativePath=".\memdc.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RDragDropFiles.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TipDlg.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolTipListCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\UpdateCheck.h"
+					>
+				</File>
+				<File
+					RelativePath=".\VisualStylesXP.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
 			<File
-				RelativePath=".\res\HelpBtnBlue.bmp">
+				RelativePath=".\res\HelpBtnBlue.bmp"
+				>
 			</File>
 			<File
-				RelativePath=".\res\HelpBtnClassic.bmp">
+				RelativePath=".\res\HelpBtnClassic.bmp"
+				>
 			</File>
 			<File
-				RelativePath=".\res\HelpBtnHomestead.bmp">
+				RelativePath=".\res\HelpBtnHomestead.bmp"
+				>
 			</File>
 			<File
-				RelativePath=".\res\HelpBtnMetallic.bmp">
+				RelativePath=".\res\HelpBtnMetallic.bmp"
+				>
 			</File>
 			<File
-				RelativePath=".\res\iPodWizard.ico">
+				RelativePath=".\res\iPodWizard.ico"
+				>
 			</File>
 			<File
-				RelativePath=".\iPodWizard.rc">
+				RelativePath=".\iPodWizard.rc"
+				>
 			</File>
 			<File
-				RelativePath=".\res\iPodWizard.rc2">
+				RelativePath=".\res\iPodWizard.rc2"
+				>
+			</File>
+			<File
+				RelativePath=".\res\litebulb.bmp"
+				>
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\res\iPodWizard.manifest">
+			RelativePath=".\res\iPodWizard.manifest"
+			>
 		</File>
 		<File
-			RelativePath=".\ReadMe.txt">
+			RelativePath=".\ReadMe.txt"
+			>
+		</File>
+		<File
+			RelativePath=".\Tips.txt"
+			>
 		</File>
 	</Files>
 	<Globals>
 		<Global
 			Name="RESOURCE_FILE"
-			Value="iPodWizard.rc"/>
+			Value="iPodWizard.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

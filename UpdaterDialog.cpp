@@ -80,10 +80,11 @@ void CUpdaterDialog::OnBnClickedExtractFirmware()
 	CString filename;
 	filename=m_FirmwareList.GetItemText(nItem, 0);
 	CFileDialog dlg(FALSE, NULL, filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("All Files (*.*)|*.*||"), this);
+	MO_LOAD_FIRMWARE_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-	
+	MO_SAVE_FIRMWARE_PATH(dlg)	
 	LPBYTE buffer=m_pRsrcMgr->UpdLoadResource(FIRMWARE_RESOURCE_TYPE, m_pRsrcMgr->GetResourceName(nItem));
 	if (buffer==NULL)
 		MessageBox(TEXT("Couldn't load firmware data to memory for extraction!"));
@@ -104,7 +105,7 @@ void CUpdaterDialog::OnBnClickedExtractFirmware()
 			file.Write(buffer, size);
 			file.Close();
 			m_pRsrcMgr->UpdFreeResource();
-			MessageBox(TEXT("Extracted firmware successfully!"));
+			MessageBox(TEXT("Extracted firmware successfully!\nWarning: According to Apple's EULA, uploading firmware to 3rd party websites is prohibited! Use this firmware for personal use only!"));
 		}
 		else
 		{
@@ -146,10 +147,11 @@ void CUpdaterDialog::OnBnClickedLoadFirmware()
 	MessageBox(TEXT("Be aware that the binary file you are about to load must be a valid firmware!\nIf not, you can severly screw your iPod and you can pray for something to fix it.\nEverything should be ok if you extracted the firmware using iPodWizard."));
 
 	CFileDialog dlg(TRUE, NULL, name, OFN_HIDEREADONLY, TEXT("All Files (*.*)|*.*||"), this);
+	MO_LOAD_FIRMWARE_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_FIRMWARE_PATH(dlg)
 	CFile file;
 	if (!file.Open(dlg.GetPathName(), CFile::modeRead))
 	{
@@ -157,12 +159,13 @@ void CUpdaterDialog::OnBnClickedLoadFirmware()
 		return;
 	}
 
-	if (size!=file.GetLength())
+	/*if (size!=file.GetLength())
 	{
 		file.Close();
 		MessageBox(TEXT("The firmware binary size you are about to load has to be exactly like the firmware in the updater!"));
 		return;
-	}
+	}*/
+	size=(DWORD)file.GetLength();
 
 	//make firmware checkups
 	LPBYTE buf=m_pRsrcMgr->UpdLoadResource(FIRMWARE_RESOURCE_TYPE, m_pRsrcMgr->GetResourceName(nItem));
@@ -180,22 +183,22 @@ void CUpdaterDialog::OnBnClickedLoadFirmware()
 	char ata[4]={0x21,0x41,0x54,0x41};
 	IPOD_PARTITION_HEADER *part;
 	IPOD_PARTITION_HEADER *part2;
-	part=(IPOD_PARTITION_HEADER *)&buffer[PARTITION_MAP_ADDRESS];
-	part2=(IPOD_PARTITION_HEADER *)&buf[PARTITION_MAP_ADDRESS];
+	part=(IPOD_PARTITION_HEADER *)&buffer[theApp.PARTITION_MAP_ADDRESS];
+	part2=(IPOD_PARTITION_HEADER *)&buf[theApp.PARTITION_MAP_ADDRESS];
 	int num=0;
 	DWORD loadAddr=0,loadAddr2=0,offset=0,offset2=0;
-	while (memcmp(part[num].type, &ata, 4) == 0 || memcmp(part2[num].type, &ata, 4) == 0)
+	while (memcmp(part[num].type, &ata, 4) == 0 || memcmp(part2[num].type, &nand, 4) == 0)
 	{
 		if (strcmp(part2[num].id, "soso")==0) // file
 		{
 			//load address is 0xffff after the firmware is loaded and therefore we need to change it
-			offset2=PARTITION_MAP_ADDRESS + sizeof(IPOD_PARTITION_HEADER) * (num+1) - 4;
+			offset2=theApp.PARTITION_MAP_ADDRESS + sizeof(IPOD_PARTITION_HEADER) * (num+1) - 4;
 			loadAddr2=part2[num].loadAddr;
 		}
 		if (strcmp(part[num].id, "soso")==0) //real
 		{
 			//if load address is 0xffff meaning the flash update occured but we need a workign load addr in the firmware so the next time the ipod will flash the firmware and therefore we need to change it
-			offset=PARTITION_MAP_ADDRESS + sizeof(IPOD_PARTITION_HEADER) * (num+1) - 4;
+			offset=theApp.PARTITION_MAP_ADDRESS + sizeof(IPOD_PARTITION_HEADER) * (num+1) - 4;
 			loadAddr=part[num].loadAddr;
 		}
 		num++;
@@ -298,15 +301,16 @@ void CUpdaterDialog::OnBnClickedExtractiPodFirmware()
 {
 	if (theApp.m_DeviceSel.IsEmpty() == TRUE)
 	{
-		MessageBox(TEXT("iPod not connected!"));
+		MessageBox(TEXT("iPod not connected or unmounted!"));
 		return;
 	}
 
 	CFileDialog dlg(FALSE, NULL,NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("All Files (*.*)|*.*||"), this);
+	MO_LOAD_FIRMWARE_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_FIRMWARE_PATH(dlg)
 	TCHAR devstring[25];
 	wsprintf (devstring, TEXT("%s"), theApp.m_DeviceSel);
 	int dev = _wopen (devstring, O_RDONLY | _O_RAW);
@@ -319,21 +323,25 @@ void CUpdaterDialog::OnBnClickedExtractiPodFirmware()
 	CFile file;
 	if (!file.Open(dlg.GetPathName(), CFile::modeCreate | CFile::modeWrite))
 	{
-		close(dev);
+		_close(dev);
 		MessageBox(TEXT("Unable to save file!"));
 		return;
 	}
 
+	theApp.InitHDDValues(dev);
+
 	DWORD size=0;
 	LPBYTE partitions;
-	lseek(dev, FIRMWARE_START + PARTITION_MAP_ADDRESS, SEEK_SET);
-	partitions = new BYTE[BLOCK_SIZE];
-	read(dev, partitions, BLOCK_SIZE);
+	long pos=theApp.FIRMWARE_START + theApp.PARTITION_MAP_ADDRESS;
+	pos%=theApp.BLOCK_SIZE;
+	_lseek(dev, theApp.FIRMWARE_START + theApp.PARTITION_MAP_ADDRESS - pos, SEEK_SET);
+	partitions = new BYTE[theApp.BLOCK_SIZE];
+	_read(dev, partitions, theApp.BLOCK_SIZE);
 	IPOD_PARTITION_HEADER *	m_pParts;
 	int num=0;
-	char ata[4]={0x21,0x41,0x54,0x41}; 
-	m_pParts = (IPOD_PARTITION_HEADER *)partitions;
-	while (memcmp(&m_pParts[num].type, &ata, 4) == 0)
+	//char ata[4]={0x21,0x41,0x54,0x41}; 
+	m_pParts = (IPOD_PARTITION_HEADER *)(&partitions[pos]);
+	while (memcmp(&m_pParts[num].type, &ata, 4) == 0 || memcmp(&m_pParts[num].type, &nand, 4) == 0)
 	{
 		if (m_pParts[num].devOffset+m_pParts[num].len > size)
 			size=m_pParts[num].devOffset+m_pParts[num].len;
@@ -343,16 +351,16 @@ void CUpdaterDialog::OnBnClickedExtractiPodFirmware()
 	
 	LPBYTE buffer;
 	DWORD i=0;
-	for (i=0;i<size;i+=BLOCK_SIZE);
-	size=i+BLOCK_SIZE; //extra read
+	for (i=0;i<size;i+=theApp.BLOCK_SIZE);
+	size=i+theApp.BLOCK_SIZE; //extra read
 	buffer = new BYTE[size];
-	lseek(dev, FIRMWARE_START, SEEK_SET);
-	for (i=0;i<size;i+=BLOCK_SIZE)
-		read(dev, &buffer[i], BLOCK_SIZE);
+	_lseek(dev, theApp.FIRMWARE_START, SEEK_SET);
+	for (i=0;i<size;i+=theApp.BLOCK_SIZE)
+		_read(dev, &buffer[i], theApp.BLOCK_SIZE);
 	file.Write(buffer, size);
 	delete[] buffer;
-	close(dev);
+	_close(dev);
 	file.Close();
 
-	MessageBox(TEXT("Successfully saved iPod firmware!"));
+	MessageBox(TEXT("Successfully saved iPod firmware!\nWarning: According to Apple's EULA, uploading firmware to 3rd party websites is prohibited! Use this firmware for personal use only!"));
 }

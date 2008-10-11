@@ -59,6 +59,37 @@
 
 #endif
 
+#elif _MFC_VER >= 0x0800 && _MFC_VER < 0x0900
+
+// MFC for Visual C++ 8.0 (MFC 8.x)
+
+#ifdef _AFXDLL
+
+#define BEGIN_MESSAGE_MAP_TEMPLATE(templateList, templateClass, theClass, baseClass) \
+	PTM_WARNING_DISABLE \
+	templateList const AFX_MSGMAP* templateClass::GetMessageMap() const \
+		{ return theClass::GetThisMessageMap(); } \
+	templateList const AFX_MSGMAP* PASCAL templateClass::GetThisMessageMap() \
+		{ \
+		typedef theClass ThisClass; \
+		typedef baseClass TheBaseClass; \
+		static const AFX_MSGMAP_ENTRY _messageEntries[] = \
+		{
+
+#else
+#define BEGIN_MESSAGE_MAP_TEMPLATE(templateList, templateClass, theClass, baseClass) \
+	PTM_WARNING_DISABLE \
+	templateList const AFX_MSGMAP* templateClass::GetMessageMap() const \
+		{ return GetThisMessageMap(); } \
+    templateList const AFX_MSGMAP* templateClass::GetThisMessageMap() \
+		{ \
+		typedef templateClass ThisClass;         \
+		typedef baseClass TheBaseClass;        \
+		static const AFX_MSGMAP_ENTRY _messageEntries[] =  \
+		{
+
+#endif
+
 #else
 
 #error "MFC version not supported"

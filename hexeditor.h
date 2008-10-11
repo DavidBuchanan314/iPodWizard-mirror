@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Firmware.h"
+#include "iPodWizard.h"
 
 // CHexWnd
 

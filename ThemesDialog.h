@@ -4,9 +4,12 @@
 #include "Picture.h"
 #include "Font.h"
 #include "OTFFontParser.h"
-#include "StringDialog.h"
+#include "EditorDialog.h"
 #include "afxwin.h"
 #include "afxcmn.h"
+#include "ThemePreviewer.h"
+
+#include "..\Zip\ZipArchive.h"
 
 // CThemesDialog dialog
 
@@ -28,14 +31,15 @@ protected:
 public:
 	CListCtrl m_GraphicsList;
 	CListCtrl m_FontsList;
+	CListCtrl m_ResourcesList;
 	CString m_SCFPath;
 	CComboBox m_FontIndexCombo;
 	CComboBox m_OTFFontIndexCombo;
 	CComboBox m_StringIndexCombo;
 	CFirmware *	m_pFirmware;
-	CStringDialog *	m_pStringDialog;
+	CEditorDialog * m_pEditorDialog;
 	virtual BOOL OnInitDialog();
-	void SetFirmware(CFirmware *pFirmware, CStringDialog *pStringDialog);
+	void SetFirmware(CFirmware *pFirmware, CEditorDialog *pEditorDialog);
 	BOOL LoadPicture(CPicture *pPicture, LPCTSTR lpszFilename);
 	BOOL LoadFont(CIpodFont *pFont, LPCTSTR lpszBmpFilename, LPCTSTR lpszIfmFilename);
 	BOOL LoadOTFFont(COTFFont *pFont, DWORD index, LPCTSTR lpszFilename);
@@ -52,5 +56,9 @@ public:
 	afx_msg void OnBnClickedLoadSCF();
 	afx_msg void OnBnClickedClearSCF();
 	afx_msg void OnBnClickedOtfChk();
-	afx_msg void OnBnClickedAssociateIpw();
+	afx_msg void OnBnClickedTloadresourcesButton();
+	afx_msg void OnBnClickedTdeleteresourceButton();
+	afx_msg void OnBnClickedThemepreviewerButton();
+	afx_msg void OnBnClickedExplainButton();
+	afx_msg void OnBnClickedMakefullthemeButton();
 };

@@ -93,187 +93,6 @@ BEGIN_MESSAGE_MAP(CStringDialog, CDialog)
 	ON_BN_CLICKED(IDC_TRANSLATE_BUTTON, OnBnClickedTranslate)
 END_MESSAGE_MAP()
 
-
-BOOL WildMatch(CString sWild, CString sString, CString sLimitChar)
-{
-    BOOL bAny = FALSE;
-    BOOL bNextIsOptional = FALSE;
-    BOOL bAutorizedChar = TRUE;
-
-    int i=0;
-    int j=0;
-
-    // Check all the string char by char
-    while (i<sString.GetLength()) 
-    {
-      // Check index for array overflow
-      if (j<sWild.GetLength())
-      {
-          // Manage '*' in the wildcard
-          if (sWild[j]=='*') 
-          {
-          // Go to next character in the wildcard
-          j++;
-
-          // Enf of the string and wildcard end 
-          // with *, only test string validity
-          if (j>=sWild.GetLength()) 
-          {
-          // Check end of the string
-          while (!sLimitChar.IsEmpty() && i<sString.GetLength()) 
-          {
-          // If this char is not ok, return false
-          if (sLimitChar.Find(sString[i])<0)
-              return FALSE;
-
-          i++;
-          }
-
-          return TRUE;
-          }
-
-          bAny = TRUE;
-          bNextIsOptional = FALSE;
-          } 
-          else 
-          {
-              // Optional char in the wildcard
-              if (sWild[j]=='^')
-              {
-              // Go to next char in the wildcard and indicate 
-              // that the next is optional
-              j++;
- 
-              bNextIsOptional = TRUE;
-              }
-              else
-              {
-                bAutorizedChar = 
-                  ((sLimitChar.IsEmpty()) || (sLimitChar.Find(sString[i])>=0));
-
-                // IF :
-                  if (// Current char match the wildcard
-                    sWild[j] == sString[i] 
-                    // '?' is used and current char is in autorized char list
-                    || (sWild[j] == '?' && bAutorizedChar)
-                    // Char is optional and it's not in the string
-                    // and it's necessary to test if '*' make any 
-                    // char browsing
-                    || (bNextIsOptional && !(bAny && bAutorizedChar))) 
-                    {
-                    // If current char match wildcard, 
-                    // we stop for any char browsing
-                    if (sWild[j] == sString[i])
-                        bAny = FALSE;
-
-                    // If it's not an optional char who is not present,
-                    // go to next
-                    if (sWild[j] == sString[i] || sWild[j] == '?')
-                        i++;
-
-                    j++;
-
-                    bNextIsOptional = FALSE;
-                    } 
-                    else
-                    // If we are in any char browsing ('*') 
-                    // and curent char is autorized
-                    if (bAny && bAutorizedChar)
-                        // Go to next
-                        i++;
-                    else
-                        return FALSE;
-               }
-            }
-        }
-        else
-        // End of the wildcard but not the 
-        // end of the string => 
-        // not matching
-        return FALSE;
-    }
-
-    if (j<sWild.GetLength() && sWild[j]=='^')
-    {
-        bNextIsOptional = TRUE;
-        j++;
-    }
-
-
-    // If the string is shorter than wildcard 
-    // we test end of the 
-    // wildcard to check matching
-    while ((j<sWild.GetLength() && sWild[j]=='*') || bNextIsOptional)
-    {
-        j++;
-        bNextIsOptional = FALSE;
-
-        if (j<sWild.GetLength() && sWild[j]=='^')
-        {
-            bNextIsOptional = TRUE;
-            j++;
-        }
-    }
-
-    return j>=sWild.GetLength();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// Utf8Decode - converts UTF8-encoded string to the UCS2/MBCS format
-void Utf8Decode( char* str, wchar_t** ucs2 )
-{
-	if ( str == NULL )
-		return;
-
-	int len = (int)strlen( str );
-	if ( len < 2 ) {
-		if ( ucs2 != NULL ) {
-			*ucs2 = ( wchar_t* )malloc(( len+1 )*sizeof( wchar_t ));
-			MultiByteToWideChar( CP_ACP, 0, str, len, *ucs2, len );
-			( *ucs2 )[ len ] = 0;
-		}
-		return;
-	}
-
-	wchar_t* tempBuf = ( wchar_t* )alloca(( len+1 )*sizeof( wchar_t ));
-	{
-		wchar_t* d = tempBuf;
-		BYTE* s = ( BYTE* )str;
-
-		while( *s )
-		{
-			if (( *s & 0x80 ) == 0 ) {
-				*d++ = *s++;
-				continue;
-			}
-
-			if (( s[0] & 0xE0 ) == 0xE0 && ( s[1] & 0xC0 ) == 0x80 && ( s[2] & 0xC0 ) == 0x80 ) {
-				*d++ = (( WORD )( s[0] & 0x0F) << 12 ) + ( WORD )(( s[1] & 0x3F ) << 6 ) + ( WORD )( s[2] & 0x3F );
-				s += 3;
-				continue;
-			}
-
-			if (( s[0] & 0xE0 ) == 0xC0 && ( s[1] & 0xC0 ) == 0x80 ) {
-				*d++ = ( WORD )(( s[0] & 0x1F ) << 6 ) + ( WORD )( s[1] & 0x3F );
-				s += 2;
-				continue;
-			}
-
-			*d++ = *s++;
-		}
-
-		*d = 0;
-	}
-
-	if ( ucs2 != NULL ) {
-		int fullLen = ( len+1 )*sizeof( wchar_t );
-		*ucs2 = ( wchar_t* )malloc( fullLen );
-		memcpy( *ucs2, tempBuf, fullLen );
-	}
-
-   WideCharToMultiByte( CP_ACP, 0, tempBuf, -1, str, len, NULL, NULL );
-}
-
 // CStringDialog message handlers
 
 BOOL CStringDialog::OnInitDialog()
@@ -298,7 +117,8 @@ void CStringDialog::SetFirmware(CFirmware *pFirmware)
 	// update strings
 	m_Langidx.ResetContent();
 	CString s;
-	for (DWORD i=0;i<m_pFirmware->GetNumLangs();i++)
+	DWORD i;
+	for (i=0;i<m_pFirmware->GetNumLangs();i++)
 	{
 		s.Format(TEXT("%d"),i);	
 		m_Langidx.InsertString(i, s);
@@ -341,10 +161,11 @@ void CStringDialog::OnBnClickedStringFilterButton()
 	}
 
 	CFileDialog dlg(TRUE, TEXT("txt"), 0, OFN_HIDEREADONLY, TEXT("String List Files (*.txt)|*.txt||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlg)
 	CFile file;
 	if (!file.Open(dlg.GetPathName(), CFile::modeRead))
 	{
@@ -443,10 +264,11 @@ void CStringDialog::OnBnClickedLoadChangesButton()
 	if (m_bShowAll)
 	{
 		CFileDialog dlga(TRUE, TEXT("scf"), 0, OFN_HIDEREADONLY, TEXT("String Changes (*.scf)|*.scf||"), this);
+		MO_LOAD_RESOURCES_PATH(dlga)
 
 		if (dlga.DoModal() != IDOK)
 			return;
-
+		MO_SAVE_RESOURCES_PATH(dlga)
 		if (!file.Open(dlga.GetPathName(), CFile::modeRead))
 		{
 			MessageBox(TEXT("Unable to load file!"));
@@ -467,10 +289,11 @@ void CStringDialog::OnBnClickedLoadChangesButton()
 	else
 	{
 		CFileDialog dlgb(TRUE, TEXT("txt"), 0, OFN_HIDEREADONLY, TEXT("String List Files (*.txt)|*.txt||"), this);
+		MO_LOAD_RESOURCES_PATH(dlgb)
 
 		if (dlgb.DoModal() != IDOK)
 			return;
-
+		MO_SAVE_RESOURCES_PATH(dlgb)
 		if (!file.Open(dlgb.GetPathName(), CFile::modeRead))
 		{
 			MessageBox(TEXT("Unable to load file!"));
@@ -631,12 +454,14 @@ void CStringDialog::OnBnClickedSaveAllChangesButton()
 	
 	if (m_bShowAll)
 	{
-		filename.Format(TEXT("%s.scf"), m_pFirmware->GetName());
+		filename.Format(TEXT("Lang-%d.scf"), m_Lang);
 
 		CFileDialog dlga(FALSE, TEXT("scf"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("String Changes (*.scf)|*.scf||"), this);
+		MO_LOAD_RESOURCES_PATH(dlga)
+
 		if (dlga.DoModal() != IDOK)
 			return;
-
+		MO_SAVE_RESOURCES_PATH(dlga)
 		CFile filea;
 		if (!filea.Open(dlga.GetPathName(), CFile::modeCreate | CFile::modeWrite))
 		{
@@ -660,12 +485,14 @@ void CStringDialog::OnBnClickedSaveAllChangesButton()
 	}
 	else
 	{
-		filename.Format(TEXT("%s.txt"), m_pFirmware->GetName());
+		filename.Format(TEXT("Lang-%d.txt"), m_Lang);
 
 		CFileDialog dlgb(FALSE, TEXT("txt"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("String Language List (*.txt)|*.txt||"), this);
+		MO_LOAD_RESOURCES_PATH(dlgb)
+
 		if (dlgb.DoModal() != IDOK)
 			return;
-
+		MO_SAVE_RESOURCES_PATH(dlgb)
 		CFile fileb;
 		if (!fileb.Open(dlgb.GetPathName(), CFile::modeCreate | CFile::modeWrite))
 		{
@@ -673,12 +500,18 @@ void CStringDialog::OnBnClickedSaveAllChangesButton()
 			return;
 		}
 
-		//CString s;
+		SaveAllStrings(&fileb);
+	}
+}
+
+void CStringDialog::SaveAllStrings(CFile *fileb)
+{
+	//CString s;
 		BYTE UTF8_START[3]={0xEF,0xBB,0xBF};
-		fileb.Write(UTF8_START, 3);
+		fileb->Write(UTF8_START, 3);
 		/*
 		BYTE UNICODE_START[2]={0xFF,0xFE};
-		fileb.Write(UNICODE_START, 2);
+		fileb->Write(UNICODE_START, 2);
 		char buf[4]={13,0,10,0};
 		*/
 		DWORD num=GetNumStrings(m_Lang);
@@ -688,7 +521,7 @@ void CStringDialog::OnBnClickedSaveAllChangesButton()
 			/*
 			wchar_t *sOut;
 			Utf8Decode((char *)m_pFirmware->GetLangString(m_Lang, i), &sOut);
-			fileb.Write(sOut, (UINT)(_tcslen(sOut)*2));
+			fileb->Write(sOut, (UINT)(_tcslen(sOut)*2));
 			*/
 			LPBYTE lpStart=(LPBYTE)m_pFirmware->GetLangString(m_Lang, i);
 			LPBYTE lpPos=lpStart;
@@ -730,14 +563,13 @@ void CStringDialog::OnBnClickedSaveAllChangesButton()
 				}
 			}
 			
-			fileb.Write(lpBuf, size); //remove 0 feed
+			fileb->Write(lpBuf, size); //remove 0 feed
 			delete[] lpBuf;
 
 			if (i+1!=num)
-				fileb.Write(&buf, 2);
+				fileb->Write(&buf, 2);
 		}
-		fileb.Close();
-	}
+		fileb->Close();
 }
 
 void CStringDialog::OnEnChangeFindEdit()
@@ -1047,6 +879,7 @@ void CStringDialog::OnCbnSelchangeLangidxCombo()
 	m_Lang=i;
 	if (m_bShowAll)
 	{
+		MessageBox(TEXT("Be Warned!\nEditing this block of strings (the whole raw strings) is very risky and should be done only by program experts!"), TEXT("Warning"));
 		GetDlgItem(IDC_SAVECHANGES_BUTTON)->SetWindowText(TEXT("Save Changes"));
 		GetDlgItem(IDC_LOADCHANGES_BUTTON)->SetWindowText(TEXT("Load Changes"));
 		if (m_StringChanges.GetCount()==0)
@@ -1183,9 +1016,11 @@ void CStringDialog::OnBnClickedTranslate()
 	filename.Format(TEXT("%s.txt"), m_pFirmware->GetName());
 
 	CFileDialog dlgb(FALSE, TEXT("txt"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("String Language List (*.txt)|*.txt||"), this);
+	MO_LOAD_RESOURCES_PATH(dlgb)
+
 	if (dlgb.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlgb)
 	CFile fileb;
 	if (!fileb.Open(dlgb.GetPathName(), CFile::modeCreate | CFile::modeWrite))
 	{

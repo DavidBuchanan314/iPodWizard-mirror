@@ -1,0 +1,11 @@
+Before beginning, save a clean firmware file to your hard drive in case you need to start fresh again.	Save problems later?	Starting/Troubleshooting	http://www.ipodwizard.net/wiki/index.php/Getting_Started
+Several hacks have been developed to allow you to get a background on your iPod. See the links for more.	Did you know?	Editing	http://www.ipodwizard.net/wiki/index.php/Background_Hack
+This can be done by changing strings. Under the strings tab in 'Firmware Editor', search for the string 'iPod'.	Change 'iPod' in title?	Editing	http://www.ipodwizard.net/wiki/index.php/Strings
+Chances are that you've chosen the wrong theme for your iPod firmware. Try a theme converter.	Images messed up?	Editing	http://www.ipodwizard.net/wiki/index.php/FAQs#I.27ve_installed_a_theme.2C_but_all_of_the_pictures_are_cut_off_and_out_of_place._How_can_I_fix_them.3F
+A method has been discovered to allow you to get icons on your menus, next to the text. See the links for more.	Did you know?	Editing	http://www.ipodwizard.net/wiki/index.php/Arbitrary_Font_Images
+iPodWizard can tweak many aspects of your iPod, from uncapping your volume to showing your battery in volts. Click the 'Tweaks' button.	Did you know?	Tweaks	http://www.ipodwizard.net/wiki/index.php/Tweaks
+iPodWizard allows you to combine all of your changes - graphics, fonts, and strings - into the one .ipw file. This is perfect for not only storage, but sharing your creative works with other iPodWizard users around the world!	Want to share your theme?	Themes	http://www.ipodwizard.net/forumdisplay.php?f=17
+iPodWizard.net is a friendly community which is home to close to 3,000 user-made themes. The site also has a 'Ultimate Theme List' - a list of all the themes recommended by the people who actually use them!	Want a pre-made theme?	Themes	http://www.ipodwizard.net/showthread.php?t=3978
+If you are using Vista, it is needed to run iPodWizard as computer administrator user in order to load the iPod firmware directly	Vista problems?	Troubleshooting	0
+All resources on the iPod are linked to form one big puzzle. Check the Layouts tab for editing resources connections.	Did you know?	Resources	0
+Many questions about the program can be answered at the community website. Click 'Tell me more' to go there.	Have a question?	Info	http://www.ipodwizard.net

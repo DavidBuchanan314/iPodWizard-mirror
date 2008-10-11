@@ -120,6 +120,8 @@ int CFontWnd::GetZoom()
 
 void CFontWnd::OnPaint()
 {
+	if (theApp.m_LoadingFirmware==TRUE || theApp.m_SavingFirmware==TRUE)
+		return;
 	CPaintDC dc(this); // device context for painting
 	
 	CRect clientRect;

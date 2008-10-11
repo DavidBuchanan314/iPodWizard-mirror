@@ -43,12 +43,20 @@ BOOL CScanDialog::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CScanDialog::ScanFirmware(CFirmware *pFirmware)
+void CScanDialog::ScanFirmware(CFirmware *pFirmware, DWORD size)
 {
-	m_ProgressCtrl.SetRange32(0, pFirmware->GetFirmwareSize());
-	m_ProgressCtrl.SetPos(0);
+	if (pFirmware)
+	{
+		m_ProgressCtrl.SetRange32(0, pFirmware->GetFirmwareSize());
+		m_ProgressCtrl.SetPos(0);
 
-	pFirmware->ScanFirmware(this);
+		pFirmware->ScanFirmware(this);
+	}
+	else
+	{
+		m_ProgressCtrl.SetRange32(0, size);
+		m_ProgressCtrl.SetPos(0);
+	}
 }
 
 LRESULT CScanDialog::OnScanProgress(WPARAM wParam, LPARAM lParam)
@@ -58,9 +66,33 @@ LRESULT CScanDialog::OnScanProgress(WPARAM wParam, LPARAM lParam)
 		SetWindowText((LPCTSTR)wParam);
 	}
 
+	UpdateDisplay();
+
 	m_ProgressCtrl.SetPos((int)lParam);
 
 	m_ProgressCtrl.UpdateWindow();
 
 	return 0;
+}
+
+void CScanDialog::UpdateDisplay()
+{
+	this->UpdateWindow();
+	MSG message;
+	if (::PeekMessage(&message, this->m_hWnd, 0, 0, PM_REMOVE)) {
+		// periodically (every 10000 cycles) check for messages
+		// in particular the Timer message
+		// Notice this is the message pump  we say earlier in WinMain loop!
+            ::TranslateMessage(&message);
+            ::DispatchMessage(&message);
+    }
+
+	this->GetParent()->UpdateWindow();
+	if (::PeekMessage(&message, this->GetParent()->m_hWnd, 0, 0, PM_REMOVE)) {
+		// periodically (every 10000 cycles) check for messages
+		// in particular the Timer message
+		// Notice this is the message pump  we say earlier in WinMain loop!
+            ::TranslateMessage(&message);
+            ::DispatchMessage(&message);
+    }
 }

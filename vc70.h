@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 6.00.0361 */
-/* at Sat Mar 25 17:48:34 2006
+/* at Fri Jul 21 13:55:09 2006
  */
 /* Compiler settings for vc70.idl:
     Oicf, W1, Zp8, env=Win32 (32b run)

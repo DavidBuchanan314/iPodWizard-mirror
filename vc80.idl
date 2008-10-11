@@ -1,0 +1,449 @@
+import "docobj.idl";
+
+#line 15 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IiPodPreferences;
+#line 19 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IiPodUpdater;
+#line 21 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface _IiPodUpdaterEvents;
+#line 23 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IiPodUser;
+#line 25 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface _IiPodManagerEvents;
+#line 28 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesService;
+#line 30 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesServiceCallback;
+#line 34 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesDevices;
+#line 36 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesDevicePrefs;
+#line 38 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesHelper;
+#line 42 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+typedef long IPODAPPID;
+
+typedef long HIPOD;
+
+#line 12 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+enum __MIDL___MIDL_itf_iPodService_0000_0001;
+#line 44 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+typedef enum __MIDL___MIDL_itf_iPodService_0000_0001 EFormatState;
+
+typedef long HDB;
+
+typedef long EFileCopyStatus;
+
+typedef long EDBNotification;
+
+typedef long EDeviceStatus;
+
+typedef long EUnlockNotification;
+
+#line 32 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+enum __MIDL___MIDL_itf_iPodService_0000_0002;
+#line 50 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+typedef enum __MIDL___MIDL_itf_iPodService_0000_0002 _EDeviceStatus;
+
+#line 57 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+enum __MIDL___MIDL_itf_iPodService_0000_0001 {
+	kFormatUnknown = 0,
+	kFormatFat32 = 1,
+	kFormatMac = 2,
+	kFormatFat32NoFirmware = 3,
+	kFormatMacNoFirmware = 4,
+};
+
+#line 66 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+enum EIPodClass {
+	kIPodClassNone = 0,
+	kIPodClassV1 = 1,
+	kIPodClassV2 = 2,
+	kIPodClassV3 = 4,
+	kIPodClassALL = 65535,
+};
+
+[
+	uuid(31e3fbaf-c200-4776-9dbf-45226765cf4d),
+	dual
+] 
+#line 75 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IiPodManager : IDispatch {
+#line 81 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(1)] HRESULT  RegisterApp([in] IPODAPPID appID, [in] BSTR appName, [in] BSTR appPath, [in] BSTR cmdLine);
+#line 86 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(2)] HRESULT  UnregisterApp([in] IPODAPPID appID);
+#line 88 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(3)] HRESULT  GetRegisteredApps([out,retval] SAFEARRAY(IPODAPPID)* pArrayAppID);
+#line 90 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(4)] HRESULT  GetAppNameFromID([in] IPODAPPID appID, [out,retval] BSTR *pAppName);
+#line 93 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(5)] HRESULT  GetAPILockingApp([out,retval] IPODAPPID *pAppID);
+#line 95 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(6)] HRESULT  Login([in] IPODAPPID appID);
+#line 97 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(7)] HRESULT  Logout([in] IPODAPPID appID);
+#line 99 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(8)] HRESULT  EnableSync([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 102 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(9)] HRESULT  DisableSync([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 105 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(10)] HRESULT  BeginTransfer([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 108 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(11)] HRESULT  EndTransfer([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 111 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(12)] HRESULT  LockiPod([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 114 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(13)] HRESULT  UnlockiPod([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 117 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(14)] HRESULT  GetiPodLockingApp([in] HIPOD iPodHandle, [out,retval] IPODAPPID *pAppID);
+#line 120 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(15)] HRESULT  FindFirstiPod([in] IPODAPPID appID, [out,retval] HIPOD *piPodHandle);
+#line 123 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(16)] HRESULT  FindNextiPod([in] IPODAPPID appID, [in] HIPOD pCuriPodHandle, [out,retval] HIPOD *piPodHandle);
+#line 127 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(17)] HRESULT  Mount([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 130 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(18)] HRESULT  Unmount([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 133 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(19)] HRESULT  IsMounted([in]IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] long *bIsMounted);
+#line 137 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(20)] HRESULT  GetiPodFreeSpace([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] CURRENCY *pSpace);
+#line 141 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(21)] HRESULT  GetDiskSize([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] CURRENCY *pSize);
+#line 145 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(22)] HRESULT  GetiPodDriveLetter([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] int format, [out,retval] BSTR *driveLetter);
+#line 150 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(23)] HRESULT  LaunchUpdater([in] IPODAPPID callerAppID);
+#line 152 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(24)] HRESULT  GetVersionInfo([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out] BSTR *firmwareVersion, [out,retval] BSTR *pVersion);
+#line 157 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(25)] HRESULT  GetAPIVersion([out,retval] long *pVersion);
+#line 159 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(26)] HRESULT  IsFormatted([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] EFormatState *IsFormatted);
+#line 163 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(27)] HRESULT  GetVoiceNotesFolderName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] BSTR *pFolderName);
+#line 167 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(28)] HRESULT  GetDeviceUniqueID([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] BSTR *pUniqueID);
+#line 171 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(29)] HRESULT  BeginTransferAsync([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 174 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(30)] HRESULT  EndTransferAsync([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 177 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(31)] HRESULT  GetFirmwareVersion([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] unsigned short *firmwareVersion);
+#line 181 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(32)] HRESULT  GetCheckpointData([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] SAFEARRAY(char)* checkpointData);
+#line 185 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(33)] HRESULT  SetSupportedIPodClasses([in] IPODAPPID appID, [in] enum EIPodClass supportedIPodClasses);
+#line 188 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(34)] HRESULT  GetSupportedIPodClasses([in] IPODAPPID appID, [out,retval] enum EIPodClass *supportedIPodClasses);
+};
+
+#line 194 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+enum EAutomaticUpdateMode {
+	kUpdateUnknown = 0,
+	kUpdateAll = 1,
+	kUpdateSelectedPlaylists = 2,
+};
+
+#line 201 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+enum EiPodState {
+	kUnknowniPod = 0,
+	kNewiPod = 1,
+	kConfigured = 4,
+};
+
+[
+	uuid(3be5a207-40f6-4f25-bf37-27b898660b67),
+	dual
+] 
+#line 208 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IiPodPreferences : IDispatch {
+#line 214 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(1)] HRESULT  DeviceName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] BSTR *pVal);
+#line 218 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(1)] HRESULT  DeviceName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] BSTR pVal);
+#line 222 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(2)] HRESULT  OwnerName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] BSTR *pVal);
+#line 226 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(2)] HRESULT  OwnerName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] BSTR pVal);
+#line 230 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(3)] HRESULT  HomeMachineName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] BSTR *pVal);
+#line 234 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(3)] HRESULT  HomeMachineName([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] BSTR pVal);
+#line 238 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(4)] HRESULT  FireWireDiskUse([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] long *pVal);
+#line 242 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(4)] HRESULT  FireWireDiskUse([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] long pVal);
+#line 246 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(5)] HRESULT  LaunchApplication([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] long *pVal);
+#line 250 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(5)] HRESULT  LaunchApplication([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] long pVal);
+#line 254 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(6)] HRESULT  HomeApplicationID([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] IPODAPPID *pVal);
+#line 258 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(6)] HRESULT  HomeApplicationID([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] IPODAPPID pVal);
+#line 262 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(7)] HRESULT  AutomaticUpdate([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] long *pVal);
+#line 266 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(7)] HRESULT  AutomaticUpdate([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] long pVal);
+#line 270 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(8)] HRESULT  AutomaticUpdateMode([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] enum EAutomaticUpdateMode *pVal);
+#line 274 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(8)] HRESULT  AutomaticUpdateMode([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] enum EAutomaticUpdateMode pVal);
+#line 278 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(9)] HRESULT  HomeUserID([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] CURRENCY *pVal);
+#line 282 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(9)] HRESULT  HomeUserID([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] CURRENCY pVal);
+#line 286 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(10)] HRESULT  Configured([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] long *pVal);
+#line 290 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(10)] HRESULT  Configured([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] long pVal);
+#line 294 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(11)] HRESULT  SetSessionState([in] IPODAPPID appID, [in] HIPOD iPodHandle, [in] enum EiPodState sessionState, [in] IPODAPPID sessionHomeAppID);
+#line 299 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(12)] HRESULT  SetHomeMachine([in] IPODAPPID appID, [in] HIPOD iPodHandle);
+#line 302 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(13)] HRESULT  IsItHomeMachine([in] IPODAPPID appID, [in] HIPOD iPodHandle, [out,retval] long *pRet);
+};
+
+[
+	uuid(42a63984-1154-4995-a75e-2e92f75ed902),
+	dual
+] 
+#line 309 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IiPodUpdater : IDispatch {
+#line 315 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(1)] HRESULT  LockAPI([in] IPODAPPID updaterID, [out,retval] IPODAPPID *pLockingAppID);
+#line 318 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(2)] HRESULT  UnlockAPI([in] IPODAPPID updaterID);
+#line 320 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(3)] HRESULT  U_InitUpdater();
+	[id(4)] HRESULT  U_CloseUpdater();
+	[id(5)] HRESULT  U_IsConnected();
+	[id(6)] HRESULT  U_Mount();
+	[id(7)] HRESULT  U_Open();
+	[id(8)] HRESULT  U_LockIPOD();
+	[id(9)] HRESULT  U_EraseSector([in]unsigned long nSec);
+#line 328 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(10)] HRESULT  U_formatFAT32([in]unsigned long dwType, [in]unsigned long dwStart);
+#line 331 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(11)] HRESULT  U_WriteMBR([in]unsigned long dwType, [in]unsigned long dwStart);
+#line 334 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(12)] HRESULT  U_UnlockIPOD([in]long fDismount);
+#line 336 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(13)] HRESULT  U_Close();
+	[id(14)] HRESULT  U_Unmount();
+	[id(15)] HRESULT  U_Disconnect();
+	[id(16)] HRESULT  U_GetPowerState([in]unsigned long *pdwState);
+#line 341 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(17)] HRESULT  U_Write([in]unsigned long start, [in]unsigned long cnt, [in]VARIANT *pVar);
+#line 345 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(18)] HRESULT  U_GetiPodCount([in]unsigned long *pdwCount);
+#line 347 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(19)] HRESULT  U_GetProgressStatus([in]unsigned long *pdwDone, [in]unsigned long *pdwTotal);
+#line 350 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(20)] HRESULT  U_GetDriveLetter([in]unsigned long *pchar);
+#line 352 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(21)] HRESULT  U_NotifyUpdateComplete([in]HIPOD HIPOD);
+#line 354 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(22)] HRESULT  U_iPodGetHWVersion([in]unsigned long *pVersion);
+#line 356 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(23)] HRESULT  U_Execute([in]unsigned long param, [in]VARIANT *pvar1, [in]VARIANT *pvar2, [in]VARIANT *pvar3, [in]VARIANT *pvar4, [in]VARIANT *pvar5, [in]VARIANT *pvar6);
+#line 364 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(24)] HRESULT  U_formatFAT32Ex([in]unsigned long dwFlags, [in]unsigned long dwType, [in]unsigned long dwStart, [in]unsigned long dwFirmwareSectors);
+#line 369 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(25)] HRESULT  U_WriteMBREx([in]unsigned long dwFlags, [in]unsigned long dwType, [in]unsigned long dwStart, [in]unsigned long dwFirmwareSectors);
+#line 374 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(26)] HRESULT  U_GetLastErrorMsg([out,retval] BSTR *bstrMsg);
+};
+
+[
+	uuid(65e1d175-369d-412f-bbbf-a5e042c220e7),
+	dual
+] 
+#line 383 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IiPodUser : IDispatch {
+#line 389 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(1)] HRESULT  RegisterUser([in] IUnknown *pUnk, [in] long procID, [out,retval] unsigned long *pUserCookie);
+#line 393 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(2)] HRESULT  UnregisterUser([in] unsigned long userCookie);
+#line 395 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(3)] HRESULT  OnDisplayiPodManagerUIEvent([in] long UIHandle, [in] long SessionHomeApp, [in] long sessionState, [in] long UIStatus);
+};
+
+#line 436 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+enum EItunesDeviceClass {
+	kItunesClassNone = 0,
+	kItunesClassV1 = 1,
+	kItunesClassV2 = 2,
+	kItunesClassALL = 65535,
+};
+
+[
+	uuid(c337768e-d57c-4fc3-bed8-08fa9e892c6b),
+	dual
+] 
+#line 444 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesServiceCallback : IDispatch {
+#line 450 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(1610743808)] HRESULT  OnDeviceStateChanged([in] long hDevice, [in] enum EItunesDeviceClass devClass, [in] _EDeviceStatus lNewState);
+#line 454 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(1610743809)] HRESULT  OnRequestClientCookie([out] unsigned long *pdwCookie);
+};
+
+#line 459 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+enum __MIDL___MIDL_itf_iPodService_0000_0002 {
+	kDeviceStatusUnknown = 0,
+	kDeviceStatusConnected = 1,
+	kDeviceStatusMounted = 2,
+	kDeviceStatusUnmounted = 3,
+	kDeviceStatusDisconnected = 4,
+	kDeviceStatusMountFailed = 5,
+};
+
+[
+	uuid(6d3c0324-6a5a-47fe-97f9-ac9a1dc69cc4),
+	dual
+] 
+#line 469 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesDevicePrefs : IDispatch {
+#line 475 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(1)] HRESULT  DeviceHandle([out,retval] long *pVal);
+#line 477 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(2)] HRESULT  Configured([out,retval] VARIANT_BOOL *pVal);
+#line 479 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(2)] HRESULT  Configured([in] VARIANT_BOOL pVal);
+#line 481 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(3)] HRESULT  FireWireDiskUse([out,retval] VARIANT_BOOL *pVal);
+#line 483 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(3)] HRESULT  FireWireDiskUse([in] VARIANT_BOOL pVal);
+#line 485 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propget,id(4)] HRESULT  HomeAppAutoPlay([out,retval] VARIANT_BOOL *pVal);
+#line 487 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[propput,id(4)] HRESULT  HomeAppAutoPlay([in] VARIANT_BOOL pVal);
+};
+
+[
+	uuid(be2617aa-4914-45c0-925b-1f3f1df8007d),
+	dual
+] 
+#line 492 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesDevices : IDispatch {
+#line 498 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(1)] HRESULT  FindFirstDevice([out] long *pDevHandle);
+#line 500 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(2)] HRESULT  FindNextDevice([out] long *pDevHandle);
+#line 502 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(3)] HRESULT  RetainDevice([in] long hDevice);
+#line 504 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(4)] HRESULT  ReleaseDevice([in] long hDevice);
+#line 506 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(5)] HRESULT  RetainDeviceAsync([in] long hDevice);
+#line 508 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(6)] HRESULT  ReleaseDeviceAsync([in] long hDevice);
+#line 510 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(7)] HRESULT  GetDeviceClass([in] long hDevice, [out] enum EItunesDeviceClass *pDevClass);
+#line 513 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(8)] HRESULT  GetSerialNumber([in] long hDevice, [out] BSTR *pBstrSerial);
+#line 516 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(9)] HRESULT  GetFirmwareVersion([in] long hDevice, [out] unsigned short *pwVersion);
+#line 519 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(10)] HRESULT  GetDriveFormat([in] long hDevice, [out,retval] EFormatState *pDriveFormat);
+#line 522 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(11)] HRESULT  GetDriveLetter([in] long hDevice, [out] BSTR *pBstrDrive);
+#line 525 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(12)] HRESULT  GetAutoPlayDisableForDriveLetter([in] BSTR bstrDrive, [out,retval] VARIANT_BOOL *pvbDisableAutoPlay);
+#line 528 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(13)] HRESULT  GetPreferences([in] long hDevice, [out] IItunesDevicePrefs **ppDevPrefs);
+#line 531 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(14)] HRESULT  GetCheckpointData([in] long hDevice, [out] SAFEARRAY(char)* ppCheckpointData);
+#line 534 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(15)] HRESULT  Mount([in] long hDevice);
+#line 536 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(16)] HRESULT  Unmount([in] long hDevice);
+#line 538 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(17)] HRESULT  MountAsync([in] long hDevice);
+#line 540 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(18)] HRESULT  UnmountAsync([in] long hDevice);
+#line 542 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(19)] HRESULT  IsMounted([in] long hDevice, [out,retval] VARIANT_BOOL *pvbMounted);
+#line 545 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(20)] HRESULT  GetHWVersion([in] long hDevice, [out,retval] long *lVersion);
+#line 548 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(21)] HRESULT  GetSysVersion([in] long hDevice, [out,retval] BSTR *pBstrVersion);
+#line 551 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(22)] HRESULT  LockAPI([in] long hDevice);
+#line 553 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(23)] HRESULT  UnlockAPI([in] long hDevice);
+};
+
+[
+	uuid(0f6ffb0d-ddd3-407a-8349-7ec794720c60),
+	dual
+] 
+#line 558 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesHelper : IDispatch {
+#line 564 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(1)] HRESULT  InformDeviceNeedReformat([in] long hDevice, [in] enum EItunesDeviceClass devClass, [in] BSTR bstrUpdaterPath);
+#line 568 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(2)] HRESULT  RequestExtendedFunction([in] BSTR bstrExtendedFunction);
+};
+
+[
+	uuid(06d8e935-bf1a-4bb8-99c7-11a2d0abd238),
+	dual
+] 
+#line 573 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+interface IItunesService : IDispatch {
+#line 579 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(1)] HRESULT  Login([in] long lAppID, [in] BSTR bstrAppName, [in] IItunesServiceCallback *pCallbackIntf, [out] unsigned long *pdwCookie);
+#line 584 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(2)] HRESULT  Logout([in] unsigned long dwClientCookie);
+#line 586 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(3)] HRESULT  GetItunesDevices([in]unsigned long dwClientCookie, [out] IItunesDevices **ppDevicesIntf);
+#line 589 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(4)] HRESULT  RegisterHelper([in] IItunesHelper *pHelper);
+#line 591 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	[id(5)] HRESULT  UnregisterHelper();
+};
+
+
+[ version(1.0), uuid(bad4f4dd-bad6-3f14-b95b-11d9f615ba9a) ]
+library iPodEventReceiver
+{
+	importlib("stdole2.tlb");
+	importlib("olepro32.dll");
+
+	[
+		uuid(7a1aad4c-a417-439c-9318-d6bdc63fa46a)
+	] 
+#line 379 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	dispinterface _IiPodUpdaterEvents {
+	properties:
+
+	methods:
+	};
+
+	[
+		uuid(4d56b972-8259-4833-9ab2-543962f5cf5b)
+	] 
+#line 403 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+	dispinterface _IiPodManagerEvents {
+	properties:
+
+	methods:
+#line 410 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+		[id(1)] int  OnAddTrackStatus([in] HDB HDB, [in] long queueID, [in] EFileCopyStatus status, [in] long param, [in] VARIANT *pReserveVar);
+#line 416 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+		[id(2)] void  OnDBChanged([in] HDB HDB, [in] IPODAPPID changingApp, [in] EDBNotification notification, [in] long handleToModifiedData);
+#line 421 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+		[id(3)] void  OniPodStatusChanged([in] HIPOD HIPOD, [in] EDeviceStatus status, [in] IPODAPPID homeAppID);
+#line 425 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+		[id(4)] void  OnLockStatusChanged([in] EUnlockNotification status, [in] HIPOD HIPOD);
+#line 428 "c:\\backup\\ipodwizardsrc\\debug\\ipodservice.tlh"
+		[id(5)] long  Identify();
+	};
+
+}
+

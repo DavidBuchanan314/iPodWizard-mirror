@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(COTFFontWnd, CWnd)
 	ON_WM_PAINT()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 BOOL COTFFontWnd::RegisterWindowClass()
@@ -70,6 +71,60 @@ BOOL COTFFontWnd::RegisterWindowClass()
 }
 
 // COTFFontWnd message handlers
+
+void COTFFontWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	if (nFlags==MK_LBUTTON && m_ZoomMode==FALSE)
+	{
+		//Calc glyph num
+		CRect clientRect;
+		GetClientRect(&clientRect);
+
+		LONG xoffset = clientRect.left;
+		LONG yoffset = clientRect.top;
+
+		BYTE width=0,height=0,advance=0;
+		CHAR bearingx=0,bearingy=0;
+
+		BYTE maxh=0;
+
+		int z=0; //font line counter
+		int iGlyph=-1;
+		for (int c = 0; c < m_pFont->GetNumGlyphs(); c++)
+		{
+			m_pFont->GetCharMetrics(c, &width, &height, &bearingx, &bearingy, &advance);
+
+			if (height>maxh)
+				maxh=height;
+
+			if (xoffset + (width + 2) > clientRect.right)
+			{
+				z++;
+				xoffset = clientRect.left;
+				if (z>m_FontLine)
+				{
+					yoffset += maxh + 2;
+					maxh=0;
+				}
+			}
+
+			if (yoffset + height > clientRect.bottom)
+				break;
+
+			if (z>=m_FontLine)
+			{
+				if (point.x >= xoffset && point.x < (xoffset + width) && point.y >= yoffset && point.y < (yoffset + height))
+				{
+					iGlyph = c;
+					break;
+				}
+			}
+			xoffset += width + 2;
+		}
+		//
+		::SendMessage(::GetParent(m_hWnd), WM_APP, (WPARAM)10, (LPARAM)iGlyph);
+	}
+}
 
 void COTFFontWnd::ChangeZoom(BOOL bMode)
 {

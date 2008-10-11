@@ -1,21 +1,33 @@
-Microsoft Visual Studio Solution File, Format Version 8.00
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iPodWizard", "iPodWizard.vcproj", "{F63FD213-98B8-4736-9F77-77D18E6669AF}"
 	ProjectSection(ProjectDependencies) = postProject
+		{342C6CC5-06F0-4A06-83CD-C52E210E1B6D} = {342C6CC5-06F0-4A06-83CD-C52E210E1B6D}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zip", "..\zip\Zip.vcproj", "{342C6CC5-06F0-4A06-83CD-C52E210E1B6D}"
+EndProject
 Global
-	GlobalSection(SolutionConfiguration) = preSolution
-		Debug = Debug
-		Release = Release
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		Static Release|Win32 = Static Release|Win32
 	EndGlobalSection
-	GlobalSection(ProjectConfiguration) = postSolution
-		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Debug.ActiveCfg = Debug|Win32
-		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Debug.Build.0 = Debug|Win32
-		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Release.ActiveCfg = Release|Win32
-		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Release.Build.0 = Release|Win32
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Debug|Win32.Build.0 = Debug|Win32
+		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Release|Win32.ActiveCfg = Release|Win32
+		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Release|Win32.Build.0 = Release|Win32
+		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Static Release|Win32.ActiveCfg = Release|Win32
+		{F63FD213-98B8-4736-9F77-77D18E6669AF}.Static Release|Win32.Build.0 = Release|Win32
+		{342C6CC5-06F0-4A06-83CD-C52E210E1B6D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{342C6CC5-06F0-4A06-83CD-C52E210E1B6D}.Debug|Win32.Build.0 = Debug|Win32
+		{342C6CC5-06F0-4A06-83CD-C52E210E1B6D}.Release|Win32.ActiveCfg = Release|Win32
+		{342C6CC5-06F0-4A06-83CD-C52E210E1B6D}.Release|Win32.Build.0 = Release|Win32
+		{342C6CC5-06F0-4A06-83CD-C52E210E1B6D}.Static Release|Win32.ActiveCfg = Static Release|Win32
+		{342C6CC5-06F0-4A06-83CD-C52E210E1B6D}.Static Release|Win32.Build.0 = Static Release|Win32
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-	EndGlobalSection
-	GlobalSection(ExtensibilityAddIns) = postSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

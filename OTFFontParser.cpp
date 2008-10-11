@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include <atlconv.h>
-#include ".\OTFFontParser.h"
+#include "OTFFontParser.h"
 
 COTFFont::COTFFont(void):
 	m_pHeader(NULL),
@@ -8,6 +8,8 @@ COTFFont::COTFFont(void):
 	m_pEBLC(NULL),
 	m_pCMap(NULL),
 	m_pEBDT(NULL),
+	m_FontName(NULL),
+	m_FontStyle(NULL),
 	m_BigLen(0),
 	m_EBDTLen(0)
 {
@@ -15,6 +17,10 @@ COTFFont::COTFFont(void):
 
 COTFFont::~COTFFont(void)
 {
+	if (m_FontName!=NULL)
+		delete m_FontName;
+	if (m_FontStyle!=NULL)
+		delete m_FontStyle;
 }
 
 // operations
@@ -29,7 +35,7 @@ ULONG	CalcTableChecksum(ULONG *Table, ULONG Length)
 		Sum += SWAPLONG(*Table);
 		Table++;
 	}
-	return Sum;
+	return SWAPLONG(Sum);
 }
 
 
@@ -67,6 +73,7 @@ BOOL COTFFont::Read(LPBYTE lpPos, BOOL bParse)
 	m_pEBLC = NULL;
 	m_pCMap = NULL;
 	m_pEBDT = NULL;
+	m_pHead = NULL;
 	m_BigLen = 0;
 	m_EBDTLen = 0;
 	//
@@ -114,6 +121,14 @@ BOOL COTFFont::Read(LPBYTE lpPos, BOOL bParse)
 		{
 			m_pName = (NAME_HEADER *)(&lpStart[m_pTable->offset]);
 		}
+		else if (!strncmp(m_pTable->name, "head", 4))
+		{
+			m_pHead = (HEAD_HEADER *)(&lpStart[m_pTable->offset]);
+		}
+		else if (!strncmp(m_pTable->name, "hdmx", 4))
+		{
+			m_pHDMX = (HDMX_HEADER *)(LPBYTE)(&lpStart[m_pTable->offset]);
+		}
 		m_BigLen+=m_pTable->length;
 		lpPos+=sizeof(TABLE_DIRECTORY);
 	}
@@ -122,15 +137,21 @@ BOOL COTFFont::Read(LPBYTE lpPos, BOOL bParse)
 		return FALSE;
 
 	//Parse the font tables in the following order:
+	if (ParseName()==FALSE)
+		return FALSE;
+	
+	if (ParseHDMX()==FALSE)
+		return FALSE;
+
 	if (bParse==TRUE)
 	{
-		if (ParseName()==FALSE)
-			return FALSE;
 		if (ParseCMap()==FALSE)
 			return FALSE;
 		if (ParseEBDT()==FALSE)
 			return FALSE;
 		if (ParseEBLC()==FALSE)
+			return FALSE;
+		if (ParseHead()==FALSE)
 			return FALSE;
 	}
 
@@ -141,7 +162,7 @@ BOOL COTFFont::Read(LPBYTE lpPos, BOOL bParse)
 		lpPos++;
 		m_BigLen++;
 	}
-	m_BigLen+=6;
+	m_BigLen+=4;
 
 	return TRUE;
 }
@@ -176,7 +197,8 @@ LPCTSTR	COTFFont::GetFontName()
 		return NULL;
 
 	wchar_t* lpwStr;
-	LPTSTR lpStr = m_FontName.GetBuffer( m_FontName.GetLength() );
+	//LPTSTR lpStr = m_FontName.GetBuffer( m_FontName.GetLength() );
+	LPTSTR lpStr = (LPTSTR)m_FontName;
 	int nLen = MultiByteToWideChar(CP_ACP, 0,(LPCSTR)lpStr, -1, NULL, NULL);
 	lpwStr = ( wchar_t* )malloc(( nLen )*sizeof( wchar_t ));
 	MultiByteToWideChar(CP_ACP, 0, (LPCSTR)lpStr, -1, lpwStr, nLen);
@@ -189,11 +211,32 @@ LPCTSTR	COTFFont::GetFontStyle()
 		return NULL;
 
 	wchar_t* lpwStr;
-	LPTSTR lpStr = m_FontStyle.GetBuffer( m_FontStyle.GetLength() );
+	//LPTSTR lpStr = m_FontStyle.GetBuffer( m_FontStyle.GetLength() );
+	LPTSTR lpStr = (LPTSTR)m_FontStyle;
 	int nLen = MultiByteToWideChar(CP_ACP, 0,(LPCSTR)lpStr, -1, NULL, NULL);
 	lpwStr = ( wchar_t* )malloc(( nLen )*sizeof( wchar_t ));
 	MultiByteToWideChar(CP_ACP, 0, (LPCSTR)lpStr, -1, lpwStr, nLen);
 	return (LPTSTR)lpwStr;
+}
+
+BOOL COTFFont::ParseHDMX()
+{
+	if (m_pHDMX == NULL)
+		return FALSE;
+
+	m_FontSize=(WORD)m_pHDMX->records[0].pixelSize;
+
+	return TRUE;
+}
+
+BOOL COTFFont::ParseHead()
+{
+	if (m_pHead == NULL)
+		return FALSE;
+
+	LPBYTE lpPos=(LPBYTE)m_pHead;
+
+	return TRUE;
 }
 
 BOOL COTFFont::ParseName()
@@ -216,13 +259,16 @@ BOOL COTFFont::ParseName()
 		//macinttosh font (let's get this and not windows because the windows name is in UTF (Bleh))
 		//nameid 6 = postscript name
 		{
-			char *strname = new char[nrd->length+1];
+			char *strname;
+			strname = new char[nrd->length+1];
 			strncpy(strname, (char*)(&lpTemp[m_pName->stringOffset+nrd->offset]), nrd->length);
 			strname[nrd->length]='\0';
 			if (nrd->nameID == 1)
-				m_FontName.Format(TEXT("%s"), strname);
+				//m_FontName.Format(TEXT("%s"), strname);
+				m_FontName=strname;
 			else if (nrd->nameID == 2)
-				m_FontStyle.Format(TEXT("%s"), strname);
+				//m_FontStyle.Format(TEXT("%s"), strname);
+				m_FontStyle=strname;
 		}
 		lpPos+=sizeof(NameRecord);
 	}
@@ -666,6 +712,14 @@ WORD COTFFont::GetGlyphIndex(WORD index)
 	if (index+1>m_GlyphTable.GetCount())
 		return 1;
 	return m_GlyphTable.GetAt(index);
+}
+
+WORD COTFFont::GetIndexFromGlyphTable(WORD glyph)
+{
+	for (WORD i=0;i<m_GlyphTable.GetCount();i++)
+		if (m_GlyphTable.GetAt(i)==glyph)
+			return i;
+	return -1;
 }
 
 WORD COTFFont::GetNumGlyphs()

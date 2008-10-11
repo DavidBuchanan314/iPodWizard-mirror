@@ -240,6 +240,67 @@ struct NAME_HEADER
 	//(Variable)  Storage for the actual string data. 
 };
 
+struct HEAD_HEADER
+{
+	BE_UL table_version; 
+	BE_UL font_revision;  
+	BE_UL checkSumAdjustment; //To compute: set it to 0, sum the entire font as ULONG, then store 0xB1B0AFBA - sum. 
+	BE_UL magicNumber; //Set to 0x5F0F3CF5. 
+	BE_US flags; /*Bit 0: Baseline for font at y=0;
+Bit 1: Left sidebearing point at x=0;
+Bit 2: Instructions may depend on point size; 
+Bit 3: Force ppem to integer values for all internal scaler math; may use fractional ppem sizes if this bit is clear; 
+Bit 4: Instructions may alter advance width (the advance widths might not scale linearly); 
+Bits 5-10: These should be set according to Apple's specification . However, they are not implemented in OpenType. 
+Bit 11: Font data is 'lossless,' as a result of having been compressed and decompressed with the Agfa MicroType Express engine.
+Bit 12: Font converted (produce compatible metrics)
+Bit 13: Font optimised for ClearType
+Bit 14: Reserved, set to 0
+Bit 15: Reserved, set to 0 */
+ 
+	BE_US unitsPerEm; //Valid range is from 16 to 16384. This value should be a power of 2 for fonts that have TrueType outlines. 
+
+	BYTE created[64]; //Number of seconds since 12:00 midnight, January 1, 1904. 64-bit integer 
+	BYTE modified[64]; //Number of seconds since 12:00 midnight, January 1, 1904. 64-bit integer 
+	BE_US xMin; //For all glyph bounding boxes. 
+	BE_US yMin; //For all glyph bounding boxes. 
+	BE_US xMax; //For all glyph bounding boxes. 
+	BE_US yMax; //For all glyph bounding boxes. 
+	BE_US macStyle; /*Bit 0: Bold (if set to 1); 
+	Bit 1: Italic (if set to 1) 
+	Bit 2: Underline (if set to 1) 
+	Bit 3: Outline (if set to 1) 
+	Bit 4: Shadow (if set to 1) 
+	Bit 5: Condensed (if set to 1) 
+	Bit 6: Extended (if set to 1) 
+	Bits 7-15: Reserved (set to 0).  */
+	BE_US lowestRecPPEM; //Smallest readable size in pixels. 
+	BE_US fontDirectionHint; /*0: Fully mixed directional glyphs; 
+	1: Only strongly left to right; 
+	2: Like 1 but also contains neutrals; 
+	-1: Only strongly right to left; 
+	-2: Like -1 but also contains neutrals. 1 */
+	BE_US indexToLocFormat; //0 for short offsets, 1 for long. 
+	BE_US glyphDataFormat; //0 for current format. 
+
+
+};
+
+struct DeviceRecord
+{
+	BYTE pixelSize; // Pixel size for following widths (as ppem). 
+	BYTE maxWidth; // Maximum width. 
+	BYTE widths[1]; // Array of widths (numGlyphs is from the 'maxp' table). 
+};
+
+struct HDMX_HEADER
+{
+	BE_US version; // Table version number (0) 
+	BE_US numRecords; // Number of device records. 
+	BE_UL sizeDeviceRecord; // Size of a device record, long aligned. 
+	DeviceRecord records[1]; // Array of device records. 
+};
+
 struct smallGlyphMetrics
 {
 	BYTE height;
@@ -301,14 +362,18 @@ private:
 	EBDT_HEADER		*			m_pEBDT;
 	EBLC_HEADER		*			m_pEBLC;
 	NAME_HEADER		*			m_pName;
+	HEAD_HEADER		*			m_pHead;
+	HDMX_HEADER		*			m_pHDMX;
 	GLYPH_OFFSETS				m_GlyphsOffsets;
 
 	TABLE_DIRECTORY *			m_CMapChecksum;
 	TABLE_DIRECTORY *			m_EBDTChecksum;
 	TABLE_DIRECTORY *			m_EBLCChecksum;
 	
-	CString		m_FontName;
-	CString		m_FontStyle;
+	//CString		m_FontName;
+	//CString		m_FontStyle;
+	char*		m_FontName;
+	char*		m_FontStyle;
 	WORD		m_BitDepth;
 	WORD		m_FontSize;
 	DWORD		m_BigLen;
@@ -326,6 +391,8 @@ public:
 	BOOL	ParseEBDT();
 	BOOL	ParseEBLC();
 	BOOL	ParseName();
+	BOOL	ParseHead();
+	BOOL	ParseHDMX();
 
 	COLORREF	GetFontPixel(WORD index, CPoint point);
 	void		SetFontPixel(WORD index, LONG x, LONG y, COLORREF color);
@@ -342,6 +409,7 @@ public:
 	WORD		GetUnicodeCharOffset(WORD c);
 	void		GetCharMetrics(WORD index, LPBYTE width, LPBYTE height, CHAR *bearingx, CHAR *bearingy, LPBYTE advance);
 	WORD		GetGlyphIndex(WORD index);
+	WORD		GetIndexFromGlyphTable(WORD glyph);
 	CSize		GetFontBitmapSize(WORD index);
 	void		SetCharMetrics(WORD index, BYTE width, BYTE height, CHAR bearingx, CHAR bearingy, BYTE advance, BOOL bMakeFont = FALSE);
 	void		SetUnicodeGroup(WORD index, WORD start, WORD end, WORD offset);

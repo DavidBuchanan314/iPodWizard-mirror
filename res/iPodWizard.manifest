@@ -6,7 +6,7 @@
     name="Microsoft.Windows.iPodWizard"
     type="win32" 
 /> 
-<description>Your app description here</description> 
+<description>iPodWizard</description> 
 <dependency> 
     <dependentAssembly> 
         <assemblyIdentity 

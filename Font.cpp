@@ -252,6 +252,40 @@ LPCTSTR	CIpodFont::GetFontStyle()
 	return (LPTSTR)lpwStr;
 }
 
+void CIpodFont::SetFontName(CString sNewName)
+{
+	if (m_pHeader1==NULL)
+		return;
+
+	char *stname;
+	stname=Unicode2MB(sNewName);
+	if (strlen(stname)>63)
+		return;
+
+	strcpy(m_pHeader2->name, stname);
+}
+
+void CIpodFont::SetFontSize(DWORD iNewSize)
+{
+	if (m_pHeader2 == NULL)
+		return;
+
+	m_pHeader2->size=iNewSize;
+}
+
+void CIpodFont::SetFontStyle(CString sNewStyle)
+{
+	if (m_pHeader1==NULL)
+		return;
+
+	char *ststyle;
+	ststyle=Unicode2MB(sNewStyle);
+	if (!strcmp(ststyle, "Bold"))
+		m_pHeader2->style|=0x01;
+	else if (!strcmp(ststyle, "Regular"))
+		m_pHeader2->style&=0x0;
+}
+
 void CIpodFont::SetData(LPBYTE buffer)
 {
 	memcpy((LPBYTE)m_pHeader1, buffer, GetFontBlockLen());
@@ -304,6 +338,290 @@ BOOL CIpodFont::IsFixedWidth()
 CSize CIpodFont::GetFontBitmapSize()
 {
 	return CSize(m_BitmapHeader.rowSizePixels, m_BitmapHeader.height);
+}
+
+void CIpodFont::ReMakeBitmap()
+{
+	pNewBitmap=new BYTE[GetFontBlockLen()];
+	memset(pNewBitmap, 0, GetFontBlockLen());
+	unsigned long i,j,k,m,start,y;
+	WORD c, group;
+
+	CSize size = GetFontBitmapSize();
+
+	DWORD offset1, offset2;
+	SHORT width, ident;
+	WORD w;
+
+	LPBYTE pNewMetrics;
+	DWORD len;
+	if (m_pHeader2->bitdepth==2)
+	{
+		len=sizeof(IPOD_FONT_CHARINFO_V2)*GetNumUnicodeChars();
+	}
+	else
+	{
+		len=sizeof(IPOD_FONT_CHARINFO)*GetNumUnicodeChars();
+	}
+	pNewMetrics=new BYTE[len];
+
+	LPBYTE saveBitmap;
+	saveBitmap=m_pBitmapData;
+	CPoint p;
+	COLORREF cr;
+	CWordArray wlist;
+
+	m=0;
+	y=(unsigned)-1;
+	bool end=false;
+	for (i = 0; i < GetNumUnicodeChars(); i++)
+	{
+		c = GetUnicodeChar(i, &group);
+
+		w = GetCharMapping(GetUnicodeCharOffset(c));
+
+		for (j=0;j<wlist.GetCount();j++)
+			if (wlist.GetAt(j)==w)
+			{
+				end=true;
+				break;
+			}
+		if (end)
+		{
+			SetCharMapping(GetUnicodeCharOffset(c), j);
+			end=false;
+			continue;
+		}
+		wlist.Add(w);
+		y++;
+
+		GetCharMetrics(w, &offset1, &offset2, &width, &ident);
+
+		SetCharMapping(GetUnicodeCharOffset(c), y);
+
+		if (width>30 || (offset2-offset1)>30 || (offset2-offset1)<0)
+		{
+			if (m_pHeader2->bitdepth==2)
+			{
+				((IPOD_FONT_CHARINFO_V2 *)pNewMetrics)[y].ident = ident;
+				((IPOD_FONT_CHARINFO_V2 *)pNewMetrics)[y].offset1 = offset1;
+				((IPOD_FONT_CHARINFO_V2 *)pNewMetrics)[y].offset2 = offset2;
+				((IPOD_FONT_CHARINFO_V2 *)pNewMetrics)[y].width = width;
+			}
+			else
+			{
+				((IPOD_FONT_CHARINFO *)pNewMetrics)[y].ident = ident;
+				((IPOD_FONT_CHARINFO *)pNewMetrics)[y].offset1 = offset1;
+				((IPOD_FONT_CHARINFO *)pNewMetrics)[y].offset2 = offset2;
+				((IPOD_FONT_CHARINFO *)pNewMetrics)[y].width = width;
+			}
+			continue;
+		}
+
+		start=m;
+		for (k=offset1;k<offset2;k++,m++)
+		{
+			for (j=0;j<size.cy;j++)
+			{
+				p.SetPoint(k, j);
+				cr=GetFontPixel(p);
+				m_pBitmapData=pNewBitmap;
+				if (m>=size.cx)
+				{
+					//out of space!
+					//m_pBitmapData=saveBitmap;
+					end=true;
+					break;
+				}
+				SetFontPixel(m, j, cr);
+				m_pBitmapData=saveBitmap;
+			}
+			if (end)
+				break;
+		}
+		if (end)
+			break;
+
+		if (m_pHeader2->bitdepth==2)
+		{
+			((IPOD_FONT_CHARINFO_V2 *)pNewMetrics)[y].ident = ident;
+			((IPOD_FONT_CHARINFO_V2 *)pNewMetrics)[y].offset1 = start;
+			((IPOD_FONT_CHARINFO_V2 *)pNewMetrics)[y].offset2 = m;
+			((IPOD_FONT_CHARINFO_V2 *)pNewMetrics)[y].width = width;
+		}
+		else
+		{
+			((IPOD_FONT_CHARINFO *)pNewMetrics)[y].ident = ident;
+			((IPOD_FONT_CHARINFO *)pNewMetrics)[y].offset1 = start;
+			((IPOD_FONT_CHARINFO *)pNewMetrics)[y].offset2 = m;
+			((IPOD_FONT_CHARINFO *)pNewMetrics)[y].width = width;
+		}
+	}
+finish:
+	if (m_pHeader2->bitdepth==2)
+	{
+		len=sizeof(IPOD_FONT_CHARINFO_V2)*y;
+	}
+	else
+	{
+		len=sizeof(IPOD_FONT_CHARINFO)*y;
+	}
+	memcpy(m_pCharInfo, pNewMetrics, len);
+	delete pNewMetrics;
+	m_pBitmapData=pNewBitmap;
+	return;
+}
+
+LPBYTE CIpodFont::MakeFont()
+{
+	LPBYTE lpBuffer;
+	LPBYTE lpPos;
+	DWORD len=GetFontBlockLen();
+	DWORD unicode_group_num=2;
+	DWORD num_chars=145;
+	BYTE bitdepth=4;
+	BYTE ststyle=0; //0 for regular, 1 for bold
+	DWORD fsize=18;
+	lpBuffer=new BYTE[len];
+	lpPos=lpBuffer;
+	memset(lpBuffer, 0, len);
+	
+	IPOD_FONT_HEADER1 *header1=m_pHeader1;
+	IPOD_FONT_HEADER2 *header2=m_pHeader2;
+
+	header1->first_char=0x6000; //602a
+	header1->last_char=0xfeff; //6069
+	header1->numChars=num_chars;
+	header1->numMappingEntries=unicode_group_num;
+
+	header2->bitdepth=bitdepth;
+	header2->line_height=32;
+	strcpy(header2->name, "Podium Sans_0600_0700");
+	header2->numChars=num_chars;
+	header2->size=fsize;
+	header2->style=ststyle;
+	header2->width=fsize;
+	header2->flags=0;
+	
+	memcpy(lpPos, header1, sizeof(IPOD_FONT_HEADER1));
+	lpPos += sizeof(IPOD_FONT_HEADER1);
+
+	//
+	DWORD i;
+
+	IPOD_FONT_UNICODE_GROUP *UnicodeGroups = new IPOD_FONT_UNICODE_GROUP[unicode_group_num];
+
+	/*for (i=0;i<unicode_group_num;i++)
+	{
+		UnicodeGroups[i].code=0x0020;
+		UnicodeGroups[i].length=1;
+		UnicodeGroups[i].offset=1;
+	}*/
+	UnicodeGroups[0].code=0x0627;
+	UnicodeGroups[0].length=36;
+	UnicodeGroups[0].offset=1;
+	UnicodeGroups[1].code=0xfe8e;
+	UnicodeGroups[1].length=114;
+	UnicodeGroups[1].offset=37;
+	
+	memcpy(lpPos, UnicodeGroups, sizeof(IPOD_FONT_UNICODE_GROUP)*unicode_group_num);
+	lpPos+=sizeof(IPOD_FONT_UNICODE_GROUP)*unicode_group_num;
+	
+	memcpy(lpPos, header2, sizeof(IPOD_FONT_HEADER2));
+	header2=(IPOD_FONT_HEADER2 *)lpPos;
+	lpPos += sizeof(IPOD_FONT_HEADER2);
+
+	WORD *CharMapping=new WORD[num_chars];
+
+	for (i = 0; i < num_chars; i++)
+	{
+		CharMapping[i]=i;
+	}
+
+	memcpy(lpPos, CharMapping, sizeof(WORD)*num_chars);
+	lpPos+=sizeof(WORD)*num_chars;
+
+	// read tables
+
+
+	header2->charMapEnd=(DWORD)(lpPos-(LPBYTE)header2);
+
+	
+	//m_NumMetrics is equal for us to num chars because we don't use the same metric twice
+	//m_NumMetrics = num_chars;
+	if (bitdepth == 2)
+		header2->metricsEnd=header2->charMapEnd+sizeof(IPOD_FONT_CHARINFO_V2)*num_chars;
+	else
+		header2->metricsEnd=header2->charMapEnd+sizeof(IPOD_FONT_CHARINFO)*num_chars;
+
+	lpPos = ((lpPos - lpBuffer + 3) / 4) * 4 + lpBuffer;
+
+	// variable width
+	IPOD_FONT_CHARINFO *c1=new IPOD_FONT_CHARINFO[num_chars];
+	IPOD_FONT_CHARINFO_V2 *c2=new IPOD_FONT_CHARINFO_V2[num_chars];
+
+	for (i = 0; i < num_chars; i++)
+	{
+		if (bitdepth == 2)
+		{
+			c2[i].ident=0;
+			c2[i].width=0;
+			c2[i].offset1=0;
+			c2[i].offset2=0;
+		}
+		else
+		{
+			c1[i].ident=0;
+			c1[i].width=0;
+			c1[i].offset1=0;
+			c1[i].offset2=0;
+		}
+	}
+
+	if (bitdepth == 2)
+	{
+		memcpy(lpPos, c2, sizeof(IPOD_FONT_CHARINFO_V2)*num_chars);
+		lpPos+=sizeof(IPOD_FONT_CHARINFO_V2)*num_chars;
+	}
+	else
+	{
+		memcpy(lpPos, c1, sizeof(IPOD_FONT_CHARINFO)*num_chars);
+		lpPos+=sizeof(IPOD_FONT_CHARINFO)*num_chars;
+	}
+
+	DWORD bmplen;
+	// bitmap header
+	if (bitdepth == 2)
+	{
+		IPOD_FONT_BITMAP_HEADER_V2 bitmapHeader2;
+		bmplen=len-(lpPos-lpBuffer+sizeof(IPOD_FONT_BITMAP_HEADER_V2));
+		bitmapHeader2.height=header2->line_height+2;
+		bitmapHeader2.rowLenghBytes=bmplen/bitmapHeader2.height;
+		bitmapHeader2.rowSizePixels=bitmapHeader2.rowLenghBytes*8/bitdepth;
+		memcpy(&bitmapHeader2.d2,&bmplen,4);
+
+		memcpy(lpPos, &bitmapHeader2, sizeof(IPOD_FONT_BITMAP_HEADER_V2));
+
+		lpPos += sizeof(IPOD_FONT_BITMAP_HEADER_V2);
+	}
+	else
+	{
+		IPOD_FONT_BITMAP_HEADER bitmapHeader;
+		bmplen=len-(lpPos-lpBuffer+sizeof(IPOD_FONT_BITMAP_HEADER));
+		bitmapHeader.w1=m_BitmapHeader.w1;
+		bitmapHeader.w2=m_BitmapHeader.w2;
+		bitmapHeader.bitDepth=bitdepth;
+		bitmapHeader.height=header2->line_height+2;
+		bitmapHeader.rowLenghBytes=bmplen/bitmapHeader.height;
+		bitmapHeader.rowSizePixels=bitmapHeader.rowLenghBytes*8/bitdepth;
+		bitmapHeader.length=bmplen;
+
+		memcpy(lpPos, &bitmapHeader, sizeof(IPOD_FONT_BITMAP_HEADER));
+
+		lpPos += sizeof(IPOD_FONT_BITMAP_HEADER);
+	}
+	memcpy(m_pHeader1, lpBuffer, len);
+	return lpBuffer;
 }
 
 COLORREF CIpodFont::GetFontPixel(CPoint point)

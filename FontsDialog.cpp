@@ -177,6 +177,14 @@ BEGIN_MESSAGE_MAP(CFontsDialog, CDialog)
 	ON_MESSAGE(WM_APP, OnSelectMetricsFromBitmap)
 	ON_BN_CLICKED(IDC_EXPLAIN_BUTTON, OnBnClickedCharMapExplain)
 	ON_BN_CLICKED(IDC_OTF_BUTTON, OnBnClickedOtfButton)
+	ON_BN_CLICKED(IDC_BUTTON1, &CFontsDialog::OnBnClickedButton1)
+	ON_EN_CHANGE(IDC_FONTNAME_EDIT, &CFontsDialog::OnEnChangeFontnameEdit)
+	ON_EN_CHANGE(IDC_FONTSTYLE_EDIT, &CFontsDialog::OnEnChangeFontstyleEdit)
+	ON_EN_CHANGE(IDC_FONTSIZE_EDIT, &CFontsDialog::OnEnChangeFontsizeEdit)
+	ON_BN_CLICKED(IDC_MULTISAVE_GLYPH, &CFontsDialog::OnBnClickedMultisaveGlyph)
+	ON_BN_CLICKED(IDC_LOADFONT_BUTTON, &CFontsDialog::OnBnClickedLoadfontButton)
+	ON_BN_CLICKED(IDC_CHANGE_FONT_COLOR, &CFontsDialog::OnBnClickedChangeFontColor)
+	ON_BN_CLICKED(IDC_SAVE_IFONT, &CFontsDialog::OnBnClickedSaveIfont)
 END_MESSAGE_MAP()
 
 
@@ -198,6 +206,11 @@ BOOL CFontsDialog::OnInitDialog()
 
 	m_CharCombo.SendMessage(CCM_SETUNICODEFORMAT, TRUE, 0);
 
+	//reinterpret_cast<CEdit*>(GetDlgItem(IDC_FONTNAME_EDIT))->SetReadOnly(TRUE);
+	//reinterpret_cast<CEdit*>(GetDlgItem(IDC_FONTSTYLE_EDIT))->SetReadOnly(TRUE);
+	//reinterpret_cast<CEdit*>(GetDlgItem(IDC_FONTSIZE_EDIT))->SetReadOnly(TRUE);
+	
+	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -255,9 +268,11 @@ void CFontsDialog::OnBnClickedZoomOut()
 	GetDlgItem(IDC_STATIC_ZOOM)->SetWindowText(temp);
 }
 
-void CFontsDialog::SetFirmware(CFirmware *pFirmware)
+void CFontsDialog::SetFirmware(CFirmware *pFirmware, CLayoutDialog *pLayoutDialog)
 {
 	m_pFirmware = pFirmware;
+
+	m_pLayoutDialog = pLayoutDialog;
 
 	m_FontIndex = 0;
 
@@ -270,6 +285,10 @@ void CFontsDialog::SetFirmware(CFirmware *pFirmware)
 		m_FontIndexCombo.InsertString(i, s);
 	}
 	m_FontIndexCombo.SetCurSel(0);
+
+	reinterpret_cast<CEdit*>(GetDlgItem(IDC_FONTNAME_EDIT))->EnableWindow(TRUE);
+	reinterpret_cast<CEdit*>(GetDlgItem(IDC_FONTSTYLE_EDIT))->EnableWindow(TRUE);
+	reinterpret_cast<CEdit*>(GetDlgItem(IDC_FONTSIZE_EDIT))->EnableWindow(TRUE);
 
 	UpdateFont();
 }
@@ -338,11 +357,13 @@ void CFontsDialog::UpdateFont()
 	GetDlgItem(ID_MAKE_FONT)->EnableWindow(bCanWrite);
 	GetDlgItem(ID_PREV_PICTURE)->EnableWindow(TRUE);
 	GetDlgItem(ID_NEXT_PICTURE)->EnableWindow(TRUE);
-	GetDlgItem(ID_CHK_NEWMETRICS)->EnableWindow(TRUE);
 	GetDlgItem(ID_ZOOMIN_BUTTON)->EnableWindow(TRUE);
 	GetDlgItem(ID_ZOOMOUT_BUTTON)->EnableWindow(TRUE);
 	GetDlgItem(IDC_CHKGRID)->EnableWindow(TRUE);
 	GetDlgItem(IDC_OTF_BUTTON)->EnableWindow(TRUE);
+	GetDlgItem(IDC_CHANGE_FONT_COLOR)->EnableWindow(TRUE);
+	GetDlgItem(IDC_LOADFONT_BUTTON)->EnableWindow(TRUE);
+	GetDlgItem(IDC_SAVE_IFONT)->EnableWindow(TRUE);
 }
 
 void CFontsDialog::OnBnClickedPrevPicture()
@@ -371,10 +392,11 @@ void CFontsDialog::OnBnClickedSaveBitmap()
 	filename.Format(TEXT("%s.bmp"), m_Font.GetFontName());
 
 	CFileDialog dlg(FALSE, TEXT("bmp"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("BMP Files (*.bmp)|*.bmp||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlg)
 	CSize size = m_Font.GetFontBitmapSize();
 
 	CImage img;
@@ -472,10 +494,11 @@ void CFontsDialog::OnBnClickedSaveBitmap()
 void CFontsDialog::OnBnClickedLoadBitmap()
 {
 	CFileDialog dlg(TRUE, 0, 0, OFN_HIDEREADONLY, TEXT("Bitmap Files (*.bmp, *.gif, *.jpg)|*.bmp;*.gif;*.jpg||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlg)
 	CImage img;
 	if (FAILED(img.Load(dlg.GetPathName())))
 	{
@@ -649,7 +672,7 @@ void CFontsDialog::ReadCharMetrics()
 	GetDlgItem(IDC_OFFSET2_EDIT)->EnableWindow(bEnable);
 	GetDlgItem(IDC_WIDTH_EDIT)->EnableWindow(bEnable);
 	GetDlgItem(IDC_IDENT_EDIT)->EnableWindow(bEnable);
-	GetDlgItem(IDC_UPDATE_BUTTON)->EnableWindow(bEnable);
+	//GetDlgItem(IDC_UPDATE_BUTTON)->EnableWindow(bEnable);
 
 	UpdateData(FALSE);
 }
@@ -717,10 +740,11 @@ void CFontsDialog::UpdateGroupExplanation()
 void CFontsDialog::OnBnClickedLoadMetrics()
 {
 	CFileDialog dlg(TRUE, TEXT("ifm"), 0, OFN_HIDEREADONLY, TEXT("Fonts Metrics (*.ifm)|*.ifm||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
 
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlg)
 	CFile file;
 	if (!file.Open(dlg.GetPathName(), CFile::modeRead))
 	{
@@ -733,7 +757,7 @@ void CFontsDialog::OnBnClickedLoadMetrics()
 	WORD c;
 
 	//Old Version
-	if (IsDlgButtonChecked(ID_CHK_NEWMETRICS) == 1)
+	if (theApp.m_OldFontMetricsSystem)
 	{
 		while (TRUE)
 		{
@@ -809,6 +833,7 @@ void CFontsDialog::OnBnClickedLoadMetrics()
 		{
 			m_Font.SetMetricData(lpBuf);
 		}
+		delete lpBuf;
 	}
 
 	file.Close();
@@ -830,9 +855,11 @@ void CFontsDialog::OnBnClickedSaveMetrics()
 	filename.Format(TEXT("%s-%s.ifm"), m_Font.GetFontName(), idx);
 
 	CFileDialog dlg(FALSE, TEXT("ifm"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("Fonts Metrics (*.ifm)|*.ifm||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
+
 	if (dlg.DoModal() != IDOK)
 		return;
-
+	MO_SAVE_RESOURCES_PATH(dlg)
 	CFile file;
 	if (!file.Open(dlg.GetPathName(), CFile::modeCreate | CFile::modeWrite))
 	{
@@ -846,7 +873,7 @@ void CFontsDialog::OnBnClickedSaveMetrics()
 	WORD c, group;
 
 	//Old version
-	if (IsDlgButtonChecked(ID_CHK_NEWMETRICS) == 1)
+	if (theApp.m_OldFontMetricsSystem)
 	{
 		for (WORD i = 0; i < m_Font.GetNumUnicodeChars(); i++)
 		{
@@ -1058,4 +1085,642 @@ void CFontsDialog::OnBnClickedOtfButton()
 		::SendMessage(::GetParent(::GetParent(m_hWnd)), WM_APP, (WPARAM)10, (LPARAM)TRUE);
 	else
 		MessageBox(TEXT("No OpenType fonts found in this firmware."));
+}
+
+void CFontsDialog::OnBnClickedButton1()
+{
+	// TODO: Add your control notification handler code here
+	/*m_Font.ReMakeBitmap();
+	UpdateCharCombo();
+	OnCbnSelchangeCharCombo();
+	//OnBnClickedSaveBitmap();*/
+
+
+	if (theApp.m_OldFontMetricsSystem)
+	{
+		LPBYTE fntb=m_Font.MakeFont();
+		UpdateFont();
+		return;
+	}
+
+	LPITEMIDLIST il;
+	TCHAR folderPath[MAX_PATH];
+
+	BROWSEINFO br;
+    br.hwndOwner = AfxGetMainWnd()->GetSafeHwnd();
+    br.pidlRoot = NULL;
+    br.pszDisplayName = folderPath;
+    br.lpszTitle = TEXT("Select folder for files");
+    br.ulFlags = BIF_RETURNONLYFSDIRS;
+    br.lpfn = NULL;
+    br.lParam = 0;
+    br.iImage = 0;
+
+	il = SHBrowseForFolder(&br);
+	if (il == NULL)
+		return;
+
+	SHGetPathFromIDList(il, folderPath);
+
+	CString filename = folderPath;
+	filename += "\\????.bmp";
+
+	BYTE width,height;
+	WORD gidx;
+	WORD offset_start=m_Offset1;
+	SHORT ident=0;
+	WIN32_FIND_DATA findData;
+	BYTE aw=0;
+	HANDLE hFind = FindFirstFile(filename, &findData);
+	CSize bsize=m_Font.GetFontBitmapSize();
+	gidx=m_Font.GetCharMapping(m_CharMapCombo1.GetCurSel());
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			filename = folderPath;
+			filename += "\\";
+			filename += findData.cFileName;
+			WORD index;
+			LPBYTE ib=new BYTE[8];
+			index=0;
+			_stscanf(findData.cFileName, TEXT("%04X"), ib);
+			index=*((LPWORD)ib);
+			//index<<=8;
+			//index = _wtoi(findData.cFileName + 4);
+
+			if (index>=m_GroupStart && index<=m_GroupStart+m_GroupLen)
+			{
+				CImage img;
+				if (FAILED(img.Load(filename)))
+				{
+					CString msg;
+					msg.Format(TEXT("Unable to load image %d!"), index);
+					MessageBox(msg);
+					return;
+				}
+
+				width = img.GetWidth();
+				height = img.GetHeight();
+
+				//calculate bearingy
+				int x, y;
+
+				int hstart = -1, hend = -1;
+				BOOL bLineEmpty;
+
+				/*for (y = 0; y < height; y++)
+				{
+					bLineEmpty = TRUE;
+					for (x = 0; x < width; x++)
+					{
+						if (img.GetPixel(x, y) != RGB(255, 255, 255))
+						{
+							bLineEmpty = FALSE;
+							break;
+						}
+					}
+					if (!bLineEmpty)
+					{
+						hstart = y;
+						break;
+					}
+				}*/
+				hstart=0;
+
+				for (y = height - 1; y >= 0 && hstart != -1; y--)
+				{
+					bLineEmpty = TRUE;
+					for (x = 0; x < width ; x++)
+					{
+						if (img.GetPixel(x, y) != RGB(255, 255, 255))
+						{
+							bLineEmpty = FALSE;
+							break;
+						}
+					}
+					if (!bLineEmpty)
+					{
+						hend = y;
+						break;
+					}
+				}
+				if (hstart!=-1)
+					hend++;
+				//
+				height=hend-hstart;
+				
+				//bearingy=m_BaseLine-hstart;
+				//bearingy=height;
+				//if (hend>m_BaseLine)
+				//	bearingy-=hend-m_BaseLine;
+				//advance=m_ALeft + width + m_ARight;
+				m_Font.SetCharMetrics(gidx, offset_start, offset_start+width, width+aw, ident);
+				
+
+				//LONG j, k;
+				COLORREF color;
+
+				for (x = 0; x < img.GetWidth(); x++)
+				{
+					for (y = 0; y < height; y++)
+					{
+						color = img.GetPixel(x, y + hstart);
+						m_Font.SetFontPixel(offset_start+x, y, color);
+					}
+					for (y=height;y<bsize.cy;y++)
+						m_Font.SetFontPixel(offset_start+x, y, RGB(255, 255, 255));
+				}
+				offset_start+=width;
+				gidx++;
+			}
+		} while (FindNextFile(hFind, &findData) != 0);
+
+		FindClose(hFind);
+
+		UpdateData(FALSE);
+
+		ReadCharMetrics();
+		UpdateZoomView();
+	}
+}
+
+void CFontsDialog::OnEnChangeFontnameEdit()
+{
+	// TODO:  If this is a RICHEDIT control, the control will not
+	// send this notification unless you override the CDialog::OnInitDialog()
+	// function and call CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Add your control notification handler code here
+	if (theApp.m_LoadingFirmware==TRUE || theApp.m_SavingFirmware==TRUE)
+		return;
+
+	UpdateData(TRUE);
+
+	m_Font.SetFontName(m_FontName);
+}
+
+void CFontsDialog::OnEnChangeFontstyleEdit()
+{
+	// TODO:  If this is a RICHEDIT control, the control will not
+	// send this notification unless you override the CDialog::OnInitDialog()
+	// function and call CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Add your control notification handler code here
+	if (theApp.m_LoadingFirmware==TRUE || theApp.m_SavingFirmware==TRUE)
+		return;
+
+	UpdateData(TRUE);
+
+	m_Font.SetFontStyle(m_FontStyle);
+}
+
+void CFontsDialog::OnEnChangeFontsizeEdit()
+{
+	// TODO:  If this is a RICHEDIT control, the control will not
+	// send this notification unless you override the CDialog::OnInitDialog()
+	// function and call CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Add your control notification handler code here
+	if (theApp.m_LoadingFirmware==TRUE || theApp.m_SavingFirmware==TRUE)
+		return;
+
+	UpdateData(TRUE);
+
+	m_Font.SetFontSize(m_FontSize);
+}
+
+void CFontsDialog::OnBnClickedMultisaveGlyph()
+{
+	LPITEMIDLIST il;
+	TCHAR folderPath[MAX_PATH];
+
+	BROWSEINFO br;
+    br.hwndOwner = AfxGetMainWnd()->GetSafeHwnd();
+    br.pidlRoot = NULL;
+    br.pszDisplayName = folderPath;
+    br.lpszTitle = TEXT("Select folder for files");
+    br.ulFlags = BIF_RETURNONLYFSDIRS;
+    br.lpfn = NULL;
+    br.lParam = 0;
+    br.iImage = 0;
+
+	il = SHBrowseForFolder(&br);
+	if (il == NULL)
+		return;
+
+	SHGetPathFromIDList(il, folderPath);
+
+	CString filename;
+
+	CSize size = m_Font.GetFontBitmapSize();
+
+	CImage img;
+
+	WORD hexcode;
+	WORD p=0;
+
+	for (hexcode=m_GroupStart;hexcode<m_GroupStart+m_GroupLen;hexcode++,p++)
+	{
+
+		m_CharMapCombo1.SetCurSel(m_GroupOffset - 1 + p);
+		UpdateCharMap();
+
+		bool reffound=false;
+		int j=0;
+		for (j=0;j<redirectionTableCount;j++)
+		{
+			if (redirectionTable[j][0]==hexcode)
+			{
+				reffound=true;
+				break;
+			}
+		}
+		if (reffound==false)
+			continue;
+		//filename.Format(_T("%s\\%0004X.bmp"), folderPath, hexcode); 
+		BYTE w[2];
+		w[0]=(BYTE)redirectionTable[j][1];
+		w[1]=0x06;
+		filename.Format(_T("%s\\%0004X.bmp"), folderPath, *((LPWORD)w));
+		
+		size.cx=m_Offset2-m_Offset1;
+		size.cy--;
+
+		int x, y;
+
+		int hstart = -1, hend = -1;
+		/*
+		BOOL bLineEmpty;
+
+		for (y = 0; y < size.cy; y++)
+		{
+			bLineEmpty = TRUE;
+			for (x = 0; x < size.cx; x++)
+			{
+				if (m_Font.GetFontPixel(CPoint(x+m_Offset1, y)) != RGB(255, 255, 255))
+				{
+					bLineEmpty = FALSE;
+					break;
+				}
+			}
+			if (!bLineEmpty)
+			{
+				hstart = y;
+				break;
+			}
+		}
+
+		for (y = size.cy - 1; y >= 0 && hstart != -1; y--)
+		{
+			bLineEmpty = TRUE;
+			for (x = 0; x < size.cx ; x++)
+			{
+				if (m_Font.GetFontPixel(CPoint(x+m_Offset1, y)) != RGB(255, 255, 255))
+				{
+					bLineEmpty = FALSE;
+					break;
+				}
+			}
+			if (!bLineEmpty)
+			{
+				hend = y;
+				break;
+			}
+		}
+		if (hstart!=-1)
+			hend++;*/
+
+		//nano
+		//hstart=3;
+		//hend=19;
+		//photo
+		//hstart=6;
+		//hend=24;
+		hstart=5;
+		hend=32;
+
+		int exwidth;
+		if (m_Width<size.cx)
+			exwidth=0;
+		else
+			exwidth=m_Width-size.cx;
+
+		if (!img.Create(size.cx + exwidth, hend - hstart, 24))
+		{
+			MessageBox(TEXT("Unable to create image!"));
+			return;
+		}
+
+		/*for (x = 0; x < size.cx; x++)
+		{
+			for (y = 0; y < hend - hstart; y++)
+			{
+				img.SetPixel(x, y, m_Font.GetFontPixel(CPoint(x+m_Offset1, y + hstart)));
+			}
+		}*/
+		
+		for (y = 0; y < hend - hstart; y++)
+		{
+			x = 0;
+			for (x = 0; x < exwidth; x++)
+			{
+				img.SetPixel(x, y, RGB(255,255,255));
+			}
+			for (; x < size.cx+exwidth; x++)
+			{
+				img.SetPixel(x, y, m_Font.GetFontPixel(CPoint(x-exwidth+m_Offset1, y + hstart)));
+			}
+		}
+
+		if (FAILED(img.Save(filename)))
+		{
+			MessageBox(TEXT("Unable to save image!"));
+			return;
+		}
+		img.Destroy();
+	}
+	
+	/*
+	LPITEMIDLIST il;
+	TCHAR folderPath[MAX_PATH];
+
+	BROWSEINFO br;
+    br.hwndOwner = AfxGetMainWnd()->GetSafeHwnd();
+    br.pidlRoot = NULL;
+    br.pszDisplayName = folderPath;
+    br.lpszTitle = TEXT("Select folder for files");
+    br.ulFlags = BIF_RETURNONLYFSDIRS;
+    br.lpfn = NULL;
+    br.lParam = 0;
+    br.iImage = 0;
+
+	il = SHBrowseForFolder(&br);
+	if (il == NULL)
+		return;
+
+	SHGetPathFromIDList(il, folderPath);
+
+	CString filename;
+
+	CSize size = m_Font.GetFontBitmapSize();
+
+	CImage img;
+
+	WORD hexcode;
+	WORD p=0;
+	size.cy--;
+
+	for (hexcode=m_GroupStart;hexcode<m_GroupStart+m_GroupLen;hexcode++,p++)
+	{
+
+		m_CharMapCombo1.SetCurSel(m_GroupOffset - 1 + p);
+		UpdateCharMap();
+
+		bool reffound=false;
+		int j=0;
+		for (j=0;j<redirectionTableCount;j++)
+		{
+			if (redirectionTable[j][0]==hexcode)
+			{
+				reffound=true;
+				break;
+			}
+		}
+		if (reffound==false)
+			continue;
+		//filename.Format(_T("%s\\%0004X.bmp"), folderPath, hexcode); 
+		LPBYTE w=new BYTE[2];
+		w[0]=(BYTE)redirectionTable[j][1];
+		w[1]=0x06;
+		filename.Format(_T("%s\\%0004X.bmp"), folderPath, *((LPWORD)w));
+		
+		size.cx=m_Offset2-m_Offset1;
+
+		int x, y;
+
+		int hstart = -1, hend = -1;
+		
+		BOOL bLineEmpty;
+
+		for (y = 0; y < size.cy; y++)
+		{
+			bLineEmpty = TRUE;
+			for (x = 0; x < size.cx; x++)
+			{
+				if (m_Font.GetFontPixel(CPoint(x+m_Offset1, y)) != RGB(255, 255, 255))
+				{
+					bLineEmpty = FALSE;
+					break;
+				}
+			}
+			if (!bLineEmpty)
+			{
+				hstart = y;
+				break;
+			}
+		}
+
+		for (y = size.cy - 1; y >= 0 && hstart != -1; y--)
+		{
+			bLineEmpty = TRUE;
+			for (x = 0; x < size.cx ; x++)
+			{
+				if (m_Font.GetFontPixel(CPoint(x+m_Offset1, y)) != RGB(255, 255, 255))
+				{
+					bLineEmpty = FALSE;
+					break;
+				}
+			}
+			if (!bLineEmpty)
+			{
+				hend = y;
+				break;
+			}
+		}
+		if (hstart!=-1)
+			hend++;
+
+		if (!img.Create(size.cx, hend - hstart, 24))
+		{
+			MessageBox(TEXT("Unable to create image!"));
+			return;
+		}
+
+		for (x = 0; x < size.cx; x++)
+		{
+			for (y = 0; y < hend - hstart; y++)
+			{
+				img.SetPixel(x, y, m_Font.GetFontPixel(CPoint(x+m_Offset1, y + hstart)));
+			}
+		}
+
+		if (FAILED(img.Save(filename)))
+		{
+			MessageBox(TEXT("Unable to save image!"));
+			return;
+		}
+		img.Destroy();
+	}
+	*/
+}
+
+void CFontsDialog::OnBnClickedLoadfontButton()
+{
+	CFileDialog dlg(TRUE, 0, 0, OFN_HIDEREADONLY, TEXT("iPod Font Files (*.fnt)|*.fnt||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
+
+	if (dlg.DoModal() != IDOK)
+		return;
+	MO_SAVE_RESOURCES_PATH(dlg)
+	LoadFullFont(dlg.GetPathName(), m_Font.GetFontBlockLen());
+
+	UpdateFont();
+}
+
+void CFontsDialog::LoadFullFont(CString path, DWORD size, DWORD fidx)
+{
+	DWORD fontindex;
+	if (fidx==-1)
+		fontindex=m_FontIndex;
+	else
+		fontindex=fidx;
+
+	CFile file;
+	if (!file.Open(path, CFile::modeRead))
+	{
+		MessageBox(_T("Unable to load file!"));
+		return;
+	}
+
+	if ((ULONGLONG)size==file.GetLength())
+	{
+		file.Read(m_pFirmware->GetFont(fontindex), (UINT)size);
+	}
+	else
+	{
+		MessageBox(_T("File size doesn't match current font!"));
+		return;
+	}
+	UpdateFont();
+}
+
+void CFontsDialog::LoadFullFontsDir(CString folderPath)
+{
+	CString filename;
+	filename = folderPath;
+	filename += "\\*-*-*.fnt";
+
+	WIN32_FIND_DATA findData;
+	CIpodFont font;
+	CString fname;
+	CString fontname,fontstyle,fontsize;
+	LPBYTE lpEnd=m_pFirmware->GetFirmwareBuffer()+m_pFirmware->GetFirmwareSize();
+	HANDLE hFind = FindFirstFile(filename, &findData);
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			filename = folderPath;
+			filename += "\\";
+			filename += findData.cFileName;
+			fname.Format(findData.cFileName);
+			int fpos=fname.Find('-');
+			fontname=fname.Left(fpos);
+			int ftemp=fpos+1;
+			fpos=fname.Find('-', ftemp);
+			fontstyle=fname.Mid(ftemp, fpos);
+			ftemp=fpos+1;
+			fpos=fname.Find('-', ftemp);
+			fontsize=fname.Mid(ftemp, fpos);
+			for (DWORD z=0;z<m_pFirmware->GetNumFonts();z++)
+			{
+				font.Read(m_pFirmware->GetFont(z), lpEnd);
+				if (!fontname.Compare(font.GetFontName()) && !fontstyle.Compare(font.GetFontStyle()) && _ttoi(fontsize)==font.GetFontSize())
+				{
+					LoadFullFont(filename, font.GetFontBlockLen(), z);
+					break;
+				}
+			}
+		} while (FindNextFile(hFind, &findData) != 0);
+
+		FindClose(hFind);
+
+		UpdateFont();
+	}
+}
+void CFontsDialog::OnBnClickedChangeFontColor()
+{
+	CWaitCursor wait;
+
+	DWORD i,id=-1;
+	wchar_t *sOut;
+	DWORD lang=m_pFirmware->GetNumLangs()-1;
+	for (i=0;i<m_pFirmware->GetNumLangStrings(lang);i++)
+	{
+		Utf8Decode((char *)m_pFirmware->GetLangString(lang, i), &sOut);
+		if (!_tcscmp(sOut, m_FontName))
+		{
+			id=m_pFirmware->GetLangStringID(lang, i);
+			delete sOut;
+			break;
+		}
+		delete sOut;
+	}
+	if (id!=-1)
+	{
+		DWORD style=0;
+		for (i=0;i<m_pLayoutDialog->TypeList->size();i++)
+		{
+			if (!wcscmp(m_FontStyle, _T("Bold")))
+				style=1;
+			else if (!wcscmp(m_FontStyle, _T("Regular")))
+				style=0;
+			if (m_pLayoutDialog->TypeList->at(i)->element->fontID==id && m_pLayoutDialog->TypeList->at(i)->element->style==style && m_pLayoutDialog->TypeList->at(i)->element->size==m_FontSize && m_pLayoutDialog->TypeList->at(i)->element->alignment==0)
+			{
+				//font found
+				CString sID;
+				sID.Format(_T("%d"), m_pLayoutDialog->TypeList->at(i)->id);
+				m_pLayoutDialog->m_ResourceTypeIdx.SetCurSel(2);
+				m_pLayoutDialog->OnCbnSelchangeResourceTypeidxCombo();
+				m_pLayoutDialog->GetDlgItem(IDC_FIND_EDIT)->SetWindowTextW(sID);
+				m_pLayoutDialog->OnBnClickedFindButton();
+				LRESULT ret=1; //important!
+				NMITEMACTIVATE nmhdr;
+				nmhdr.iItem=0;
+				nmhdr.iSubItem=3;
+				m_pLayoutDialog->OnLvnItemDblClickedResourceList((LPNMHDR)&nmhdr, &ret);
+				//::SendMessage(::GetParent(::GetParent(m_hWnd)), WM_APP, (WPARAM)21, (LPARAM)0);
+				break;
+			}
+		}
+		
+	}
+}
+
+void CFontsDialog::OnBnClickedSaveIfont()
+{
+	CString filename;
+	filename.Format(TEXT("%s-%s-%d.fnt"), m_Font.GetFontName(), m_Font.GetFontStyle(), m_FontSize);
+
+	CFileDialog dlg(FALSE, TEXT("fnt"), filename, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, TEXT("iPod Font RAW Binary File (*.fnt)|*.fnt||"), this);
+	MO_LOAD_RESOURCES_PATH(dlg)
+
+	if (dlg.DoModal() != IDOK)
+		return;
+	MO_SAVE_RESOURCES_PATH(dlg)
+	CFile file;
+	if (!file.Open(dlg.GetPathName(), CFile::modeCreate | CFile::modeWrite))
+	{
+		MessageBox(TEXT("Unable to save file!"));
+		return;
+	}
+
+	file.Write(m_pFirmware->GetFont(m_FontIndex), m_Font.GetFontBlockLen());
+	file.Close();
+
+	MessageBox(_T("Saved Successfully!"));
 }

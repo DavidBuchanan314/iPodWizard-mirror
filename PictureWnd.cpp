@@ -28,6 +28,8 @@ BEGIN_MESSAGE_MAP(CPictureWnd, CWnd)
 	ON_WM_PAINT()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
+	ON_WM_CREATE()
+	ON_WM_DROPFILES()
 END_MESSAGE_MAP()
 
 BOOL CPictureWnd::RegisterWindowClass()
@@ -60,8 +62,39 @@ BOOL CPictureWnd::RegisterWindowClass()
 
 // CPictureWnd message handlers
 
+int CPictureWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	DragAcceptFiles(TRUE);
+	return 0;
+}
+
+void CPictureWnd::OnDropFiles(HDROP hDropInfo)
+{
+	rjc::RDragDropFiles myFiles (hDropInfo);
+    CString buf;
+
+	int iL = 0;
+	int filesRead = 0;
+	while (myFiles ()) {
+		myFiles.sNextFile (buf);
+		iL++;
+		if (!(GetFileAttributes(buf.GetBuffer()) & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			GetParent()->SendMessage(WM_APP, 11, (LPARAM)buf.GetBuffer());
+			filesRead++;
+			if (filesRead==1)
+				GetParent()->SendMessage(WM_APP, 10, (LPARAM)buf.Left(buf.ReverseFind('\\')).GetBuffer());
+		}
+		else
+			GetParent()->SendMessage(WM_APP, 10, (LPARAM)buf.GetBuffer());
+	}
+}
+
 void CPictureWnd::OnPaint()
 {
+	if (theApp.m_LoadingFirmware==TRUE || theApp.m_SavingFirmware==TRUE)
+		return;
+
 	CPaintDC dc(this); // device context for painting
 	
 	CRect clientRect;

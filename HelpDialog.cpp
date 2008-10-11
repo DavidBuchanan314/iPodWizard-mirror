@@ -74,6 +74,28 @@ BOOL CHelpDialog::OnInitDialog()
 		while (*p++);
 	} while (*p);
 	m_iPodCombo.SetCurSel(0);
+
+	//
+	szTemp[0]='\0';
+	GetPrivateProfileSection(TEXT("GenInfoAdvanced"), szTemp, 2048, theApp.m_IniPath);
+	p = szTemp;
+	i=0;
+	do
+	{
+		p2=p;
+		i=0;
+		while(*p2++)
+			i++;
+		CString skey(p, i);
+		s_new.SetString(skey.Left(skey.Find(TEXT("="))));
+		s_new.AppendChar('\0');
+		m_iPodNamesAdvanced1.Add(s_new); 
+		s_new.SetString(skey.Right(skey.GetLength()-skey.Find(TEXT("="))-1));
+		s_new.AppendChar('\0');
+		m_iPodNamesAdvanced2.Add(s_new);
+		while (*p++);
+	} while (*p);
+
 	OnCbnSelchangeiPodCombo();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -112,6 +134,95 @@ LRESULT CHelpDialog::OnClose(WPARAM wParam, LPARAM lParam)
 
 void CHelpDialog::OnBnClickedFindGen()
 {
+	int curr_genid=-1; //need to set this according to proper generation id of the iPod
+	unsigned long i=0; //id representd the language block id that will be replaced with Hebrew
+
+	//Get info about the iPod such as: Generation ID, Firmware Version
+	//Try SCSI Inquiry method first
+	//If it doesn't work, check SysInfo file (should be for 3G and below)
+
+	unsigned char bresult[1024];
+	memset(bresult, 0, sizeof(bresult));
+	char *devstring=Unicode2MB(theApp.m_DeviceSel);
+	//Get XML VPD (Vital Product Data - See SCSI Inquiry Documention) Data
+	int retc=GetiPodSCSIInfo(devstring, 0x0c0, (unsigned char *)bresult);
+	if (retc==0 && bresult[3]!=0)
+	{
+		//We got the data, now translate it and find what we need
+		int num_pages=bresult[3];
+		int start_pagecode=bresult[4];
+		unsigned char device_data[20000];
+		int pos=0;
+		int w;
+		for (w=start_pagecode;w<start_pagecode+num_pages;w++)
+		{
+			retc=GetiPodSCSIInfo(devstring, w, (unsigned char *)bresult);
+			if (retc==0)
+			{
+				memcpy(&device_data[pos], &bresult[4], bresult[3]);
+				pos+=bresult[3];
+			}
+		}
+		device_data[pos]=0;
+		char geninfo[3];
+		int t=0;
+		int tlen=pos-15;
+		char *data=new char[tlen];
+		memcpy(data, &device_data, tlen);
+		for (w=0;w<tlen;w++)
+		{
+			if (strncmp(&data[w], "<key>OEMV</key>", 15)==0)
+			{
+				w+=25;
+				pos=w;
+				while (data[w]!='<')
+				{
+					geninfo[t]=data[w];
+					w++;
+					t++;
+				}
+				break;
+			}
+			else if (strncmp(&data[w], "<key>OEMU</key>", 15)==0)
+			{
+				w+=25;
+				pos=w;
+				while (data[w]!='<')
+				{
+					geninfo[t]=data[w];
+					w++;
+					t++;
+				}
+				break;
+			}
+		}
+		//We found generation ID and stored it in geninfo
+		geninfo[t]=0;
+		curr_genid=atoi(geninfo);
+	}
+	delete devstring;
+
+	BOOL bFound=FALSE;
+	if (curr_genid>0)
+	{
+		CString sgen;
+		sgen.Format(_T("%d"), curr_genid);
+		WORD m;
+		for (m=0;m < m_iPodNamesAdvanced1.GetCount();m++)
+		{
+			if (!m_iPodNamesAdvanced1.GetAt(m).Compare(sgen))
+			{
+				CString sfinal;
+				sfinal.Format(TEXT("Your iPod generation is: %s."), m_iPodNamesAdvanced2.GetAt(m));
+				MessageBox(sfinal, TEXT("Information"));
+				bFound=TRUE;
+			}
+		}
+		if (bFound==FALSE)
+			MessageBox(TEXT("Either your iPod is from an unknown generation or iPodWizard doesn't know about it. Check www.iPodWizard.net website for updates concerning new iPods."));
+		return;
+	}
+
 	CFile file;
 	CString path;
 	path.SetString(theApp.m_iPodDRV);
@@ -122,7 +233,7 @@ void CHelpDialog::OnBnClickedFindGen()
 		return;
 	}
 	BYTE b;
-	DWORD len, i;
+	DWORD len;
 	len=(DWORD)file.GetLength();
 	char *buffer = new char[len];
 	i=0;
@@ -161,7 +272,6 @@ void CHelpDialog::OnBnClickedFindGen()
 		}
 	}
 	WORD j, k, last=0;
-	BOOL bFound=FALSE;
 	CString str;
 	BOOL bCmp=FALSE;
 	for (j=0;j < m_iPodCombo.GetCount();j++)
@@ -193,6 +303,7 @@ void CHelpDialog::OnBnClickedFindGen()
 			bFound=TRUE;
 		}
 	}
+	delete buffer;
 	if (bFound==FALSE)
 		MessageBox(TEXT("Either your iPod is from an unknown generation or iPodWizard doesn't know about it. Check www.iPodWizard.net website for updates concerning new iPods."));
 	file.Close();

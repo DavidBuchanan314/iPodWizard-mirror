@@ -1,11 +1,12 @@
 #pragma once
 
-//static const char FONT_MAGIC[] = { 0x04, 0x00, 0x21, 0x00 };
+static const char FONT_MAGIC[] = { 0x04, 0x00, 0x21, 0x00 };
 //it tunes out that the 0x04 is not always that value (there was 0x05 too)
 
 struct IPOD_FONT_HEADER1
 {
-	DWORD z0; //char magic[4];
+	//DWORD z0; //
+	char magic[4];
 	WORD first_char;
 	WORD last_char;
 	WORD z1; //seems to be always 0x01
@@ -103,10 +104,13 @@ public:
 	BOOL						Read(LPBYTE lpBuffer, LPBYTE lpEnd);
 
 	LPCTSTR						GetFontName();
-	DWORD						GetFontBlockLen();
-	WORD						GetFontBitDepth();
 	DWORD						GetFontSize();
 	LPCTSTR						GetFontStyle();
+	void						SetFontName(CString sNewName);
+	void						SetFontSize(DWORD iNewSize);
+	void						SetFontStyle(CString sNewStyle);
+	DWORD						GetFontBlockLen();
+	WORD						GetFontBitDepth();
 	BOOL						IsFixedWidth();
 	void						SetData(LPBYTE buffer);
 	LPBYTE						GetMetricData();
@@ -130,4 +134,8 @@ public:
 	WORD						GetUnicodeCharOffset(WORD c);
 	void						GetCharMetrics(WORD c, LPDWORD offset1, LPDWORD offset2, SHORT *width, SHORT *ident);
 	void						SetCharMetrics(WORD c, WORD offset1, WORD offset2, SHORT width, SHORT ident);
+
+	void						ReMakeBitmap();
+	LPBYTE						MakeFont();
+	LPBYTE pNewBitmap;
 };

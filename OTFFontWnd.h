@@ -23,6 +23,7 @@ public:
 	int m_FontLine,m_TotalLines;
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	BOOL m_ZoomMode, m_Grid;
 	void SetZoomMode(BOOL bZoomMode);
 	void ChangeZoom(BOOL bMode);

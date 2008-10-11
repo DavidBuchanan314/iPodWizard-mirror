@@ -7,7 +7,7 @@
 #include ".\tweaksdialog.h"
 
 int dev = 0, byte_cap = 0;
-unsigned char buffer[BLOCK_SIZE];
+unsigned char buffer[512];
 
 
 // CTweaksDialog dialog
@@ -45,17 +45,17 @@ int CTweaksDialog::isCapped(void)
 	BYTE temp[8]={0x8,0x0,0x9F,0xE5,0x38,0x1,0x90,0xE5};
 	BYTE temp2[8]={0x8,0x0,0x9F,0xE5,0x94,0x0,0x90,0xE5};
 	   
-	lseek (dev, BLOCK_SIZE * 1000, SEEK_SET);
+	_lseek (dev, theApp.BLOCK_SIZE * 1000, SEEK_SET);
 	   
-	while ((block_cap < BLOCK_SIZE * 2000) && read (dev, buffer, BLOCK_SIZE) != -1)
+	while ((block_cap < theApp.BLOCK_SIZE * 2000) && _read (dev, buffer, theApp.BLOCK_SIZE) != -1)
 	{
-		block_cap += BLOCK_SIZE;
+		block_cap += theApp.BLOCK_SIZE;
 
-		for (byte_cap = 7; byte_cap < BLOCK_SIZE - 2; byte_cap++)
+		for (byte_cap = 7; byte_cap < theApp.BLOCK_SIZE - 2; byte_cap++)
 		{
 			if (memcmp(&buffer[byte_cap-7], &temp, 8)==0 || memcmp(&buffer[byte_cap-7], &temp2, 8)==0)
 			{
-				if (byte_cap > BLOCK_SIZE - 3)
+				if (byte_cap > theApp.BLOCK_SIZE - 3)
 				break;
 
 				if ((buffer[byte_cap+1] == 0x1 && buffer[byte_cap+2] == 0x0) || (buffer[byte_cap+1] == 0x0 && buffer[byte_cap+2] == 0x1))
@@ -82,10 +82,10 @@ int CTweaksDialog::unCap(void)
 {
    buffer[byte_cap+1]=0x0;
    buffer[byte_cap+2]=0x1;
-   lseek(dev, -BLOCK_SIZE, SEEK_CUR);
-   write(dev, buffer, BLOCK_SIZE);
-   lseek(dev, -BLOCK_SIZE, SEEK_CUR);
-   read(dev, buffer, BLOCK_SIZE);
+   _lseek(dev, -theApp.BLOCK_SIZE, SEEK_CUR);
+   _write(dev, buffer, theApp.BLOCK_SIZE);
+   _lseek(dev, -theApp.BLOCK_SIZE, SEEK_CUR);
+   _read(dev, buffer, theApp.BLOCK_SIZE);
    
    if(!(buffer[byte_cap+1] == 0x0 && buffer[byte_cap+2] == 0x1))
    {
@@ -105,10 +105,10 @@ int CTweaksDialog::reCap(void)
 {
    buffer[byte_cap+1]=0x1;
    buffer[byte_cap+2]=0x0;
-   lseek(dev, -BLOCK_SIZE, SEEK_CUR);
-   write(dev, buffer, BLOCK_SIZE);
-   lseek(dev, -BLOCK_SIZE, SEEK_CUR);
-   read(dev, buffer, BLOCK_SIZE);
+   _lseek(dev, -theApp.BLOCK_SIZE, SEEK_CUR);
+   _write(dev, buffer, theApp.BLOCK_SIZE);
+   _lseek(dev, -theApp.BLOCK_SIZE, SEEK_CUR);
+   _read(dev, buffer, theApp.BLOCK_SIZE);
    if(buffer[byte_cap+1] == 0x1 && buffer[byte_cap+2] == 0x0)
    {
       MessageBox(TEXT("Successfully capped your iPod!"), TEXT("Success"), MB_OK);
@@ -130,8 +130,8 @@ void CTweaksDialog::InitCapping()
 	dev = _wopen (devstring, O_RDWR | _O_RAW);
 	if (dev!=-1)
 	{
-		lseek(dev, FIRMWARE_START, SEEK_SET);
-		read(dev, buffer, BLOCK_SIZE);
+		_lseek(dev, theApp.FIRMWARE_START, SEEK_SET);
+		_read(dev, buffer, theApp.BLOCK_SIZE);
 		int ret;
 		ret=isCapped();
 		if (ret==0)
@@ -180,7 +180,7 @@ BOOL CTweaksDialog::OnInitDialog()
 LRESULT CTweaksDialog::OnClose(WPARAM wParam, LPARAM lParam)
 {
 	if (dev!=-1)
-		close(dev);
+		_close(dev);
 	this->EndDialog(IDOK);
 	return 0;
 }
@@ -220,7 +220,7 @@ void CTweaksDialog::OnBnClickedApply()
 	else if (file.Open(path, CFile::modeCreate))
 		file.Close();
 	if (dev!=-1)
-		close(dev);
+		_close(dev);
 	this->EndDialog(IDOK);
 }
 

@@ -77,6 +77,9 @@ BOOL CHexWnd::RegisterWindowClass()
 
 void CHexWnd::OnPaint()
 {
+	if (theApp.m_LoadingFirmware==TRUE || theApp.m_SavingFirmware==TRUE)
+		return;
+
 	CPaintDC dc(this); // device context for painting
 	
 	// CMemDC pDC(&dc);

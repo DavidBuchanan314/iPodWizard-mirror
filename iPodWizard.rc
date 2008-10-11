@@ -72,58 +72,63 @@ IDR_MAINFRAME           ICON                    "res\\iPodWizard.ico"
 //
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 205, 75
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About iPodWizard"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "iPodWizard Version 1.2",IDC_STATIC,40,10,119,8,
-                    SS_NOPREFIX
-    LTEXT           "Copyright © 2005-2006 Kingstone and © 2004 TheWizard",
-                    IDC_STATIC,40,21,114,16
+    LTEXT           "iPodWizard Version 1.3.0.7",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "Copyright © 2005-2007 Kingstone and © 2004 TheWizard",IDC_STATIC,40,21,114,16
     DEFPUSHBUTTON   "OK",IDOK,148,7,50,16,WS_GROUP
-    LTEXT           "If you like this program and you want me to keep working on it, you can help and donate via PayPal to: gearforce@gmail.com",
-                    IDC_STATIC,40,42,158,26
+    LTEXT           "If you like this program and you want me to keep working on it, you can help and donate via PayPal to: gearforce@gmail.com",IDC_STATIC,40,42,158,26
 END
 
-IDD_IPODWIZARD_DIALOG DIALOGEX 0, 0, 450, 334
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | 
-    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+IDD_TIP DIALOGEX 0, 0, 277, 161
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Tip of the Day"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TIP_RECT,"Static",SS_ETCHEDFRAME,10,11,255,123,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
+    LTEXT           "Some String",IDC_TIPSTRING,55,63,195,42
+    CONTROL         "&Show Tips on StartUp",IDC_STARTUP,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,146,92,10
+    PUSHBUTTON      "&Next Tip",IDC_NEXTTIP,165,140,50,14,WS_GROUP
+    DEFPUSHBUTTON   "&Close",IDOK,220,140,50,14,WS_GROUP
+    RTEXT           "Footer text here",ST_FOOTER,55,105,180,8
+    PUSHBUTTON      "Tell Me &More",IDB_MORE,110,140,50,14
+    CONTROL         "",IDB_LIGHTBULB,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,15,20,18,20
+    LTEXT           "Header",ST_HEADER,55,25,195,30
+END
+
+IDD_IPODWIZARD_DIALOG DIALOGEX 0, 0, 450, 380
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "iPodWizard v1.2"
+CAPTION "iPodWizard v1.3"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     PUSHBUTTON      "&Open Updater...",ID_OPEN,96,7,63,14
-    LTEXT           "Firmware:",IDC_STATIC,163,7,33,8
-    COMBOBOX        IDC_FIRMWARE_COMBO,199,7,134,120,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Firmware:",IDC_STATIC,163,7,167,8
+    COMBOBOX        IDC_FIRMWARE_COMBO,199,7,134,120,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "&Load",ID_LOAD_FIRMWARE,336,7,50,14,WS_DISABLED
     GROUPBOX        "Firmware information",IDC_STATIC,4,22,276,47
-    PUSHBUTTON      "&Write",IDC_WRITE_FIRMWARE_BUTTON,225,32,50,14,
-                    WS_DISABLED
-    CONTROL         "",IDC_FIRMWARE_LIST,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
-                    WS_BORDER | WS_TABSTOP,11,32,210,31
+    PUSHBUTTON      "&Write",IDC_WRITE_FIRMWARE_BUTTON,222,31,49,14,WS_DISABLED
+    CONTROL         "",IDC_FIRMWARE_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,11,32,202,31
     PUSHBUTTON      "&About...",ID_ABOUT,395,7,50,14
-    PUSHBUTTON      "&Downgrade Firmware",IDC_USYSINFO_BUTTON,294,50,73,14
+    PUSHBUTTON      "&Downgrade Firmware",IDC_USYSINFO_BUTTON,293,50,73,14
     GROUPBOX        "iPodWizard Essentials",IDC_STATIC,287,22,158,47
-    LTEXT           "Found 1 iPod drives:",IDC_STATIC_FOUND,289,36,69,8,NOT 
-                    WS_VISIBLE
-    COMBOBOX        IDC_IPODDRIVE_COMBO,359,34,79,120,CBS_DROPDOWNLIST | NOT 
-                    WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "&Tweaks",ID_TWEAKS,381,50,50,14
-    LTEXT           "No iPod found on computer",IDC_STATIC_NOTFOUND,323,36,
-                    101,8
-    CONTROL         "",IDC_OPT_TAB,"SysTabControl32",0x0,4,72,441,258
-    PUSHBUTTON      "Load iPod Firmware",IDC_LOADIPODFW_BUTTON,96,7,68,14,
-                    NOT WS_VISIBLE | WS_DISABLED
-    COMBOBOX        IDC_MODE_COMBO,39,7,53,120,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+    LTEXT           "Found 1 iPod drives:",IDC_STATIC_FOUND,289,36,69,8,NOT WS_VISIBLE
+    COMBOBOX        IDC_IPODDRIVE_COMBO,359,34,79,120,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Tweaks",ID_TWEAKS,403,50,35,14
+    LTEXT           "No iPod found on computer",IDC_STATIC_NOTFOUND,323,36,101,8
+    CONTROL         "",IDC_OPT_TAB,"SysTabControl32",0x0,4,69,441,307
+    PUSHBUTTON      "Load iPod Firmware",IDC_LOADIPODFW_BUTTON,96,7,68,14,NOT WS_VISIBLE | WS_DISABLED
+    COMBOBOX        IDC_MODE_COMBO,39,7,53,120,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Edit Mode:",IDC_STATIC,4,9,35,10
+    PUSHBUTTON      "&Eject",ID_EJECT_BUTTON,369,50,31,14
+    PUSHBUTTON      "&Open Firmware...",ID_OPEN_FFILE,97,7,63,14,NOT WS_VISIBLE
+    PUSHBUTTON      "Write to iPod",IDC_WRITE2IPOD_FIRMWARE_BUTTON,222,48,50,14,NOT WS_VISIBLE | WS_DISABLED
 END
 
-IDD_PICTURES_DIALOG DIALOGEX 0, 0, 432, 227
+IDD_PICTURES_DIALOG DIALOGEX 0, 0, 431, 275
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
@@ -132,391 +137,392 @@ BEGIN
     LTEXT           "Height:",IDC_STATIC,171,9,24,8
     EDITTEXT        IDC_HEIGHT_EDIT,195,7,24,14,ES_AUTOHSCROLL | ES_READONLY
     LTEXT           "Bit depth:",IDC_STATIC,223,9,32,8
-    EDITTEXT        IDC_BITDEPTH_EDIT,255,7,22,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
+    EDITTEXT        IDC_BITDEPTH_EDIT,255,7,22,14,ES_AUTOHSCROLL | ES_READONLY
     PUSHBUTTON      "<<",ID_PREV_PICTURE,386,7,19,14,WS_DISABLED
-    PUSHBUTTON      ">>",ID_NEXT_PICTURE,406,7,19,14,WS_DISABLED
+    PUSHBUTTON      ">>",ID_NEXT_PICTURE,405,7,19,14,WS_DISABLED
     LTEXT           "Index:",IDC_STATIC,7,9,22,8
-    CONTROL         "Picture",IDC_PICTURE,"IpodPictureWnd",WS_VSCROLL | 
-                    WS_HSCROLL | WS_TABSTOP,7,24,361,196,WS_EX_CLIENTEDGE
-    PUSHBUTTON      "&Load bitmap",ID_LOAD_BITMAP,375,27,50,14,WS_DISABLED
-    PUSHBUTTON      "&Save bitmap",ID_SAVE_BITMAP,375,46,50,14,WS_DISABLED
+    CONTROL         "Picture",IDC_PICTURE,"IpodPictureWnd",WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,27,361,241,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "&Load bitmap",ID_LOAD_BITMAP,374,27,50,14,WS_DISABLED
+    PUSHBUTTON      "&Save bitmap",ID_SAVE_BITMAP,374,46,50,14,WS_DISABLED
     LTEXT           "Type:",IDC_STATIC,282,9,20,8
     EDITTEXT        IDC_TYPE_EDIT,302,7,22,14,ES_AUTOHSCROLL | ES_READONLY
-    COMBOBOX        IDC_PICIDX_COMBO,29,7,35,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Save &all",ID_SAVE_ALL,375,85,50,14,WS_DISABLED
-    PUSHBUTTON      "Loa&d all",ID_LOAD_ALL,375,65,50,14,WS_DISABLED
+    COMBOBOX        IDC_PICIDX_COMBO,29,7,35,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Save &all",ID_SAVE_ALL,374,85,50,14,WS_DISABLED
+    PUSHBUTTON      "Loa&d all",ID_LOAD_ALL,374,65,50,14,WS_DISABLED
     LTEXT           "ID:",IDC_STATIC,71,9,11,8
     EDITTEXT        IDC_ID_EDIT,83,7,31,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "&Copy image",ID_COPY_IMAGE,374,102,50,14,WS_DISABLED
+    PUSHBUTTON      "&Paste image",ID_PASTE_IMAGE,374,122,50,14,WS_DISABLED
+    PUSHBUTTON      "&Find resource",ID_FIND_BITMAP_RSRC,374,139,50,14,WS_DISABLED
+    PUSHBUTTON      "&Theme Previewer",IDC_THEMEPREVIEW_BUTTON,374,157,50,25,BS_MULTILINE | WS_DISABLED
 END
 
-IDD_FONTS_DIALOG DIALOGEX 0, 0, 432, 230
+IDD_FONTS_DIALOG DIALOGEX 0, 0, 432, 275
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Name:",IDC_STATIC,62,9,22,8
-    EDITTEXT        IDC_FONTNAME_EDIT,84,7,116,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
+    EDITTEXT        IDC_FONTNAME_EDIT,84,7,121,14,ES_AUTOHSCROLL | WS_DISABLED
     PUSHBUTTON      "<<",ID_PREV_PICTURE,386,7,19,14,WS_DISABLED
     PUSHBUTTON      ">>",ID_NEXT_PICTURE,406,7,19,14,WS_DISABLED
     LTEXT           "Index:",IDC_STATIC,7,9,22,8
-    CONTROL         "Picture",IDC_PICTURE,"IpodFontWnd",WS_TABSTOP,7,26,353,
-                    75,WS_EX_CLIENTEDGE
-    PUSHBUTTON      "&Load bitmap",ID_LOAD_BITMAP,375,26,50,14,WS_DISABLED
-    PUSHBUTTON      "&Save bitmap",ID_SAVE_BITMAP,375,41,50,14,WS_DISABLED
-    LTEXT           "Size:",IDC_STATIC,255,9,16,8
-    EDITTEXT        IDC_FONTSIZE_EDIT,271,7,17,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
-    COMBOBOX        IDC_FONTIDX_COMBO,29,7,29,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Picture",IDC_FONTZOOM,"IpodFontWnd",WS_TABSTOP,247,106,
-                    113,120,WS_EX_CLIENTEDGE
-    COMBOBOX        IDC_CHAR_COMBO,370,133,55,115,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Character:",IDC_STATIC,370,122,36,8
-    EDITTEXT        IDC_OFFSET1_EDIT,183,143,25,14,ES_AUTOHSCROLL
-    LTEXT           "Offset1:",IDC_STATIC,153,145,28,8
-    EDITTEXT        IDC_OFFSET2_EDIT,183,158,25,14,ES_AUTOHSCROLL
-    LTEXT           "Offset2:",IDC_STATIC,153,159,27,8
-    EDITTEXT        IDC_WIDTH_EDIT,183,173,25,14,ES_AUTOHSCROLL
-    LTEXT           "Width:",IDC_STATIC,153,175,22,8
-    EDITTEXT        IDC_IDENT_EDIT,183,188,25,14,ES_AUTOHSCROLL
-    LTEXT           "Ident:",IDC_STATIC,153,189,27,8
-    PUSHBUTTON      "&Refresh",IDC_REFRESH_BUTTON,375,101,50,14,WS_DISABLED
-    LTEXT           "Bit depth:",IDC_STATIC,291,9,32,8
-    EDITTEXT        IDC_BITDEPTH_EDIT,323,7,18,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
-    GROUPBOX        "Unicode Groups",IDC_STATIC,7,102,121,124
-    LTEXT           "Index:",IDC_STATIC,15,118,22,8
-    COMBOBOX        IDC_GROUPIDX_COMBO,47,116,37,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Start:",IDC_STATIC,16,137,20,8
-    LTEXT           "Length:",IDC_STATIC,15,153,26,8
-    EDITTEXT        IDC_GROUPLEN_EDIT,58,152,25,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_GROUPSTART_EDIT,58,135,25,14,ES_AUTOHSCROLL
-    LTEXT           "Table index:",IDC_STATIC,15,172,40,8
-    EDITTEXT        IDC_GROUPOFFSET_EDIT,58,169,25,14,ES_AUTOHSCROLL
-    GROUPBOX        "Character Mapping",IDC_STATIC,131,102,113,124
-    LTEXT           "Index",IDC_STATIC,137,115,20,8
-    COMBOBOX        IDC_CHARMAPIDX_COMBO,159,112,37,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CHARMAPIDX2_COMBO,159,128,37,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Explanation: Unicode characters U+0555 to U+0555 are mapped to entries 1234 to 2345 of the character mapping table",
-                    IDC_GROUPEXPLAIN_STATIC,15,186,104,33
-    LTEXT           "is mapped to",IDC_STATIC,199,114,42,8
-    LTEXT           "Index",IDC_STATIC,137,130,20,8
-    LTEXT           "which has:",IDC_STATIC,200,130,34,8
-    LTEXT           "U+",IDC_STATIC,46,137,11,8
-    PUSHBUTTON      "Save &metrics",ID_SAVE_METRICS,375,71,50,14,WS_DISABLED
-    PUSHBUTTON      "Load me&trics",ID_LOAD_METRICS,375,56,50,14,WS_DISABLED
-    PUSHBUTTON      "Make &Font",ID_MAKE_FONT,375,86,50,14,WS_DISABLED
-    CONTROL         "Use old metrics method",ID_CHK_NEWMETRICS,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,378,151,47,
-                    25
-    LTEXT           "Zoom Factor:",IDC_STATIC,375,186,50,8
-    CTEXT           "x8",IDC_STATIC_ZOOM,387,199,17,8
-    PUSHBUTTON      "+",ID_ZOOMIN_BUTTON,408,197,17,13,WS_DISABLED
-    PUSHBUTTON      "-",ID_ZOOMOUT_BUTTON,367,197,17,13,WS_DISABLED
-    CONTROL         "Show Grid",IDC_CHKGRID,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,374,216,44,10
-    PUSHBUTTON      "Explanation",IDC_EXPLAIN_BUTTON,155,206,59,13
-    PUSHBUTTON      "OTF Fonts",IDC_OTF_BUTTON,343,7,40,14,WS_DISABLED
-    LTEXT           "Style:",IDC_STATIC,202,9,20,8
-    EDITTEXT        IDC_FONTSTYLE_EDIT,221,7,31,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
+    CONTROL         "Picture",IDC_PICTURE,"IpodFontWnd",WS_TABSTOP,7,42,353,100,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "&Load bitmap",ID_LOAD_BITMAP,366,43,59,14,WS_DISABLED
+    PUSHBUTTON      "&Save bitmap",ID_SAVE_BITMAP,366,58,59,14,WS_DISABLED
+    LTEXT           "Size:",IDC_STATIC,270,9,16,8
+    EDITTEXT        IDC_FONTSIZE_EDIT,286,7,17,14,ES_AUTOHSCROLL | WS_DISABLED
+    COMBOBOX        IDC_FONTIDX_COMBO,29,7,29,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Picture",IDC_FONTZOOM,"IpodFontWnd",WS_TABSTOP,247,151,113,120,WS_EX_CLIENTEDGE
+    COMBOBOX        IDC_CHAR_COMBO,370,196,55,115,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Character:",IDC_STATIC,370,185,36,8
+    EDITTEXT        IDC_OFFSET1_EDIT,185,187,25,14,ES_AUTOHSCROLL
+    LTEXT           "Offset1:",IDC_STATIC,155,190,28,8
+    EDITTEXT        IDC_OFFSET2_EDIT,185,202,25,14,ES_AUTOHSCROLL
+    LTEXT           "Offset2:",IDC_STATIC,155,203,27,8
+    EDITTEXT        IDC_WIDTH_EDIT,185,217,25,14,ES_AUTOHSCROLL
+    LTEXT           "Width:",IDC_STATIC,155,219,22,8
+    EDITTEXT        IDC_IDENT_EDIT,185,233,25,14,ES_AUTOHSCROLL
+    LTEXT           "Ident:",IDC_STATIC,155,233,27,8
+    PUSHBUTTON      "&Refresh",IDC_REFRESH_BUTTON,366,151,59,14,WS_DISABLED
+    LTEXT           "Bit depth:",IDC_STATIC,311,9,32,8
+    EDITTEXT        IDC_BITDEPTH_EDIT,343,7,22,14,ES_AUTOHSCROLL | ES_READONLY
+    GROUPBOX        "Unicode Groups",IDC_STATIC,7,147,121,124
+    LTEXT           "Index:",IDC_STATIC,15,161,22,8
+    COMBOBOX        IDC_GROUPIDX_COMBO,47,159,37,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Start:",IDC_STATIC,16,180,20,8
+    LTEXT           "Length:",IDC_STATIC,15,196,26,8
+    EDITTEXT        IDC_GROUPLEN_EDIT,58,194,25,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_GROUPSTART_EDIT,58,177,25,14,ES_AUTOHSCROLL
+    LTEXT           "Table index:",IDC_STATIC,15,215,40,8
+    EDITTEXT        IDC_GROUPOFFSET_EDIT,58,212,25,14,ES_AUTOHSCROLL
+    GROUPBOX        "Character Mapping",IDC_STATIC,131,147,113,124
+    LTEXT           "Index",IDC_STATIC,139,159,20,8
+    COMBOBOX        IDC_CHARMAPIDX_COMBO,161,156,37,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CHARMAPIDX2_COMBO,161,172,37,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Explanation: Unicode characters U+0555 to U+0555 are mapped to entries 1234 to 2345 of the character mapping table",IDC_GROUPEXPLAIN_STATIC,15,228,104,33
+    LTEXT           "is mapped to",IDC_STATIC,201,158,42,8
+    LTEXT           "Index",IDC_STATIC,139,174,20,8
+    LTEXT           "which has:",IDC_STATIC,201,174,34,8
+    LTEXT           "U+",IDC_STATIC,46,180,11,8
+    PUSHBUTTON      "Save &metrics",ID_SAVE_METRICS,366,88,59,14,WS_DISABLED
+    PUSHBUTTON      "Load me&trics",ID_LOAD_METRICS,366,73,59,14,WS_DISABLED
+    PUSHBUTTON      "Make &Font",ID_MAKE_FONT,366,134,59,14,WS_DISABLED
+    LTEXT           "Zoom Factor:",IDC_STATIC,375,231,50,8
+    CTEXT           "x8",IDC_STATIC_ZOOM,387,244,17,8
+    PUSHBUTTON      "+",ID_ZOOMIN_BUTTON,408,242,17,13,WS_DISABLED
+    PUSHBUTTON      "-",ID_ZOOMOUT_BUTTON,367,242,17,13,WS_DISABLED
+    CONTROL         "Show Grid",IDC_CHKGRID,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,374,261,44,10
+    PUSHBUTTON      "Explanation",IDC_EXPLAIN_BUTTON,157,250,59,13
+    PUSHBUTTON      "OTF Fonts",IDC_OTF_BUTTON,366,26,59,14,WS_DISABLED,WS_EX_DLGMODALFRAME
+    LTEXT           "Style:",IDC_STATIC,212,9,20,8
+    EDITTEXT        IDC_FONTSTYLE_EDIT,231,7,31,14,ES_AUTOHSCROLL | WS_DISABLED
+    PUSHBUTTON      "Save  Font",IDC_SAVE_IFONT,366,118,59,14,BS_VCENTER | BS_MULTILINE | WS_DISABLED
+    PUSHBUTTON      "Multi Load Glyph",IDC_BUTTON1,92,23,59,14,NOT WS_VISIBLE | WS_DISABLED
+    PUSHBUTTON      "Multi Save Glyph",IDC_MULTISAVE_GLYPH,154,23,59,14,NOT WS_VISIBLE | WS_DISABLED
+    PUSHBUTTON      "Load  Font",IDC_LOADFONT_BUTTON,366,103,59,14,BS_VCENTER | BS_MULTILINE | WS_DISABLED
+    PUSHBUTTON      "Change Font Color",IDC_CHANGE_FONT_COLOR,216,23,66,14,WS_DISABLED
 END
 
 IDD_SCAN_DIALOG DIALOGEX 0, 0, 186, 28
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
-    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Scanning Firmware"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_SCAN_PROGRESS,"msctls_progress32",WS_BORDER,7,7,
-                    172,14
+    CONTROL         "",IDC_SCAN_PROGRESS,"msctls_progress32",WS_BORDER,7,7,172,14
 END
 
-IDD_STRINGS_DIALOG DIALOGEX 0, 0, 432, 231
+IDD_STRINGS_DIALOG DIALOGEX 0, 0, 432, 276
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LISTBOX         IDC_STRING_LIST,7,57,418,66,LBS_USETABSTOPS | 
-                    LBS_NOINTEGRALHEIGHT | NOT WS_VISIBLE | WS_DISABLED | 
-                    WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+    LISTBOX         IDC_STRING_LIST,7,57,418,111,LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | NOT WS_VISIBLE | WS_DISABLED | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
     DEFPUSHBUTTON   "&Find",IDC_FIND_BUTTON,274,24,43,14,WS_DISABLED
     EDITTEXT        IDC_FIND_EDIT,7,24,262,14,ES_AUTOHSCROLL | WS_DISABLED
-    CONTROL         "Hex",IDC_HEX,"IpodHexWnd",WS_VSCROLL | WS_TABSTOP,7,127,
-                    418,97,WS_EX_CLIENTEDGE
-    PUSHBUTTON      "Find &Next",IDC_FINDNEXT_BUTTON,320,24,44,14,
-                    WS_DISABLED
-    PUSHBUTTON      "&Change String",IDC_CHANGETEXT_BUTTON,273,40,50,14,
-                    WS_DISABLED
+    CONTROL         "Hex",IDC_HEX,"IpodHexWnd",WS_VSCROLL | WS_TABSTOP,7,171,418,98,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Find &Next",IDC_FINDNEXT_BUTTON,320,24,44,14,WS_DISABLED
+    PUSHBUTTON      "&Change String",IDC_CHANGETEXT_BUTTON,273,40,50,14,WS_DISABLED
     EDITTEXT        IDC_CHANGE_EDIT,7,40,262,14,ES_AUTOHSCROLL | WS_DISABLED
-    PUSHBUTTON      "Check Length",IDC_CHECKTEXT_BUTTON,326,40,51,14,
-                    WS_DISABLED
-    CONTROL         "Wildcard match",IDC_CHKWILD,"Button",BS_AUTOCHECKBOX | 
-                    BS_CENTER | WS_DISABLED | WS_TABSTOP,365,25,60,12,
-                    WS_EX_RTLREADING
-    PUSHBUTTON      "&Save List",IDC_SAVECHANGES_BUTTON,320,7,53,14,
-                    WS_DISABLED
-    PUSHBUTTON      "&Load List",IDC_LOADCHANGES_BUTTON,376,7,49,14,
-                    WS_DISABLED
+    PUSHBUTTON      "Check Length",IDC_CHECKTEXT_BUTTON,326,40,51,14,WS_DISABLED
+    CONTROL         "Wildcard match",IDC_CHKWILD,"Button",BS_AUTOCHECKBOX | BS_CENTER | WS_DISABLED | WS_TABSTOP,365,25,60,12,WS_EX_RTLREADING
+    PUSHBUTTON      "&Save List",IDC_SAVECHANGES_BUTTON,320,7,53,14,WS_DISABLED
+    PUSHBUTTON      "&Load List",IDC_LOADCHANGES_BUTTON,376,7,49,14,WS_DISABLED
     LTEXT           "Hex GoTo:",IDC_STATIC,83,7,43,9
     PUSHBUTTON      "&Jump",IDC_JUMP_BUTTON,162,7,20,14,WS_DISABLED
     EDITTEXT        IDC_ADDR_EDIT,118,7,41,14,ES_AUTOHSCROLL | WS_DISABLED
-    CONTROL         "Hex string",IDC_CHKHEX,"Button",BS_AUTOCHECKBOX | 
-                    BS_CENTER | WS_DISABLED | WS_TABSTOP,380,41,45,12,
-                    WS_EX_RTLREADING
-    PUSHBUTTON      "String Filter",IDC_SFILTER_BUTTON,274,7,43,14,
-                    WS_DISABLED
-    PUSHBUTTON      "Volume Hack",IDC_VOLUMEHACK_BUTTON,226,7,45,14,
-                    WS_DISABLED
+    CONTROL         "Hex string",IDC_CHKHEX,"Button",BS_AUTOCHECKBOX | BS_CENTER | WS_DISABLED | WS_TABSTOP,380,41,45,12,WS_EX_RTLREADING
+    PUSHBUTTON      "String Filter",IDC_SFILTER_BUTTON,274,7,43,14,WS_DISABLED
+    PUSHBUTTON      "Volume Hack",IDC_VOLUMEHACK_BUTTON,226,7,45,14,WS_DISABLED
     LTEXT           "Lang block:",IDC_STATIC,7,7,36,9
-    COMBOBOX        IDC_LANGIDX_COMBO,43,7,38,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    CONTROL         "",IDC_LANGSTRING_LIST,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | 
-                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,58,418,65
+    COMBOBOX        IDC_LANGIDX_COMBO,43,7,38,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_LANGSTRING_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,58,418,110
     PUSHBUTTON      "Translate",IDC_TRANSLATE_BUTTON,185,7,38,14,WS_DISABLED
 END
 
 IDD_TWEAKS_DIALOG DIALOGEX 0, 0, 149, 204
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
-    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "iPod Tweaks"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "&Apply Tweaks",ID_APPLY_BUTTON,45,151,61,14
-    CONTROL         "Voltage tweak - Show voltage (mV) meter instead of battery display.",
-                    ID_VOLTAGE_CHKBOX,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,7,27,135,18
-    CONTROL         "CPU usage meter tweak - Shows CPU usage in iPod's titlebar.",
-                    ID_CPU_CHKBOX,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
-                    WS_TABSTOP,7,51,135,18
-    CONTROL         "Deep sleep - Forces deep sleep mode when iPod's shut down.",
-                    ID_DEEPSLEEP_CHKBOX,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,7,75,135,18
-    CONTROL         "Disable caching - Forces iPod's hard drive to constantly spin (beware: drains battery).",
-                    ID_CACHE_CHKBOX,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
-                    WS_TABSTOP,7,100,135,24
-    CTEXT           "Note: The tweaks don't work on iPod Photo and above.",
-                    IDC_STATIC,7,7,135,18
-    CONTROL         "No deep sleep - Disable deep sleep mode in the iPod.",
-                    ID_NODEEPSLEEP_CHKBOX,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,7,130,135,18
+    CONTROL         "Voltage tweak - Show voltage (mV) meter instead of battery display.",ID_VOLTAGE_CHKBOX,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,27,135,18
+    CONTROL         "CPU usage meter tweak - Shows CPU usage in iPod's titlebar.",ID_CPU_CHKBOX,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,51,135,18
+    CONTROL         "Deep sleep - Forces deep sleep mode when iPod's shut down.",ID_DEEPSLEEP_CHKBOX,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,75,135,18
+    CONTROL         "Disable caching - Forces iPod's hard drive to constantly spin (beware: drains battery).",ID_CACHE_CHKBOX,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,100,135,24
+    CTEXT           "Note: The tweaks don't work on iPod Photo and above.",IDC_STATIC,7,7,135,18
+    CONTROL         "No deep sleep - Disable deep sleep mode in the iPod.",ID_NODEEPSLEEP_CHKBOX,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,130,135,18
     LTEXT           "iPod Volume Hack:",IDC_STATIC,19,170,58,9
     PUSHBUTTON      "UnCap Volume",ID_VOLUMECAP_BUTTON,87,168,55,14
-    LTEXT           "* Volume hack doesn't work for iPod 1/2G and iPods later than 5G!",
-                    IDC_STATIC,7,182,126,16
+    LTEXT           "* Volume hack doesn't work for iPod 1/2G and iPods later than 5G!",IDC_STATIC,7,182,126,16
 END
 
-IDD_HELP_DIALOG DIALOGEX 0, 0, 232, 243
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
-    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+IDD_HELP_DIALOG DIALOGEX 0, 0, 247, 263
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "iPodWizard Help"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "&What is my iPod generation?",ID_FINDGEN_BUTTON,67,25,
-                    96,14
-    CTEXT           "www.iPodWizard.net",IDC_HYPERLINK,143,227,67,10
+    PUSHBUTTON      "&What is my iPod generation?",ID_FINDGEN_BUTTON,72,26,96,14
+    CTEXT           "www.iPodWizard.net",IDC_HYPERLINK,143,247,67,10
     LTEXT           "Choose your iPod:",IDC_STATIC,22,46,59,11
-    COMBOBOX        IDC_IPOD_COMBO,81,45,122,120,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Firmware version:",IDC_STATIC,7,65,59,11
-    LTEXT           "Main menu font index:",IDC_STATIC,115,65,74,11
-    LTEXT           "For more help and info, visit our website:",IDC_STATIC,
-                    7,227,131,10
-    CTEXT           "First make sure you know what iPod you've got, you can use the button below (your iPod has to be connected) if you don't know.",
-                    IDC_STATIC,7,7,218,18
-    LTEXT           "none",IDC_STATIC_FIRM,67,65,44,11
-    LTEXT           "none",IDC_STATIC_FONT,189,65,36,11
-    LTEXT           "Other Stuff:",IDC_STATIC,96,165,40,10
-    LTEXT           "String Filter: You can load your list of strings so you'll change just what you need, string filter files are just text files with the strings, each in one line.",
-                    IDC_STATIC,7,175,218,25
-    LTEXT           "Volume Hack: It is known that iPods purchased in non U.S. have volume limit and this can be uncapped using iPW. Note that iPW cannot uncap the volume of iPod models 1/2G or above 5G!",
-                    IDC_STATIC,7,201,218,25
-    LTEXT           "Language indexes:",IDC_STATIC,79,78,62,11
-    LTEXT           "none",IDC_STATIC_LANG,7,89,218,74
+    COMBOBOX        IDC_IPOD_COMBO,81,45,122,120,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Firmware version:",IDC_STATIC,7,69,59,11
+    LTEXT           "Main menu font:",IDC_STATIC,111,69,54,11
+    LTEXT           "For more help and info, visit our website:",IDC_STATIC,7,247,131,10
+    CTEXT           "First make sure you know what iPod you've got, you can use the button below (your iPod has to be connected) if you don't know.",IDC_STATIC,7,7,233,18
+    LTEXT           "none",IDC_STATIC_FIRM,67,69,44,11
+    LTEXT           "none",IDC_STATIC_FONT,165,69,75,21
+    LTEXT           "Other Stuff:",IDC_STATIC,96,180,40,10
+    LTEXT           "String Filter: You can load your list of strings so you'll change just what you need, string filter files are just text files with the strings, each in one line.",IDC_STATIC,7,190,233,25
+    LTEXT           "Volume Hack: It is known that iPods purchased in non U.S. have volume limit and this can be uncapped using iPW. Note that iPW cannot uncap the volume of iPod models 1/2G or above 5G!",IDC_STATIC,7,216,233,25
+    LTEXT           "Language indexes:",IDC_STATIC,79,93,62,11
+    LTEXT           "none",IDC_STATIC_LANG,7,104,233,74
 END
 
-IDD_EDITOR_DIALOG DIALOGEX 0, 0, 442, 255
+IDD_EDITOR_DIALOG DIALOGEX 0, 0, 442, 300
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_PROP_TAB,"SysTabControl32",0x0,0,0,441,255
+    CONTROL         "",IDC_PROP_TAB,"SysTabControl32",0x0,0,0,441,296
 END
 
-IDD_THEMES_DIALOG DIALOGEX 0, 0, 441, 249
+IDD_THEMES_DIALOG DIALOGEX 0, 0, 441, 300
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Make Theme",IDC_MAKETHEME_BUTTON,315,25,76,14,
-                    WS_DISABLED
-    LTEXT           "A theme consists of upto three different materials (Graphics, Fonts and Strings) but only one is nessecary to make a working theme. In order to make or load a theme you first need to load the firmware the theme is intended for.",
-                    IDC_STATIC,9,7,423,17
-    LTEXT           "Graphics:",IDC_STATIC,167,39,30,10
-    LTEXT           "In order to make a theme with graphics, you need first to save all the graphics you've changed (use either 'Save bitmap' or 'Save All' button in the Pictures tab in the firmware editor). Then add them to the list below:",
-                    IDC_STATIC,9,49,383,19
-    CONTROL         "",IDC_GRAPHICS_LIST,"SysListView32",LVS_REPORT | 
-                    LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,10,69,334,39
-    PUSHBUTTON      "Load theme graphics",IDC_LOADGRAPHICS_BUTTON,352,71,79,
-                    15,WS_DISABLED
-    PUSHBUTTON      "Delete from list",IDC_DELETEGRAPHIC_BUTTON,352,89,79,14
-    LTEXT           "Fonts:",IDC_STATIC,171,111,30,10
-    CONTROL         "",IDC_FONT_LIST,"SysListView32",LVS_REPORT | 
-                    LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,10,141,263,39
-    PUSHBUTTON      "Load theme font",IDC_LOADFONT_BUTTON,352,143,79,15,
-                    WS_DISABLED
-    PUSHBUTTON      "Delete from list",IDC_DELETEFONT_BUTTON,352,161,79,14
-    LTEXT           "In order to make a theme with fonts, you need first to save all the fonts you've changed (use 'Save bitmap' and 'Save Metrics' buttons or 'Save Font' button for OTF in the Fonts tab in the firmware editor). Then add them to the list below:",
-                    IDC_STATIC,9,120,383,19
-    LTEXT           "Strings:",IDC_STATIC,171,183,30,9
-    LTEXT           "In order to make a theme with changed strings, you need to have a string list file for a specific language block.",
-                    IDC_STATIC,11,194,356,12
-    PUSHBUTTON      "Load String List File",IDC_LOADSCF_BUTTON,261,222,88,13,
-                    WS_DISABLED
-    PUSHBUTTON      "Load Theme",IDC_LOADTHEME_BUTTON,24,25,76,14,
-                    WS_DISABLED
-    LTEXT           "Goto Strings tab in the firmware editor and change the string you want using 'Change String' button and then save the whole list into a file using the 'Save List' button. The language block you want is usaully English but can also be other languages.",
-                    IDC_STATIC,11,202,401,17
-    LTEXT           "Choose font index for",IDC_STATIC,277,143,70,9
-    COMBOBOX        IDC_FONTIDX_CMB,320,151,29,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "No String List file loaded",IDC_SCFPATH_STATIC,12,223,
-                    245,13,0,WS_EX_CLIENTEDGE
-    PUSHBUTTON      "Clear",IDC_CLEARSCF_BUTTON,352,222,23,13
-    COMBOBOX        IDC_OTFFONTIDX_CMB,320,164,29,152,CBS_DROPDOWNLIST | NOT 
-                    WS_VISIBLE | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "OpenType",IDC_OTF_CHK,"Button",BS_AUTOCHECKBOX | 
-                    BS_RIGHT | NOT WS_VISIBLE | WS_TABSTOP,275,165,44,9
-    LTEXT           "loaded font:",IDC_STATIC,277,151,40,9
-    COMBOBOX        IDC_STRIDX_CMB,402,223,29,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Index:",IDC_STATIC,379,224,22,9
-    PUSHBUTTON      "Associate .iPW theme file with the program",
-                    IDC_ASSOCIATE_IPW,142,26,142,12
+    PUSHBUTTON      "Make Theme",IDC_MAKETHEME_BUTTON,271,30,76,14,WS_DISABLED
+    LTEXT           "A theme consists of upto four different materials (Graphics, Fonts, Strings and Layout resources) but only one is nessecary to make a working theme. In order to make or load a theme you first need to load the firmware the theme is intended for.",IDC_STATIC,9,7,423,17
+    LTEXT           "Graphics:",IDC_STATIC,167,44,30,10
+    CONTROL         "",IDC_GRAPHICS_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,11,59,334,39
+    PUSHBUTTON      "Load theme graphics",IDC_LOADGRAPHICS_BUTTON,353,61,79,15,WS_DISABLED
+    PUSHBUTTON      "Delete from list",IDC_DELETEGRAPHIC_BUTTON,353,80,79,14
+    LTEXT           "Fonts:",IDC_STATIC,173,101,30,10
+    CONTROL         "",IDC_FONT_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,11,114,263,39
+    PUSHBUTTON      "Load theme font",IDC_LOADFONT_BUTTON,353,113,79,15,WS_DISABLED
+    PUSHBUTTON      "Delete from list",IDC_DELETEFONT_BUTTON,353,132,79,14
+    LTEXT           "Strings:",IDC_STATIC,171,204,30,9
+    PUSHBUTTON      "Load String List File",IDC_LOADSCF_BUTTON,261,217,88,13,WS_DISABLED
+    PUSHBUTTON      "Load Theme",IDC_LOADTHEME_BUTTON,355,30,76,14,WS_DISABLED
+    LTEXT           "Choose font index for",IDC_STATIC,279,113,70,9
+    COMBOBOX        IDC_FONTIDX_CMB,321,121,29,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "No String List file loaded",IDC_SCFPATH_STATIC,13,218,245,13,0,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Clear",IDC_CLEARSCF_BUTTON,353,217,23,13
+    COMBOBOX        IDC_OTFFONTIDX_CMB,321,135,29,152,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "OpenType",IDC_OTF_CHK,"Button",BS_AUTOCHECKBOX | BS_RIGHT | NOT WS_VISIBLE | WS_TABSTOP,277,135,44,9
+    LTEXT           "loaded font:",IDC_STATIC,279,121,40,9
+    COMBOBOX        IDC_STRIDX_CMB,401,217,29,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Index:",IDC_STATIC,379,219,22,9
+    LTEXT           "Resources:",IDC_STATIC,169,154,35,10
+    CONTROL         "",IDC_RESOURCES_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,9,164,334,39
+    PUSHBUTTON      "Load theme resources",IDC_TLOADRESOURCES_BUTTON,351,167,79,15,WS_DISABLED
+    PUSHBUTTON      "Delete from list",IDC_TDELETERESOURCE_BUTTON,351,185,79,14
+    PUSHBUTTON      "Theme Previewer",IDC_THEMEPREVIEWER_BUTTON,9,30,76,14,WS_DISABLED
+    PUSHBUTTON      "Explanation about themes",IDC_EXPLAIN_BUTTON,96,238,100,14
+    LTEXT           "Click to learn about themes:",IDC_STATIC,0,240,93,10
+    PUSHBUTTON      "Make Full Theme",IDC_MAKEFULLTHEME_BUTTON,355,270,71,14,WS_DISABLED
+    LTEXT           "You can also make a full theme with the current loaded firmware, just select what you want to be in the theme:",IDC_STATIC,0,254,357,11
+    CONTROL         "Resources",IDC_CHK_RESOURCES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,112,271,46,12
+    CONTROL         "Graphics",IDC_CHK_GRAPHICS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,0,271,39,12
+    CONTROL         "Fonts",IDC_CHK_FONTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,39,271,31,12
+    CONTROL         "Strings",IDC_CHK_STRINGS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,73,271,35,12
+    CONTROL         "Scheme Layouts",IDC_CHK_RES_LAYOUT,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,171,263,39,28
+    CONTROL         "Font types",IDC_CHK_RES_TYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,213,271,48,12
+    CONTROL         "Menus",IDC_CHK_RES_MENU,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,261,270,34,12
+    CONTROL         "Command Table",IDC_CHK_RES_TCMD,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,297,262,43,29
+    LTEXT           "[",IDC_STATIC,163,271,8,10
+    LTEXT           "]",IDC_STATIC,344,270,8,10
 END
 
-IDD_UPDATER_DIALOG DIALOGEX 0, 0, 441, 249
+IDD_UPDATER_DIALOG DIALOGEX 0, 0, 441, 300
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Updater Manager",IDC_STATIC,174,12,56,10
-    LTEXT           "In updater manager you can customize you're updater by extracting firmware binaries, deleting specifc firmwares (usaully which you don't need - other than your iPod) and loading a pre made firmware binary.",
-                    IDC_STATIC,31,28,383,19
-    CONTROL         "",IDC_FIRMWARE_LIST,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
-                    WS_BORDER | WS_TABSTOP,31,76,357,64
-    PUSHBUTTON      "Extract firmware binary",IDC_EXTRACT_BUTTON,71,146,79,
-                    15
+    LTEXT           "In updater manager you can customize you're updater by extracting firmware binaries, deleting specifc firmwares (usaully which you don't need - other than your iPod) and loading a pre made firmware binary.",IDC_STATIC,31,28,383,19
+    CONTROL         "",IDC_FIRMWARE_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,31,76,357,64
+    PUSHBUTTON      "Extract firmware binary",IDC_EXTRACT_BUTTON,71,146,79,15
     PUSHBUTTON      "Delete firmware binary",IDC_DELETE_BUTTON,255,146,79,14
     PUSHBUTTON      "Load firmware binary",IDC_LOAD_BUTTON,163,146,79,15
-    LTEXT           "Firmware list on current updater:",IDC_STATIC,31,62,110,
-                    10
-    LTEXT           "Once you are finished, just click the Write button above to save updater changes.",
-                    IDC_STATIC,31,46,282,10
-    PUSHBUTTON      "Write updater changes",IDC_WRITEALL_BUTTON,153,164,99,
-                    17
+    LTEXT           "Firmware list on current updater:",IDC_STATIC,31,62,110,10
+    LTEXT           "Once you are finished, just click the Write button above to save updater changes.",IDC_STATIC,31,46,282,10
+    PUSHBUTTON      "Write updater changes",IDC_WRITEALL_BUTTON,153,164,99,17
     LTEXT           "iPod Device Firmware:",IDC_STATIC,31,184,76,10
-    LTEXT           "You can extract the current firmware that is on your iPod. This is good if you made changes to the firmware (like a theme) and it's wiped from the computer or if you are just interested in the firmware on your iPod.",
-                    IDC_STATIC,31,193,389,19
-    LTEXT           "You can afterwards load the firmware back to the updater if you want to. * You need to plugin your iPod first to do so.",
-                    IDC_STATIC,31,210,380,11
-    PUSHBUTTON      "Extract firmware binary from your iPod",
-                    IDC_EXTRACTIPOD_BUTTON,142,222,129,15
+    LTEXT           "You can extract the current firmware that is on your iPod. This is good if you made changes to the firmware (like a theme) and it's wiped from the computer or if you are just interested in the firmware on your iPod.",IDC_STATIC,31,193,389,19
+    LTEXT           "You can afterwards load the firmware back to the updater if you want to. * You need to plugin your iPod first to do so.",IDC_STATIC,31,210,380,11
+    PUSHBUTTON      "Extract firmware binary from your iPod",IDC_EXTRACTIPOD_BUTTON,142,222,129,15
 END
 
-IDD_OTF_DIALOG DIALOGEX 0, 0, 432, 230
+IDD_OTF_DIALOG DIALOGEX 0, 0, 432, 275
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Name:",IDC_STATIC,62,9,22,8
-    EDITTEXT        IDC_FONTNAME_EDIT,84,7,109,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
+    EDITTEXT        IDC_FONTNAME_EDIT,84,7,109,14,ES_AUTOHSCROLL | ES_READONLY
     PUSHBUTTON      "<<",ID_PREV_PICTURE,386,7,19,14,WS_DISABLED
     PUSHBUTTON      ">>",ID_NEXT_PICTURE,406,7,19,14,WS_DISABLED
     LTEXT           "Index:",IDC_STATIC,7,9,22,8
-    CONTROL         "Picture",IDC_PICTURE,"IpodFontWnd",WS_TABSTOP,130,26,
-                    228,120,WS_EX_CLIENTEDGE
+    CONTROL         "Picture",IDC_PICTURE,"IpodFontWnd",WS_TABSTOP,130,26,228,128,WS_EX_CLIENTEDGE
     PUSHBUTTON      "&Load Font",ID_LOAD_FONT,371,50,54,14,WS_DISABLED
     PUSHBUTTON      "&Save Font",ID_SAVE_FONT,371,65,54,14,WS_DISABLED
     LTEXT           "Size:",IDC_STATIC,258,9,16,8
-    EDITTEXT        IDC_FONTSIZE_EDIT,277,7,22,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
-    COMBOBOX        IDC_FONTIDX_COMBO,29,7,29,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Picture",IDC_FONTZOOM,"IpodFontWnd",WS_TABSTOP,163,152,
-                    141,74,WS_EX_CLIENTEDGE
-    PUSHBUTTON      "&Refresh",IDC_REFRESH_BUTTON,371,97,54,14,WS_DISABLED
+    EDITTEXT        IDC_FONTSIZE_EDIT,277,7,22,14,ES_AUTOHSCROLL | ES_READONLY
+    COMBOBOX        IDC_FONTIDX_COMBO,29,7,29,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Picture",IDC_FONTZOOM,"IpodFontWnd",WS_TABSTOP,154,180,150,91,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "&Refresh",IDC_REFRESH_BUTTON,371,131,54,14,WS_DISABLED
     LTEXT           "Bit depth:",IDC_STATIC,304,9,32,8
-    EDITTEXT        IDC_BITDEPTH_EDIT,336,7,22,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
+    EDITTEXT        IDC_BITDEPTH_EDIT,336,7,22,14,ES_AUTOHSCROLL | ES_READONLY
     PUSHBUTTON      "&Make Font",ID_MAKE_FONT,371,81,54,14,WS_DISABLED
-    EDITTEXT        IDC_WIDTH_EDIT,40,174,25,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Width:",IDC_STATIC,15,177,22,8
-    EDITTEXT        IDC_BEARINGX_EDIT,109,174,25,14,ES_AUTOHSCROLL
-    LTEXT           "BearingX:",IDC_STATIC,76,177,30,8
-    GROUPBOX        "Unicode Groups",IDC_STATIC,7,22,118,124
-    LTEXT           "Index:",IDC_STATIC,17,35,22,8
-    COMBOBOX        IDC_GROUPIDX_COMBO,49,33,37,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Start:",IDC_STATIC,18,54,20,8
-    LTEXT           "End:",IDC_STATIC,17,70,16,8
-    EDITTEXT        IDC_GROUPEND_EDIT,60,69,25,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_GROUPSTART_EDIT,60,52,25,14,ES_AUTOHSCROLL
-    LTEXT           "Glyph index:",IDC_STATIC,17,89,41,8
-    EDITTEXT        IDC_GROUPOFFSET_EDIT,60,86,25,14,ES_AUTOHSCROLL
-    GROUPBOX        "Glyphs",IDC_STATIC,7,148,135,78
-    LTEXT           "Index",IDC_STATIC,15,158,20,8
-    COMBOBOX        IDC_GLYPHIDX_COMBO,40,156,37,152,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Explanation: Unicode characters U+0555 to U+0555 are mapped to entries 1234 to 2345 of the glyphs table",
-                    IDC_GROUPEXPLAIN_STATIC,16,105,104,33
-    LTEXT           "U+",IDC_STATIC,48,54,11,8
-    EDITTEXT        IDC_BEARINGY_EDIT,109,189,25,14,ES_AUTOHSCROLL
-    LTEXT           "BearingY:",IDC_STATIC,76,192,29,8
-    COMBOBOX        IDC_CHAR_COMBO,369,128,55,115,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Character:",IDC_STATIC,368,117,36,8
-    LTEXT           "Zoom Factor:",IDC_STATIC,319,174,50,8
-    CTEXT           "x6",IDC_STATIC_ZOOM,331,187,17,8
-    PUSHBUTTON      "+",ID_ZOOMIN_BUTTON,353,185,17,13,WS_DISABLED
-    PUSHBUTTON      "-",ID_ZOOMOUT_BUTTON,311,185,17,13,WS_DISABLED
-    CONTROL         "Show Grid",IDC_CHKGRID,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,319,204,44,10
+    EDITTEXT        IDC_WIDTH_EDIT,39,214,25,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Width:",IDC_STATIC,14,217,22,8
+    EDITTEXT        IDC_BEARINGX_EDIT,108,214,25,14,ES_AUTOHSCROLL
+    LTEXT           "BearingX:",IDC_STATIC,75,217,30,8
+    GROUPBOX        "Unicode Groups",IDC_STATIC,7,22,118,131
+    LTEXT           "Index:",IDC_STATIC,17,40,22,8
+    COMBOBOX        IDC_GROUPIDX_COMBO,49,38,37,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Start:",IDC_STATIC,18,59,20,8
+    LTEXT           "End:",IDC_STATIC,17,75,16,8
+    EDITTEXT        IDC_GROUPEND_EDIT,60,74,25,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_GROUPSTART_EDIT,60,57,25,14,ES_AUTOHSCROLL
+    LTEXT           "Glyph index:",IDC_STATIC,17,94,41,8
+    EDITTEXT        IDC_GROUPOFFSET_EDIT,60,91,25,14,ES_AUTOHSCROLL
+    GROUPBOX        "Glyphs",IDC_STATIC,7,176,135,95
+    LTEXT           "Index",IDC_STATIC,14,198,20,8
+    COMBOBOX        IDC_GLYPHIDX_COMBO,39,196,37,152,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Explanation: Unicode characters U+0555 to U+0555 are mapped to entries 1234 to 2345 of the glyphs table",IDC_GROUPEXPLAIN_STATIC,16,112,104,33
+    LTEXT           "U+",IDC_STATIC,48,59,11,8
+    EDITTEXT        IDC_BEARINGY_EDIT,108,229,25,14,ES_AUTOHSCROLL
+    LTEXT           "BearingY:",IDC_STATIC,75,232,29,8
+    COMBOBOX        IDC_CHAR_COMBO,369,161,55,115,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Character:",IDC_STATIC,368,150,36,8
+    LTEXT           "Zoom Factor:",IDC_STATIC,326,206,50,8
+    CTEXT           "x6",IDC_STATIC_ZOOM,338,219,17,8
+    PUSHBUTTON      "+",ID_ZOOMIN_BUTTON,360,217,17,13,WS_DISABLED
+    PUSHBUTTON      "-",ID_ZOOMOUT_BUTTON,318,217,17,13,WS_DISABLED
+    CONTROL         "Show Grid",IDC_CHKGRID,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,326,236,44,10
     LTEXT           "Style:",IDC_STATIC,196,9,20,8
-    EDITTEXT        IDC_FONTSTYLE_EDIT,216,7,38,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
+    EDITTEXT        IDC_FONTSTYLE_EDIT,216,7,38,14,ES_AUTOHSCROLL | ES_READONLY
     PUSHBUTTON      "Bitmap Fonts",IDC_BMP_BUTTON,371,26,54,14,WS_DISABLED
-    LTEXT           "U+",IDC_STATIC,48,70,11,8
-    EDITTEXT        IDC_GINDEX_EDIT,89,156,35,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
-    LTEXT           "to",IDC_STATIC,79,158,8,8
-    LTEXT           "Height:",IDC_STATIC,15,192,26,8
-    EDITTEXT        IDC_HEIGHT_TEXT,40,189,25,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
-    PUSHBUTTON      "Load Glyph",ID_LOAD_GLYPH,375,174,50,14,WS_DISABLED
-    PUSHBUTTON      "Save Glyph",ID_SAVE_GLYPH,375,190,50,14,WS_DISABLED
-    EDITTEXT        IDC_ADVANCE_EDIT,77,205,25,14,ES_AUTOHSCROLL
-    LTEXT           "Advance:",IDC_STATIC,43,208,29,8
-    PUSHBUTTON      "Multi Load Glyph",ID_MULLOAD_GLYPH,368,212,57,14,
-                    WS_DISABLED
-    EDITTEXT        IDC_ALEFT_EDIT,393,158,25,14,ES_AUTOHSCROLL | NOT 
-                    WS_VISIBLE
-    LTEXT           "Left Space:",IDC_STATIC,349,161,38,8,NOT WS_VISIBLE
-    LTEXT           "Right Space:",IDC_STATIC,345,148,42,8,NOT WS_VISIBLE
-    EDITTEXT        IDC_ARIGHT_EDIT,393,143,25,14,ES_AUTOHSCROLL | NOT 
-                    WS_VISIBLE
-    EDITTEXT        IDC_BASELINE_EDIT,313,158,25,14,ES_AUTOHSCROLL | NOT 
-                    WS_VISIBLE
-    LTEXT           "base line:",IDC_STATIC,309,148,32,8,NOT WS_VISIBLE
+    LTEXT           "U+",IDC_STATIC,48,75,11,8
+    EDITTEXT        IDC_GINDEX_EDIT,88,196,35,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "to",IDC_STATIC,78,198,8,8
+    LTEXT           "Height:",IDC_STATIC,14,232,26,8
+    EDITTEXT        IDC_HEIGHT_TEXT,39,229,25,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Load Glyph",ID_LOAD_GLYPH,371,97,54,14,WS_DISABLED
+    PUSHBUTTON      "Save Glyph",ID_SAVE_GLYPH,371,113,54,14,WS_DISABLED
+    EDITTEXT        IDC_ADVANCE_EDIT,76,245,25,14,ES_AUTOHSCROLL
+    LTEXT           "Advance:",IDC_STATIC,42,248,29,8
+    PUSHBUTTON      "Multi Load Glyph",ID_MULLOAD_GLYPH,77,158,57,14,WS_DISABLED
+    EDITTEXT        IDC_ALEFT_EDIT,325,174,25,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    LTEXT           "Left Space:",IDC_STATIC,281,177,38,8,NOT WS_VISIBLE
+    LTEXT           "Right Space:",IDC_STATIC,277,164,42,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_ARIGHT_EDIT,325,158,25,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    EDITTEXT        IDC_BASELINE_EDIT,245,174,25,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    LTEXT           "base line:",IDC_STATIC,241,164,32,8,NOT WS_VISIBLE
+    PUSHBUTTON      "Change Font Color",IDC_CHANGE_FONT_COLOR,7,158,66,14,WS_DISABLED
+    PUSHBUTTON      "Multi Save Glyph",ID_MULSAVE_GLYPH,139,158,57,14,WS_DISABLED
+END
+
+IDD_LAYOUT_DIALOG DIALOGEX 0, 0, 432, 276
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&Find",IDC_FIND_BUTTON,183,24,43,14,WS_DISABLED
+    EDITTEXT        IDC_FIND_EDIT,7,24,172,14,ES_AUTOHSCROLL | WS_DISABLED
+    CONTROL         "Hex",IDC_HEX,"IpodHexWnd",WS_VSCROLL | WS_TABSTOP,7,168,418,101,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Find &Next",IDC_FINDNEXT_BUTTON,229,24,44,14,WS_DISABLED
+    PUSHBUTTON      "&Change Value",IDC_CHANGETEXT_BUTTON,183,40,50,14,WS_DISABLED
+    EDITTEXT        IDC_CHANGE_EDIT,7,40,172,14,ES_AUTOHSCROLL | WS_DISABLED
+    CONTROL         "Wildcard match",IDC_CHKWILD,"Button",BS_AUTOCHECKBOX | BS_CENTER | WS_DISABLED | WS_TABSTOP,275,25,60,12,WS_EX_RTLREADING
+    PUSHBUTTON      "&Save Resource",IDC_SAVECHANGES_BUTTON,315,7,53,14,WS_DISABLED
+    PUSHBUTTON      "&Load Resource",IDC_LOADCHANGES_BUTTON,371,7,54,14,WS_DISABLED
+    LTEXT           "Hex GoTo:",IDC_STATIC,118,7,43,9
+    PUSHBUTTON      "&Jump",IDC_JUMP_BUTTON,197,7,20,14,WS_DISABLED
+    EDITTEXT        IDC_ADDR_EDIT,153,7,41,14,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Resource type:",IDC_STATIC,7,7,50,9
+    COMBOBOX        IDC_LANGIDX_COMBO,61,7,53,152,CBS_DROPDOWNLIST | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_RESOURCE_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,217,58,208,107
+    CONTROL         "",IDC_RESOURCE_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,7,58,204,107
+    LTEXT           "Loading list...",IDC_STATIC_LOADINGLIST,295,90,48,9,NOT WS_VISIBLE
+    CONTROL         "String",IDC_RADIO_STRINGVAL,"Button",BS_AUTORADIOBUTTON,275,41,31,10
+    CONTROL         "Hex",IDC_RADIO_HEXVAL,"Button",BS_AUTORADIOBUTTON,308,41,27,10
+    CONTROL         "Decimal",IDC_RADIO_DECVAL,"Button",BS_AUTORADIOBUTTON,237,41,37,10
+    PUSHBUTTON      "Save All",IDC_SAVEALLRESOURCES_BUTTON,225,7,38,14,WS_DISABLED
+    PUSHBUTTON      "Load All",IDC_LOADALLRESOURCES_BUTTON,267,7,38,14,WS_DISABLED
+    PUSHBUTTON      "C&hange Selector Bar Color",IDC_SELECTORBAR_BUTTON,335,24,90,14,WS_DISABLED
+END
+
+IDD_PREFS_DIALOG DIALOGEX 0, 0, 441, 300
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Preferences",-1,196,9,41,10
+    LTEXT           "In here you can set the preferences of iPodWizard. They will be saved for further use.",-1,14,23,281,11
+    PUSHBUTTON      "Check for updates now",IDC_CHECK4UPDATES_BUTTON,172,52,79,15
+    CONTROL         "Check for updates during program startup",IDC_CHK_UPDATES,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,14,52,150,16
+    CONTROL         "Old pictures index saving sytem",IDC_CHK_PICSYSTEM2,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,14,36,117,17
+    PUSHBUTTON      "Associate .iPW theme file with the program",IDC_ASSOCIATE_IPW,14,70,142,12
+    CONTROL         "Show Tip of the Day on startup",IDC_CHK_SHOWTIPS,"Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,14,84,113,17
+    CONTROL         "Reflash iPod firmware upon boot picture change",IDC_CHK_REFLASHIMAGE,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,14,100,166,17
+    CONTROL         "Old font metrics saving sytem",IDC_CHK_METRICSYSTEM,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,14,119,115,17
+    PUSHBUTTON      "Show iPod Help Dialog",IDC_IPODHELP_BUTTON,14,169,79,15
+    PUSHBUTTON      "Create firmware-id file themes",IDC_THEMEID_BUTTON,14,139,79,21,BS_MULTILINE
+    CONTROL         "Don't load all firmware global independent strings",IDC_CHK_ALLSTRINGS,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,14,188,170,17
+    CONTROL         "Don't render OTF font preview on firmware load",IDC_CHK_OTFDRAW,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,14,207,166,17
+    CONTROL         "Don't render layout resources list on firmware load (might affect features)",IDC_CHK_LAYOUTDRAW,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,14,226,247,17
+END
+
+IDD_THEMEPREVIEWER DIALOGEX 0, 0, 366, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Theme Previewer"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Close",IDOK,309,7,50,16,WS_GROUP
+    CONTROL         "Picture",IDC_PICTURE,"IpodThemeWnd",WS_TABSTOP,115,30,228,139,WS_EX_CLIENTEDGE
+    LTEXT           "Set your iPod screen resoultion:",IDC_STATIC,7,7,104,11
+    COMBOBOX        IDC_RESOLUTION_COMBO,116,7,101,14,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Select the layout to show:",IDC_STATIC,7,47,87,11
+    COMBOBOX        IDC_LAYOUT_COMBO,7,60,64,14,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Select the menu to show:",IDC_STATIC,7,77,87,11
+    COMBOBOX        IDC_MENU_COMBO,7,90,64,14,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Main Menu",IDC_MAINMENU_RADIO,"Button",BS_AUTORADIOBUTTON,7,129,54,13
+    CONTROL         "Now Playing",IDC_NOWPLAYING_RADIO,"Button",BS_AUTORADIOBUTTON,7,149,54,13
+    PUSHBUTTON      "Load Screen",IDC_LOADSCREEN_BUTTON,246,7,58,15
+    PUSHBUTTON      "Refresh",IDC_REFRESH_BUTTON,7,27,58,15
+    CONTROL         "Draw combined layout and screen loaded",IDC_DRAWCOMBINE_CHECK,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,108,99,16
 END
 
 
@@ -526,13 +532,13 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,2,0,0
- PRODUCTVERSION 1,2,0,0
+ FILEVERSION 1,3,0,7
+ PRODUCTVERSION 1,3,0,7
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
- FILEFLAGS 0x1L
+ FILEFLAGS 0x9L
 #else
- FILEFLAGS 0x0L
+ FILEFLAGS 0x8L
 #endif
  FILEOS 0x4L
  FILETYPE 0x1L
@@ -542,14 +548,15 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "NoCompany"
+            VALUE "CompanyName", "NoCompany - Kingstone Developer"
             VALUE "FileDescription", "iPod Firmware Modifier"
-            VALUE "FileVersion", "1, 2, 0, 0"
+            VALUE "FileVersion", "1, 3, 0, 7"
             VALUE "InternalName", "iPodWizard.exe"
-            VALUE "LegalCopyright", " (c) iPodWizard.  All rights reserved."
+            VALUE "LegalCopyright", " (c) iPodWizard and Kingstone.  All rights reserved."
             VALUE "OriginalFilename", "iPodWizard.exe"
+            VALUE "PrivateBuild", "0101"
             VALUE "ProductName", "iPodWizard"
-            VALUE "ProductVersion", "1, 2, 0, 0"
+            VALUE "ProductVersion", "1, 3, 0, 7"
         END
     END
     BLOCK "VarFileInfo"
@@ -575,20 +582,28 @@ BEGIN
         BOTTOMMARGIN, 68
     END
 
+    IDD_TIP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 270
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 154
+    END
+
     IDD_IPODWIZARD_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 4
         RIGHTMARGIN, 445
         TOPMARGIN, 7
-        BOTTOMMARGIN, 330
+        BOTTOMMARGIN, 376
     END
 
     IDD_PICTURES_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 425
+        RIGHTMARGIN, 424
         TOPMARGIN, 7
-        BOTTOMMARGIN, 220
+        BOTTOMMARGIN, 268
     END
 
     IDD_FONTS_DIALOG, DIALOG
@@ -596,7 +611,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 425
         TOPMARGIN, 7
-        BOTTOMMARGIN, 226
+        BOTTOMMARGIN, 271
     END
 
     IDD_STRINGS_DIALOG, DIALOG
@@ -604,7 +619,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 425
         TOPMARGIN, 7
-        BOTTOMMARGIN, 224
+        BOTTOMMARGIN, 269
     END
 
     IDD_TWEAKS_DIALOG, DIALOG
@@ -618,25 +633,25 @@ BEGIN
     IDD_HELP_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 225
+        RIGHTMARGIN, 240
         TOPMARGIN, 7
-        BOTTOMMARGIN, 237
+        BOTTOMMARGIN, 257
     END
 
     IDD_EDITOR_DIALOG, DIALOG
     BEGIN
-        RIGHTMARGIN, 415
-        BOTTOMMARGIN, 227
+        RIGHTMARGIN, 441
+        BOTTOMMARGIN, 296
     END
 
     IDD_THEMES_DIALOG, DIALOG
     BEGIN
-        BOTTOMMARGIN, 247
+        BOTTOMMARGIN, 291
     END
 
     IDD_UPDATER_DIALOG, DIALOG
     BEGIN
-        BOTTOMMARGIN, 247
+        BOTTOMMARGIN, 249
     END
 
     IDD_OTF_DIALOG, DIALOG
@@ -644,7 +659,29 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 425
         TOPMARGIN, 7
-        BOTTOMMARGIN, 226
+        BOTTOMMARGIN, 271
+    END
+
+    IDD_LAYOUT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 425
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 269
+    END
+
+    IDD_PREFS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 14
+        BOTTOMMARGIN, 298
+    END
+
+    IDD_THEMEPREVIEWER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 359
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -658,6 +695,21 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ABOUTBOX            "&About iPodWizard..."
+    IDS_UPDATE              "http://www.getipodwizard.com/update.txt"
+    IDS_UPDATE_AVAILABLE    "You currently use version %u.%u of this program. The newest version %u.%u.%u.%u is available online. Do you want to see more information?"
+    IDS_UPDATE_NO           "No updates available."
+    IDS_UPDATE_NOCHECK      "Unable to check for updates. Make sure you are connected to the internet."
+    IDS_APPLEWARN           "{{~~  /-----  {{~~ /        {{~~|         | {{~~| S T O P | {{~~|         | {{~~       /  {{~~  ----/   Copyright(C) 2001 Apple Computer, Inc.---------------------------------------------------------------------------------------------------------"
+END
+
+STRINGTABLE 
+BEGIN
+    CG_IDS_TIPOFTHEDAY      "Displays a Tip of the Day."
+    CG_IDS_TIPOFTHEDAYMENU  "Ti&p of the Day..."
+    CG_IDS_DIDYOUKNOW       "Did you know..."
+    CG_IDS_FILE_ABSENT      "Tips file does not exist in the prescribed directory"
+    CG_IDP_FILE_CORRUPT     "Trouble reading the tips file"
+    CG_IDS_TIPOFTHEDAYHELP  "&Help"
 END
 
 #endif    // English (U.S.) resources
@@ -682,6 +734,28 @@ HELPBTN_BLUE            BITMAP                  "res\\HelpBtnBlue.bmp"
 HELPBTN_HOMESTEAD       BITMAP                  "res\\HelpBtnHomestead.bmp"
 HELPBTN_METALLIC        BITMAP                  "res\\HelpBtnMetallic.bmp"
 HELPBTN_CLASSIC         BITMAP                  "res\\HelpBtnClassic.bmp"
+IDB_LIGHTBULB           BITMAP                  "res\\litebulb.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "Fix Checksum"
+    BEGIN
+        MENUITEM "Fix Checksum",                ID_FIXCHECKSUM_FIXCHECKSUM
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// BYTE
+//
+
+IDR_TIPSTXT             BYTE                    "Tips.txt"
 #endif    // Hebrew resources
 /////////////////////////////////////////////////////////////////////////////
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Picture.h"
+#include "RDragDropFiles.h"
 
 // CPictureWnd
 
@@ -21,6 +22,8 @@ public:
 	CPicture * m_pPicture;
 	void SetPicture(CPicture *pPicture);
 	CPoint m_Origin;
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 };

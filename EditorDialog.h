@@ -5,6 +5,7 @@
 #include "FontsDialog.h"
 #include "StringDialog.h"
 #include "OTFDialog.h"
+#include "LayoutDialog.h"
 #include "afxwin.h"
 #include "afxcmn.h"
 
@@ -34,9 +35,13 @@ public:
 	CFontsDialog m_FontsDialog;
 	CStringDialog m_StringDialog;
 	COTFDialog m_OTFDialog;
+	CLayoutDialog m_LayoutDialog;
 	BOOL bFonts,bOTFCreate;
+	void SetPreviewButton(CWnd *pWnd);
+	CWnd *m_pThemePreview;
 protected:
 	virtual void OnOK();
+	CFirmware *m_pFirmware;
 public:
 	afx_msg void OnTcnSelchangePropTab(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg LRESULT OnSwitchFontSystem(WPARAM wParam, LPARAM lParam);

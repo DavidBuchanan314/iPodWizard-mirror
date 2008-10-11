@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include ".\picture.h"
+#define SWAPWORD(x) MAKEWORD(HIBYTE(x), LOBYTE(x))
+#define SWAPLONG(x) MAKELONG(SWAPWORD(HIWORD(x)), SWAPWORD(LOWORD(x)))
 
 
 // CPicture class
@@ -9,6 +11,8 @@ CPicture::CPicture(void)
 	m_pHeader = NULL;
 	m_pHeader2 = NULL;
 	m_pFooter = NULL;
+	m_pFooter2 = NULL;
+	m_pFooter3=NULL;
 	m_pData = NULL;
 
 	m_iPictureMode = 0;
@@ -27,10 +31,18 @@ void CPicture::SetPictureMode(WORD iMode)
 
 WORD CPicture::GetPictureMode()
 {
-	return m_iPictureMode;
+	switch (m_iPictureMode)
+	{
+	case 3: //boot version 2
+		return 1;
+	case 4: //boot version 3
+		return 1;
+	default:
+		return m_iPictureMode;
+	}
 }
 
-BOOL CPicture::Read(LPBYTE lpBuffer, BOOL bScan)
+BOOL CPicture::Read(LPBYTE lpBuffer, BOOL bScan, LPBYTE lpImageOffset)
 {
 	if (lpBuffer == NULL)
 		return FALSE;
@@ -38,20 +50,99 @@ BOOL CPicture::Read(LPBYTE lpBuffer, BOOL bScan)
 	switch (m_iPictureMode)
 	{
 	case 1:
+	case 3:
+	case 4:
+		m_pData=NULL;
+
 		m_pFooter = (IPOD_BOOT_PICTURE_FOOTER *)lpBuffer;
+
+		if (m_pFooter->d1!=0)
+			return FALSE;
 
 		// validity checks
 		if (m_pFooter->d1 != 0 || 
-			m_pFooter->height == 0 || m_pFooter->height >= 96 || 
-			m_pFooter->width == 0 || m_pFooter->width >= 128 ||
-			m_pFooter->lineSizeBytes >= 32 || m_pFooter->texture_format != 0 || m_pFooter->w3 != 0 ||
-			(m_pFooter->bitDepth != 1 && m_pFooter->bitDepth != 2 && m_pFooter->bitDepth != 4))
+			m_pFooter->height == 0 || m_pFooter->height >= 256 || 
+			m_pFooter->width == 0 || m_pFooter->width >= 256 ||
+			m_pFooter->lineSizeBytes >= 512 || m_pFooter->texture_format != 0 ||
+			(m_pFooter->bitDepth != 1 && m_pFooter->bitDepth != 2 && m_pFooter->bitDepth != 4  && m_pFooter->bitDepth != 8))
 		{
 			m_pFooter = NULL;
-			return FALSE;
+		}
+		else
+		{
+			if (m_pFooter->b1==0x10 && m_pFooter->image_offset[2]<=0x01)
+			{
+				m_pData = lpImageOffset + (*((LPDWORD)m_pFooter->image_offset) & 0x00FFFFFF);
+			}
+			else if (m_pFooter->b1!=0xff)
+			{
+				m_pData = lpBuffer - m_pFooter->lineSizeBytes * m_pFooter->height;
+			}
 		}
 
-		m_pData = lpBuffer - m_pFooter->lineSizeBytes * m_pFooter->height;
+		if (m_pData==NULL)
+		{
+			m_pFooter2 = (IPOD_BOOT_PICTURE_FOOTER_V2 *)lpBuffer;
+
+			if (m_pFooter2->d1 != 0 || 
+				m_pFooter2->height == 0 || m_pFooter2->height >= 256 || 
+				m_pFooter2->width == 0 || m_pFooter2->width >= 256 ||
+				m_pFooter2->lineSizeBytes >= 512 || m_pFooter2->lineSizeBytes==0 ||
+				m_pFooter2->length==0 || *((LPDWORD)m_pFooter2->image_offset)==0)
+			{
+				m_pFooter2=NULL;
+			}
+			else
+			{
+				//m_pData = lpBuffer - m_pFooter2->lineSizeBytes * m_pFooter2->height;
+				WORD bitdepth = m_pFooter2->lineSizeBytes * 8 / m_pFooter2->width;
+				if (bitdepth==1 || bitdepth==2 || bitdepth==4 || bitdepth==16)
+				{
+					if (m_pFooter2->b1==0x10 && m_pFooter2->image_offset[2]<=0x01)
+						m_pData = lpImageOffset + (*((LPDWORD)m_pFooter2->image_offset) & 0x00FFFFFF);
+					else if (m_pFooter2->b1!=0xff)
+					{
+						
+						m_pData = lpBuffer - m_pFooter2->lineSizeBytes * m_pFooter2->height;
+					}
+					m_iPictureMode = 3;
+				}
+				else
+				{
+						m_pFooter2=NULL;
+				}
+			}
+
+			if (!m_pData)
+			{
+				m_pFooter3 = (IPOD_BOOT_PICTURE_FOOTER_V3 *)lpBuffer;
+
+				if (m_pFooter3->d1 != 0 || 
+					m_pFooter3->height == 0 || m_pFooter3->height >= 256 || 
+					m_pFooter3->width == 0 || m_pFooter3->width >= 256 ||
+					m_pFooter3->lineSizeBytes >= 512 ||
+					m_pFooter3->w2 != 52 || m_pFooter3->height*m_pFooter3->lineSizeBytes!=m_pFooter3->length)
+				{
+					m_pFooter3=NULL;
+				}
+				else
+				{
+					WORD bitdepth3 = m_pFooter3->lineSizeBytes * 8 / m_pFooter3->width;
+					if (bitdepth3==1 || bitdepth3==2 || bitdepth3==4 || bitdepth3==16)
+					{
+						m_pData = lpBuffer + sizeof(IPOD_BOOT_PICTURE_FOOTER_V3);
+						m_iPictureMode = 4;
+					}
+					else
+					{
+						m_pFooter3=NULL;
+					}
+				}
+			}
+		}
+
+		if (m_pData==NULL)
+			return FALSE;
 		break;
 	default:
 		m_pHeader = (IPOD_PICTURE_HEADER *)lpBuffer;
@@ -102,6 +193,18 @@ DWORD CPicture::GetPictureBlockLen()
 
 		return sizeof(IPOD_BOOT_PICTURE_FOOTER) + m_pFooter->lineSizeBytes * m_pFooter->height;
 		break;
+	case 3:
+		if (m_pFooter2 == NULL)
+			return 0;
+
+		return sizeof(IPOD_BOOT_PICTURE_FOOTER_V2) + m_pFooter2->lineSizeBytes * m_pFooter2->height;
+		break;
+	case 4:
+		if (m_pFooter3 == NULL)
+			return 0;
+
+		return sizeof(IPOD_BOOT_PICTURE_FOOTER_V3) + m_pFooter3->lineSizeBytes * m_pFooter3->height;
+		break;
 	case 0:
 		if (m_pHeader == NULL)
 			return 0;
@@ -138,6 +241,18 @@ DWORD CPicture::GetPictureRawLen()
 
 		return m_pFooter->lineSizeBytes * m_pFooter->height;
 		break;
+	case 3:
+		if (m_pFooter2 == NULL)
+			return 0;
+
+		return m_pFooter2->lineSizeBytes * m_pFooter2->height;
+		break;
+	case 4:
+		if (m_pFooter3 == NULL)
+			return 0;
+
+		return m_pFooter3->lineSizeBytes * m_pFooter3->height;
+		break;
 	case 0:
 		if (m_pHeader == NULL)
 			return 0;
@@ -164,6 +279,14 @@ CSize CPicture::GetPictureSize()
 		size.cx = m_pFooter->width;
 		size.cy = m_pFooter->height;
 		break;
+	case 3:
+		size.cx = m_pFooter2->width;
+		size.cy = m_pFooter2->height;
+		break;
+	case 4:
+		size.cx = m_pFooter3->width;
+		size.cy = m_pFooter3->height;
+		break;
 	case 0:
 		size.cx = m_pHeader->width;
 		size.cy = m_pHeader->height;
@@ -184,6 +307,12 @@ int CPicture::GetPictureBitDepth()
 	case 1:
 		return m_pFooter->bitDepth;
 		break;
+	case 3:
+		return m_pFooter2->lineSizeBytes * 8 / m_pFooter2->width;
+		break;
+	case 4:
+		return m_pFooter3->lineSizeBytes * 8 / m_pFooter3->width;
+		break;
 	case 0:
 		return m_pHeader->bitDepth;
 		break;
@@ -195,11 +324,25 @@ int CPicture::GetPictureBitDepth()
 }
 //
 
-void CPicture::Draw(CDC *pDC, CPoint point)
+void CPicture::Draw(CDC *pDC, CPoint point, CSize psize)
 {
 	DWORD x, y;
 
-	CSize size = GetPictureSize();
+	CSize size;
+	if (psize.cx<=0)
+		size.cx = GetPictureSize().cx;
+	else
+		size.cx = psize.cx;
+
+	if (psize.cy<=0)
+		size.cy = GetPictureSize().cy;
+	else
+		size.cy = psize.cy;
+
+	if (point.x<=0)
+		point.x=0;
+	if (point.y<=0)
+		point.y=0;
 
 	for (y = 0; y < (DWORD)size.cy; y++)
 	{
@@ -217,21 +360,29 @@ COLORREF CPicture::GetPixel(DWORD x, DWORD y)
 	LPBYTE linePointer;
 	BYTE r, g, b;
 	WORD d;
-	DWORD tf;
+	WORD tf;
+
+	bitDepth = GetPictureBitDepth();
 
 	switch (m_iPictureMode)
 	{
 	case 1:
-		bitDepth = m_pFooter->bitDepth;
 		linePointer = m_pData + (m_pFooter->lineSizeBytes) * y;
+		tf=0x5652;
+		break;
+	case 3:
+		linePointer = m_pData + (m_pFooter2->lineSizeBytes) * y;
+		tf=0x5652;
+		break;
+	case 4:
+		linePointer = m_pData + (m_pFooter3->lineSizeBytes) * y;
+		tf=0x5652;
 		break;
 	case 0:
-		bitDepth = m_pHeader->bitDepth;
 		linePointer = m_pData + m_pHeader->bytes_per_row * y;
 		tf = m_pHeader->texture_format;
 		break;
 	case 2:
-		bitDepth = m_pHeader2->bitDepth;
 		linePointer = m_pData + m_pHeader2->bytes_per_row * y;
 		tf = m_pHeader2->texture_format;
 		break;
@@ -265,7 +416,7 @@ COLORREF CPicture::GetPixel(DWORD x, DWORD y)
 		break;
 	case 16:
 		DWORD pos1,pos2;
-		if (tf==0x25650000)
+		if (tf==0x2565)
 		{
 			pos1 = x * 2;
 			pos2 = pos1 + 1;
@@ -275,16 +426,74 @@ COLORREF CPicture::GetPixel(DWORD x, DWORD y)
 			pos2 = x * 2;
 			pos1 = pos2 + 1;
 		}
-		d = (linePointer[pos1] & 0xF8) >> 3;
-		r = d * 255 / 31;
+		if (tf!=0x1444)
+		{
+			d = (linePointer[pos1] & 0xF8) >> 3;
+			r = d * 255 / 31;
 
-		d = (linePointer[pos1] & 0x07);
-		d = d << 3;
-		d += (linePointer[pos2] & 0xE0) >> 5;
-		g = d * 255 / 63;
+			d = (linePointer[pos1] & 0x07);
+			d = d << 3;
+			d += (linePointer[pos2] & 0xE0) >> 5;
+			g = d * 255 / 63;
 
-		d = linePointer[pos2] & 0x1F;
-		b = d * 255 / 31;
+			d = linePointer[pos2] & 0x1F;
+			b = d * 255 / 31;
+		}
+		else
+		{
+			/*unsigned short rgba=SWAPWORD(*((LPWORD)linePointer));
+			unsigned char alpha = ((rgba & 0x00F0) >> 4);
+			r = ((rgba & 0xF000) >> 16) * alpha / 255;
+			g = ((rgba & 0x0F00) >> 8) * alpha / 255;
+			b = (rgba & 0x000F)  * alpha / 255;*/
+
+			//last
+			/*
+			d = (linePointer[x*2+1] & 0xF0) >> 4;
+			unsigned short alpha=d;
+			if (alpha==0)
+				alpha=15;
+			//alpha bits are not treated here
+			d = (linePointer[x*2] & 0xF0) >> 4;
+			//r = d * 255 / 15;
+			r = d * 255 / alpha;
+
+			d = (linePointer[x*2] & 0x0F);
+			//g = d * 255 / 15;
+			g = d * 255 / alpha;
+
+			d = (linePointer[x*2+1] & 0x0F);
+			//b = d * 255 / 15;
+			b = d * 255 / alpha;
+			*/
+			//last
+
+
+			/*d = (linePointer[x*2+1] & 0x78) >> 3;
+			r = d * 255 / 15;
+
+			d = (linePointer[x*2+1] & 0x07) << 3;
+			d += (linePointer[x*2] & 0x80) >> 7;
+			g = d * 255 / 15;
+
+			d = (linePointer[x*2] & 0x78) >> 3;
+			b = d * 255 / 15;*/
+
+			/*d = (linePointer[x*2] & 0x1E) >> 1;
+			r = d * 255 / 15;
+
+			d = (linePointer[x*2] & 0x01);
+			d += (linePointer[x*2+1] & 0x07) >> 5;
+			g = d * 255 / 15;
+
+			d = (linePointer[x*2+1] & 0x1E) >> 1;
+			b = d * 255 / 15;*/
+
+			d=*((LPWORD)(&linePointer[x*2]));
+			r = REDBYTEA(d);
+			g = GREENBYTEA(d);
+			b = BLUEBYTEA(d);
+		}
 		break;
 	}
 
@@ -296,7 +505,7 @@ void CPicture::SetPixel(DWORD x, DWORD y, COLORREF color)
 	WORD d, mask;
 	LPBYTE linePointer;
 	WORD bitDepth;
-	DWORD tf;
+	WORD tf;
 
 	CSize size = GetPictureSize();
 
@@ -309,6 +518,15 @@ void CPicture::SetPixel(DWORD x, DWORD y, COLORREF color)
 	{
 	case 1:
 		linePointer = m_pData + (m_pFooter->lineSizeBytes) * y;
+		tf=0x5652;
+		break;
+	case 3:
+		linePointer = m_pData + (m_pFooter2->lineSizeBytes) * y;
+		tf=0x5652;
+		break;
+	case 4:
+		linePointer = m_pData + (m_pFooter3->lineSizeBytes) * y;
+		tf=0x5652;
 		break;
 	case 0:
 		linePointer = m_pData + m_pHeader->bytes_per_row * y;
@@ -357,18 +575,39 @@ void CPicture::SetPixel(DWORD x, DWORD y, COLORREF color)
 		break;
 	case 16:
 		linePointer += x * 2;
-		d = GetRValue(color) * 31 / 255;
-		d = d << 6;
-		d += GetGValue(color) * 63 / 255;
-		d = d << 5;
-		d += GetBValue(color) * 31 / 255;
-		if (tf==0x25650000)
+		if (tf!=0x1444)
 		{
-			*((LPWORD)linePointer) = ((d << 8) | (d >> 8));
+			d = GetRValue(color) * 31 / 255;
+			d = d << 6;
+			d += GetGValue(color) * 63 / 255;
+			d = d << 5;
+			d += GetBValue(color) * 31 / 255;
+			if (tf==0x2565)
+			{
+				*((LPWORD)linePointer) = ((d << 8) | (d >> 8));
+			}
+			else
+			{
+				*((LPWORD)linePointer) = d;
+			}
 		}
 		else
 		{
-			*((LPWORD)linePointer) = d;
+			/*
+			d = GetRValue(color) * 15 / 255;
+			d = d << 4;
+			d += GetGValue(color) * 15 / 255;
+			d = d << 4;
+			d += (linePointer[1] & 0xF0) >> 4;
+			d = d << 4;
+			d += GetBValue(color) * 15 / 255;
+			
+			*((LPWORD)linePointer) = ((d << 8) | (d >> 8)); //swap it since the firmware is little endian and when we assembled the value we went raw to number which is the opposite way
+			*/
+
+			d=*((LPWORD)(&linePointer));
+			BYTE a=ALPHABYTEA(d);
+			ARGBFORM(a,GetRValue(color),GetGValue(color),GetBValue(color));
 		}
 		break;
 	}

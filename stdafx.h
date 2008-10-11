@@ -8,6 +8,14 @@
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
 
+#ifndef _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+#endif
+
+#ifndef _CRT_NON_CONFORMING_SWPRINTFS
+#define _CRT_NON_CONFORMING_SWPRINTFS
+#endif
+
 // Modify the following defines if you have to target a platform prior to the ones specified below.
 // Refer to MSDN for the latest info on corresponding values for different platforms.
 #ifndef WINVER				// Allow use of features specific to Windows 95 and Windows NT 4 or later.
@@ -26,8 +34,6 @@
 #define _WIN32_IE 0x0400	// Change this to the appropriate value to target IE 5.0 or later.
 #endif
 
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
-
 // turns off MFC's hiding of some common and often safely ignored warning messages
 #define _AFX_ALL_WARNINGS
 
@@ -41,10 +47,25 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 // Include the ATL headers needed:
-#define _ATL_ATTRIBUTES 1
-#include <atlbase.h>
-#include <atlcom.h>
-#include <atlimage.h>
+#include <atlimage.h> //for CImage
+//#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 
 #define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))
 
+static char *Unicode2MB(CString& sinput)
+{
+	LPTSTR lpszInput=sinput.GetBuffer( sinput.GetLength() );
+	int nLen=WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)lpszInput, -1, NULL, NULL, NULL, NULL);
+	char *snuser=new char[nLen*2];
+	WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)lpszInput, -1, snuser, nLen, NULL, NULL);
+	sinput.ReleaseBuffer();
+	return snuser;
+}
+
+static LPCTSTR MB2Unicode(char *input)
+{
+	int nLen=MultiByteToWideChar(CP_ACP, 0, input, -1, NULL, NULL);
+	LPWSTR lpwStr=new WCHAR[nLen*2];
+	MultiByteToWideChar(CP_ACP, 0, input, -1, lpwStr, nLen);
+	return (LPCTSTR)lpwStr;
+}

@@ -160,7 +160,7 @@ TEMPLATE BOOL CDialogMinHelpBtn<BASE>::OnNcActivate(BOOL bActive)
     return bResult;
 }
 
-TEMPLATE UINT CDialogMinHelpBtn<BASE>::OnNcHitTest(CPoint point)
+TEMPLATE LRESULT CDialogMinHelpBtn<BASE>::OnNcHitTest(CPoint point)
 {
     BOOL bPreviousHitTest = m_bMinHelpBtnHitTest;
     m_bMinHelpBtnHitTest = MinHelpBtnHitTest(point);
@@ -360,7 +360,7 @@ TEMPLATE void CDialogMinHelpBtn<BASE>::MinHelpBtnDraw()
     if (!pDC)
        return; // panic!
 
-    if (IsWindowsClassicStyle())
+	if (IsWindowsClassicStyle())
     {
         CBrush black(GetSysColor(COLOR_BTNTEXT));
         CBrush gray(GetSysColor(COLOR_GRAYTEXT));
@@ -419,7 +419,14 @@ TEMPLATE void CDialogMinHelpBtn<BASE>::MinHelpBtnDraw()
 			CDC dcMem;
 			if (dcMem.CreateCompatibleDC(pDC) && (pBmpOld = dcMem.SelectObject(&m_bmMinHelpBtnBitmap)) != NULL)
 			{
-				_TransparentBlt(pDC->m_hDC, btn.left, btn.top, btn.Width(), btn.Height(), dcMem.m_hDC, 0, BMP_HELPBTN_HEIGHT * (iState - 1), BMP_HELPBTN_WIDTH, BMP_HELPBTN_HEIGHT, BMP_HELPBTN_TRANSCOLOR);
+				//BOOL bRet=_TransparentBlt(pDC->m_hDC, btn.left, btn.top, btn.Width(), btn.Height(), dcMem.m_hDC, 0, BMP_HELPBTN_HEIGHT * (iState - 1), BMP_HELPBTN_WIDTH, BMP_HELPBTN_HEIGHT, BMP_HELPBTN_TRANSCOLOR);
+				BOOL bRet=_TransparentBlt(pDC->m_hDC, btn.left, btn.top, btn.Width(), btn.Height(), dcMem.m_hDC, 0, BMP_HELPBTN_HEIGHT * (iState - 1), BMP_HELPBTN_WIDTH, BMP_HELPBTN_HEIGHT, BMP_HELPBTN_TRANSCOLOR);
+				DWORD ierror=0;
+				if (!bRet)
+				{
+					ierror=::GetLastError();
+					//87 = invalid parameter?
+				}
 				dcMem.SelectObject(pBmpOld);
 			}
 		}
@@ -520,6 +527,9 @@ TEMPLATE BOOL CDialogMinHelpBtn<BASE>::MinHelpBtnInitBitmap()
 	nColor = GetVisualStylesXPColor();
 	if (nColor < 0)
 		nColor=3;
-	//return m_bmMinHelpBtnBitmap.LoadBitmap(m_pszMinHelpBtnBmpName[nColor]);
-	return m_bmMinHelpBtnBitmap.LoadBitmap(m_pszMinHelpBtnBmpId[nColor]);
+
+	if (GetWinVersion()==WVISTA)
+		nColor=0;
+
+	return m_bmMinHelpBtnBitmap.LoadBitmap(m_pszMinHelpBtnBmpName[nColor]);
 }

@@ -22,6 +22,7 @@ protected:
 public:
 	CProgressCtrl m_ProgressCtrl;
 	virtual BOOL OnInitDialog();
-	void ScanFirmware(CFirmware *pFirmware);
+	void ScanFirmware(CFirmware *pFirmware, DWORD size=0);
 	LRESULT OnScanProgress(WPARAM wParam, LPARAM lParam);
+	void UpdateDisplay();
 };

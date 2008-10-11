@@ -30,6 +30,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
+	void SaveAllStrings(CFile *fileb);
 	virtual BOOL OnInitDialog();
 	CFirmware * m_pFirmware;
 	void SetFirmware(CFirmware *pFirmware);

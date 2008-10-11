@@ -4,6 +4,7 @@
 #include "OTFFontParser.h"
 #include "OTFFontWnd.h"
 #include "afxwin.h"
+#include "LayoutDialog.h"
 
 // COTFDialog dialog
 
@@ -26,7 +27,8 @@ public:
 	virtual BOOL OnInitDialog();
 	COTFFont m_Font;
 	CFirmware * m_pFirmware;
-	void SetFirmware(CFirmware *pFirmware);
+	CLayoutDialog *m_pLayoutDialog;
+	void SetFirmware(CFirmware *pFirmware, CLayoutDialog *pLayoutDialog);
 	void UpdateFont();
 	DWORD m_FontIndex;
 	COTFFontWnd m_FontWnd;
@@ -74,6 +76,8 @@ public:
 	void UpdateZoomView();
 	void WriteUnicodeGroup();
 	void WriteCharMetrics();
+	void LoadFullFont(CString path, DWORD size, DWORD fidx=-1);
+	void LoadFullFontsDir(CString folderpath);
 	afx_msg void OnBnClickedBmpButton();
 	afx_msg void OnBnClickedLoadGlyph();
 	afx_msg void OnBnClickedSaveGlyph();
@@ -87,4 +91,7 @@ public:
 	afx_msg void OnBnClickedLoadFont();
 	afx_msg void OnBnClickedSaveFont();
 	afx_msg void OnBnClickedMulloadGlyph();
+	afx_msg LRESULT OnSelectMetricsFromBitmap(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBnClickedChangeFontColor();
+	afx_msg void OnBnClickedMulsaveGlyph();
 };
